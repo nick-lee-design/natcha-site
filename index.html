@@ -7,6 +7,8 @@
 <meta name="color-scheme" content="dark">
 <meta name="description" content="TALO Engine is Natcha Kucita's direct MEP design coordination practice &mdash; implementation advice, model coordination and deliverables, backed by advanced AI and automation tools.">
 <title>TALO Engine: MEP design coordination, orchestrated</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap" rel="stylesheet">
@@ -60,7 +62,7 @@ a{color:inherit}
 /* Header */
 .site-header{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-block:22px}
 .brand{display:inline-flex;align-items:center;gap:12px;font:600 1.25rem var(--display);font-stretch:96%;letter-spacing:.01em;text-decoration:none}
-.brand svg{display:block}
+.brand img{display:block}
 .header-right{display:flex;align-items:center;gap:32px}
 .nav-links{display:none;list-style:none;margin:0;padding:0;gap:28px}
 .nav-links a{font:400 .95rem var(--display);font-stretch:100%;letter-spacing:.01em;text-decoration:none}
@@ -68,7 +70,7 @@ a{color:inherit}
 @media (min-width:1000px){.nav-links{display:flex}}
 .brand{white-space:nowrap}
 .header-right .btn{white-space:nowrap;padding:0 18px;min-height:40px}
-@media (max-width:420px){.brand{font-size:1.15rem;gap:10px}.brand svg{width:36px;height:36px}.header-right .btn{padding:0 14px;font-size:.95rem}}
+@media (max-width:420px){.brand{font-size:1.15rem;gap:10px}.brand img{width:36px;height:36px}.header-right .btn{padding:0 14px;font-size:.95rem}}
 
 /* Hero */
 .hero{padding-block:clamp(24px,5vw,56px) 0;overflow:hidden}
@@ -289,27 +291,7 @@ a{color:inherit}
 
 <header class="wrap site-header">
   <a class="brand" href="#top" aria-label="TALO Engine, home">
-    <svg width="40" height="40" viewBox="0 0 200 200" aria-hidden="true">
-      <defs><clipPath id="talos-clip-h"><circle cx="100" cy="100" r="80"/></clipPath></defs>
-      <circle cx="100" cy="100" r="92" fill="none" stroke="var(--bronze)" stroke-width="7"/>
-      <g clip-path="url(#talos-clip-h)">
-        <g fill="var(--bronze)">
-          <path d="M100 144 C74 144 48 150 36 170 L28 200 L172 200 L164 170 C152 150 126 144 100 144 Z"/>
-          <rect x="92" y="136" width="16" height="12"/>
-          <path d="M64 66 A36 36 0 0 1 136 66 Z"/>
-        </g>
-        <g stroke="var(--cut)" stroke-width="2.5" stroke-linecap="round">
-          <line x1="100" y1="66" x2="100" y2="30"/><line x1="100" y1="66" x2="78" y2="35"/><line x1="100" y1="66" x2="122" y2="35"/>
-          <line x1="100" y1="66" x2="66" y2="50"/><line x1="100" y1="66" x2="134" y2="50"/>
-        </g>
-        <path fill="var(--bronze)" fill-rule="evenodd" d="M70 94 C70 66 82 50 100 50 C118 50 130 66 130 94 L130 108 C130 122 118 136 106 140 L94 140 C82 136 70 122 70 108 Z M81 88 H119 V96 H104 V122 H96 V96 H81 Z"/>
-          <path d="M75.376 66.416 C80.56 55.76 89.2 50 100 50 C110.8 50 119.44 55.76 124.624 66.416" fill="none" stroke="var(--cut)" stroke-width="3.5"/>
-      </g>
-      <g fill="none" stroke="var(--cut)" stroke-width="2.5" stroke-linecap="round">
-        <path d="M92 154 Q74 155 60 169"/><path d="M108 154 Q126 155 140 169"/><line x1="100" y1="146" x2="100" y2="170"/>
-      </g>
-      <circle cx="100" cy="176" r="3.5" fill="var(--cut)"/>
-    </svg>
+    <img src="logo.png" width="40" height="40" alt="">
     TALO Engine
   </a>
   <div class="header-right">
