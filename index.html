@@ -88,6 +88,7 @@ a{color:inherit}
 .contact-form input:focus,.contact-form textarea:focus{outline:2px solid var(--panel-ink);outline-offset:1px}
 .cf-submit{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:4px}
 .cf-note{font-size:.9rem;color:var(--panel-soft)}
+.cf-honey{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 @media (max-width:640px){.contact-form{grid-template-columns:1fr}}
 
 
@@ -499,7 +500,7 @@ a{color:inherit}
       <h2 class="h-xl" id="contact-title">Orchestrating the future of building services.</h2>
       <p>Tell Natcha about your project, and get direct advice on implementation, model coordination and deliverables.</p>
       <div class="actions">
-        <a class="btn" href="mailto:hello@taloengine.example?subject=Talking%20to%20TALO%20Engine">Talk to TALO Engine</a>
+        <a class="btn" href="mailto:natcha@taloengine.com?subject=Talking%20to%20TALO%20Engine">Talk to TALO Engine</a>
       </div>
 
       <form class="contact-form" id="contact-form" novalidate>
@@ -515,6 +516,11 @@ a{color:inherit}
           <label for="cf-company">Company</label>
           <input type="text" id="cf-company" name="company" autocomplete="organization">
         </div>
+        <div class="cf-row">
+          <label for="cf-email">Email</label>
+          <input type="email" id="cf-email" name="email" autocomplete="email" required>
+        </div>
+        <input type="text" name="_honey" class="cf-honey" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div class="cf-row cf-row--full">
           <label for="cf-enquiry">Enquiries</label>
           <textarea id="cf-enquiry" name="enquiry" rows="5" required></textarea>
@@ -717,29 +723,48 @@ a{color:inherit}
       e.preventDefault();
       var name = document.getElementById('cf-name').value.trim();
       var surname = document.getElementById('cf-surname').value.trim();
+      var email = document.getElementById('cf-email').value.trim();
       var company = document.getElementById('cf-company').value.trim();
       var enquiry = document.getElementById('cf-enquiry').value.trim();
+      var button = form.querySelector('button[type="submit"]');
 
-      if (!name || !surname || !enquiry) {
-        note.textContent = 'Please fill in your name, surname and enquiry.';
+      if (!name || !surname || !email || !enquiry) {
+        note.textContent = 'Please fill in your name, surname, email and enquiry.';
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        note.textContent = 'Please enter a valid email address.';
         return;
       }
 
-      var subject = 'Enquiry from ' + name + ' ' + surname;
-      var bodyLines = [
-        'Name: ' + name,
-        'Surname: ' + surname,
-        'Company: ' + (company || '—'),
-        '',
-        'Enquiry:',
-        enquiry
-      ];
-      var mailto = 'mailto:hello@taloengine.example'
-        + '?subject=' + encodeURIComponent(subject)
-        + '&body=' + encodeURIComponent(bodyLines.join('\n'));
-
-      window.location.href = mailto;
-      note.textContent = 'Opening your email client to send this enquiry to TALO Engine.';
+      // FormSubmit forwards the enquiry to Natcha's inbox; "email" becomes the reply-to.
+      button.disabled = true;
+      note.textContent = 'Sending…';
+      fetch('https://formsubmit.co/ajax/natcha@taloengine.com', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          _subject: 'Enquiry from ' + name + ' ' + surname,
+          _template: 'table',
+          _honey: form.elements._honey.value,
+          name: name,
+          surname: surname,
+          email: email,
+          company: company || '—',
+          enquiry: enquiry
+        })
+      }).then(function (res) {
+        return res.json().then(function (data) {
+          if (!res.ok || String(data.success) !== 'true') throw new Error(data.message);
+        });
+      }).then(function () {
+        form.reset();
+        note.textContent = 'Thanks, your enquiry has been sent.';
+      }).catch(function () {
+        note.textContent = 'Sorry, that didn\'t send. Please email natcha@taloengine.com.';
+      }).then(function () {
+        button.disabled = false;
+      });
     });
   }
 })();
