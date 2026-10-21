@@ -3,7 +3,7 @@ import Services from './Services';
 
 export default function Hero() {
   return (
-    <section className="hero" id="top" aria-labelledby="hero-title">
+    <section className="hero" id="intro" aria-labelledby="hero-title">
       <div className="wrap hero-top">
         <div className="hero-text">
           <h1 id="hero-title">Specialised BIM services for MEP engineering.</h1>

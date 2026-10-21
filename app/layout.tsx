@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from 'next';
-import { Bricolage_Grotesque, Literata } from 'next/font/google';
+import { display, outfit, text } from './fonts';
 import './globals.css';
-
-const display = Bricolage_Grotesque({ subsets: ['latin'], axes: ['opsz', 'wdth'], variable: '--font-display' });
-const text = Literata({ subsets: ['latin'], axes: ['opsz'], variable: '--font-text' });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://taloengine.com'),
@@ -21,7 +18,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-GB" className={`dark ${display.variable} ${text.variable}`}>
+    <html lang="en-GB" className={`dark ${display.variable} ${text.variable} ${outfit.variable}`}>
       <body>{children}</body>
     </html>
   );

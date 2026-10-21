@@ -1,0 +1,64 @@
+/* The hero fills the viewport below the site header (84px), letterboxing a 16:9
+   stage; on narrow screens the frame shrinks to the stage so there are no bars. */
+.frame {
+  --hero-void: #0c0e11;
+  --hero-ink: #d5dae1;
+  --hero-ink-dim: #6d7682;
+  --hero-blue: #3d8bff;
+  --hero-neon: #cfe7ff;
+  --hero-font: var(--font-outfit), 'Avenir Next', 'Futura', system-ui, sans-serif;
+  height: min(calc(100svh - 84px), 56.25vw);
+  min-height: 0;
+  container-type: size;
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+}
+.stage {
+  position: relative; width: min(100cqw, calc(100cqh * 16 / 9)); aspect-ratio: 16/9;
+  overflow: hidden; background: var(--hero-void); container-type: size; isolation: isolate;
+  cursor: none; touch-action: pan-y; user-select: none; -webkit-user-select: none;
+  outline: none;
+}
+.stage:focus-visible { box-shadow: inset 0 0 0 1px var(--hero-neon); }
+@media (pointer: coarse) { .stage { cursor: auto; } }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.mono {
+  font-family: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: clamp(8px, 0.6cqw, 13px); letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--hero-ink-dim); font-weight: 400; line-height: 1.6;
+  text-shadow: 0 0 6px var(--hero-void), 0 0 2px var(--hero-void), 0 0 14px var(--hero-void);
+}
+
+.mark { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; overflow: visible; }
+.mark text { font-family: var(--hero-font); font-weight: 800; font-size: 236px; letter-spacing: -3px; fill: none; stroke-linejoin: round; opacity: 0; }
+.mark .glow { stroke: var(--hero-blue); stroke-width: 10; }
+.mark .core { stroke: var(--hero-neon); stroke-width: 2.6; }
+
+.tag { position: absolute; left: 6.45cqw; top: 64.4cqh; width: 28cqw; z-index: 3; pointer-events: none; font-family: var(--hero-font); }
+.tag p { margin: 0; opacity: 0; text-shadow: 0 0 10px var(--hero-void), 0 0 3px var(--hero-void); will-change: transform, opacity, clip-path; }
+.tag .line { font-weight: 500; font-size: 2.05cqw; line-height: 1.15; letter-spacing: -0.012em; color: #e4e9ef; }
+.tag .body { margin-top: 1.1cqw; font-weight: 300; font-size: max(11px, 1.06cqw); line-height: 1.55; color: #8e98a5; max-width: 25.5cqw; text-wrap: pretty; }
+
+.cursor { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 6; will-change: transform; }
+.cursor .ring {
+  position: absolute; left: 0; top: 0; width: 23cqw; height: 23cqw; margin: -11.5cqw 0 0 -11.5cqw; border-radius: 50%;
+  border: 1px dashed rgba(207, 231, 255, .22); transform: scale(.2); opacity: 0; will-change: transform, opacity;
+}
+.cursor .cross { position: absolute; left: 0; top: 0; width: 1.2cqw; height: 1.2cqw; margin: -0.6cqw 0 0 -0.6cqw; will-change: transform; }
+.cursor .cross::before, .cursor .cross::after { content: ""; position: absolute; background: var(--hero-neon); }
+.cursor .cross::before { left: 50%; top: 0; bottom: 0; width: 1px; transform: translateX(-50%); }
+.cursor .cross::after { top: 50%; left: 0; right: 0; height: 1px; transform: translateY(-50%); }
+@media (pointer: coarse) { .cursor { display: none; } }
+
+.spark {
+  position: absolute; left: 50%; top: 52%; width: 6px; height: 6px; margin: -3px; border-radius: 50%; background: #fff;
+  box-shadow: 0 0 12px 3px rgba(61, 139, 255, .9), 0 0 40px 10px rgba(61, 139, 255, .35); opacity: 0; z-index: 2; pointer-events: none;
+}
+
+.fail { position: absolute; inset: 0; display: none; place-items: center; color: var(--hero-ink); z-index: 9; text-align: center; padding: 4cqw; }
+
+@container (max-width: 640px) {
+  .tag .body { display: none; }
+}

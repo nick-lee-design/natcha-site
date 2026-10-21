@@ -1,4 +1,5 @@
 import Header from '@/components/Header';
+import KineticHero from '@/components/hero/KineticHero';
 import Hero from '@/components/Hero';
 import Manifesto from '@/components/Manifesto';
 import WhyTalo from '@/components/WhyTalo';
@@ -16,6 +17,7 @@ export default function Home() {
       <a className="skip" href="#main">Skip to content</a>
       <Header />
       <main id="main">
+        <KineticHero />
         <Hero />
         <Manifesto />
         <WhyTalo />
