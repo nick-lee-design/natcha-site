@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { outfit } from '@/app/fonts';
 import styles from './KineticHero.module.css';
 
 export default function KineticHero() {
@@ -35,7 +34,8 @@ export default function KineticHero() {
         ring: ring.current!,
         cross: cross.current!,
         fail: fail.current!,
-        fontFamily: outfit.style.fontFamily,
+        // Set on <html> by the layout's next/font class
+        fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-outfit').trim() || 'Outfit',
       });
     });
     return () => { cancelled = true; dispose?.(); };
