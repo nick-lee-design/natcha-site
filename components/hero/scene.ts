@@ -5,13 +5,19 @@
 // as r128 did, so the render matches the prototype.
 import * as THREE from 'three';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export type HeroElements = {
+  frame: HTMLElement;
   stage: HTMLElement;
   canvas: HTMLCanvasElement;
   spark: HTMLElement;
+  scrim: HTMLElement;
   markTexts: SVGTextElement[];
-  tagLines: HTMLElement[];
+  // One entry per state (assembled, exploded, laid out): the lines to reveal.
+  steps: HTMLElement[][];
   cursor: HTMLElement;
   ring: HTMLElement;
   cross: HTMLElement;
@@ -307,13 +313,15 @@ void main(){ vec3 n = normalize(vN); gl_FragColor = vec4(n.xy*0.5+0.5, uBlue, uE
     for (; d < 140; d += 0.25) {
       c.position.copy(ctr).addScaledVector(dir, d); c.lookAt(ctr); c.updateMatrixWorld(); c.updateProjectionMatrix();
       let ok = true;
-      for (const q of pts) { const v = q.clone().project(c); if (Math.abs(v.x) > 0.9 || v.y > 0.76 || v.y < -0.84) { ok = false; break; } }
+      // Narrower than the full width: the laid-out view is shifted right to clear the copy (see LAY_SHIFT).
+      for (const q of pts) { const v = q.clone().project(c); if (Math.abs(v.x) > 0.62 || v.y > 0.76 || v.y < -0.84) { ok = false; break; } }
       if (ok) break;
     }
     const pos = ctr.clone().addScaledVector(dir, d);
     CAMS[2] = { p: [pos.x, pos.y, pos.z], t: [ctr.x, ctr.y - 0.4, ctr.z], fov: 26 };
   })();
-  const cam = { px: CAMS[0].p[0] + 6, py: CAMS[0].p[1] + 5, pz: CAMS[0].p[2] + 7, tx: CAMS[0].t[0], ty: CAMS[0].t[1], tz: CAMS[0].t[2], fov: CAMS[0].fov, par: 1 };
+  const cam = { px: CAMS[0].p[0] + 6, py: CAMS[0].p[1] + 5, pz: CAMS[0].p[2] + 7, tx: CAMS[0].t[0], ty: CAMS[0].t[1], tz: CAMS[0].t[2], fov: CAMS[0].fov, par: 1, shift: 0 };
+  const LAY_SHIFT = 0.17; // share of the stage width the laid-out view moves right, on landscape screens
 
   /* ---------- post: outline, glow, finish ---------- */
   const QUAD_VS = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`;
@@ -476,61 +484,58 @@ void main(){
     ptr.down = false; gsap.to(crossEl, { rotate: 0, scale: 1, duration: 0.6, ease: 'expo.out' });
     if (e.pointerType !== 'mouse') { calls.push(gsap.delayedCall(0.9, () => { ptr.in = false; })); }
   }, on);
-  stage.addEventListener('click', e => {
-    if ((e.target as Element).closest('button')) return;
-    setPtr(e); go((state + 1) % 3, { x: ptr.x, y: ptr.y });
-  }, on);
   function ringShow() {
     const sc = state === 2 ? 0.28 : (state === 1 ? 0.8 : 1);
     gsap.to(ringEl, { scale: ptr.in && lensGate.v > 0.5 ? sc : 0.15, opacity: ptr.in && lensGate.v > 0.5 ? 1 : 0, duration: 0.7, ease: 'expo.out' });
   }
 
-  // Keys only act while the hero has focus, so the rest of the page scrolls and types normally.
-  stage.addEventListener('keydown', e => {
-    if (e.key === '1' || e.key === '2' || e.key === '3') go(+e.key - 1, { x: SW / 2, y: SH / 2 });
-    if (e.key === ' ') { e.preventDefault(); go((state + 1) % 3, { x: SW / 2, y: SH / 2 }); }
-  }, on);
-
-  /* ---------- wordmark ---------- */
+  /* ---------- copy: wordmark, then one block of text per state ---------- */
   const markTexts = el.markTexts;
   const DASH = 1900;
   markTexts.forEach(t => { t.style.strokeDasharray = `${DASH} ${DASH}`; t.style.strokeDashoffset = String(DASH); });
   const markObj = { v: 0 };
   function markApply() { markTexts.forEach((t, i) => { t.style.strokeDashoffset = String(DASH * (1 - markObj.v)); t.style.opacity = String(i === 0 ? 0.85 * markObj.v : Math.min(1, markObj.v * 3)); }); }
   markApply();
-  const tagLines = el.tagLines;
+  const steps = el.steps, allLines = steps.flat();
   const CLIP_HIDE = 'inset(-30% 100% -30% -4%)', CLIP_SHOW = 'inset(-30% -4% -30% -4%)';
-  gsap.set(tagLines, { opacity: 0, y: 12, clipPath: CLIP_HIDE });
-  function showMark(delay = 0) {
-    gsap.to(markObj, { v: 1, duration: REDUCE ? 0.4 : 2.2, delay, ease: 'power2.inOut', onUpdate: markApply, overwrite: true });
-    gsap.to(tagLines, { opacity: 1, y: 0, clipPath: CLIP_SHOW, duration: REDUCE ? 0.4 : 1.3, ease: 'expo.out', stagger: 0.18, delay: delay + (REDUCE ? 0.1 : 1.25), overwrite: true });
+  gsap.set(allLines, { opacity: 0, y: 12, clipPath: CLIP_HIDE });
+  // Dark gradient behind the copy; stronger once glowing parts move behind it.
+  const SCRIM = [0.45, 1, 1];
+  gsap.set(el.scrim, { opacity: 0 });
+  function showStep(i: number, delay = 0) {
+    if (i === 0) gsap.to(markObj, { v: 1, duration: REDUCE ? 0.4 : 2.2, delay, ease: 'power2.inOut', onUpdate: markApply, overwrite: true });
+    gsap.to(steps[i], { opacity: 1, y: 0, clipPath: CLIP_SHOW, duration: REDUCE ? 0.4 : 1.3, ease: 'expo.out', stagger: 0.18, delay: delay + (i === 0 && !REDUCE ? 1.25 : 0.1), overwrite: true });
+    gsap.to(el.scrim, { opacity: SCRIM[i], duration: REDUCE ? 0.4 : 1.2, delay: Math.max(0, delay - 0.4), ease: 'power2.out', overwrite: true });
   }
-  function hideMark() {
-    gsap.to(markObj, { v: 0, duration: 0.6, ease: 'power3.in', onUpdate: markApply, overwrite: true });
-    gsap.to(tagLines, {
+  function hideStep(i: number) {
+    if (i === 0) gsap.to(markObj, { v: 0, duration: 0.6, ease: 'power3.in', onUpdate: markApply, overwrite: true });
+    gsap.to(steps[i], {
       opacity: 0, y: -8, duration: 0.45, ease: 'power2.in', stagger: 0.05, overwrite: true,
-      onComplete: () => { gsap.set(tagLines, { y: 12, clipPath: CLIP_HIDE }); },
+      onComplete: () => { gsap.set(steps[i], { y: 12, clipPath: CLIP_HIDE }); },
     });
   }
 
-  /* ---------- state machine ---------- */
-  let state = 0, introDone = false;
+  /* ---------- state machine: 0 assembled, 1 exploded, 2 laid out; driven by scroll ---------- */
+  let state = 0, introDone = false, wanted = 0;
   const lensGate = { v: 0 };
   const camTweenTo = (i: number, dur: number) => {
     const c = CAMS[i];
-    gsap.to(cam, { px: c.p[0], py: c.p[1], pz: c.p[2], tx: c.t[0], ty: c.t[1], tz: c.t[2], fov: c.fov, par: i === 2 ? 0.35 : 1, duration: REDUCE ? 0.6 : dur, ease: 'power3.inOut', overwrite: 'auto' });
+    gsap.to(cam, { px: c.p[0], py: c.p[1], pz: c.p[2], tx: c.t[0], ty: c.t[1], tz: c.t[2], fov: c.fov, par: i === 2 ? 0.35 : 1, shift: i === 2 ? 1 : 0, duration: REDUCE ? 0.6 : dur, ease: 'power3.inOut', overwrite: 'auto' });
   };
   const tmpS = new THREE.Vector3();
   function screenOf(v: THREE.Vector3) { tmpS.copy(v).project(camera); return { x: (tmpS.x * 0.5 + 0.5) * SW, y: (-tmpS.y * 0.5 + 0.5) * SH }; }
 
+  // Copy delay per state, timed to land as each move settles.
+  const SHOW_AT = [1.7, 0.7, 1.4];
   function go(next: number, origin?: { x: number; y: number }) {
+    wanted = next;
     if (!introDone || next === state) return;
     const prev = state; state = next;
     gsap.killTweensOf(lensGate);
     gsap.to(lensGate, { v: 0, duration: 0.25, onUpdate: ringShow });
     gsap.to(lensGate, { v: 1, duration: 0.6, delay: REDUCE ? 0.5 : 2.0, onStart: ringShow, onUpdate: ringShow });
-    if (prev === 0) hideMark();
-    if (next === 0) showMark(REDUCE ? 0.4 : 1.7);
+    hideStep(prev);
+    showStep(next, REDUCE ? 0.4 : SHOW_AT[next]);
     camTweenTo(next, next === 2 || prev === 2 ? 2.6 : 2.0);
     const dmul = REDUCE ? 0 : 1, tmul = REDUCE ? 0.4 : 1;
     const ox = origin ? origin.x : SW / 2, oy = origin ? origin.y : SH / 2;
@@ -571,7 +576,9 @@ void main(){
     if (REDUCE) {
       parts.forEach(p => { p.on = true; p.w = 0; p.mesh.visible = true; });
       cam.px = CAMS[0].p[0]; cam.py = CAMS[0].p[1]; cam.pz = CAMS[0].p[2];
-      introDone = true; lensGate.v = 1; ringShow(); showMark(0.2); return;
+      introDone = true; lensGate.v = 1; ringShow();
+      if (wanted === 0) showStep(0, 0.2); else { showStep(0, 0); go(wanted); }
+      return;
     }
     gsap.timeline()
       .to(spark, { opacity: 1, scale: 1, duration: 0.4, ease: 'power2.out' })
@@ -593,15 +600,20 @@ void main(){
         onComplete: () => { p.flash = isFit ? 1 : 0.8; },
       });
     });
-    calls.push(gsap.delayedCall(maxEnd - 0.3, () => showMark(0)));
-    calls.push(gsap.delayedCall(maxEnd + 0.4, () => { introDone = true; gsap.to(lensGate, { v: 1, duration: 0.8, onStart: ringShow, onUpdate: ringShow }); }));
+    calls.push(gsap.delayedCall(maxEnd - 0.3, () => { if (wanted === 0) showStep(0); }));
+    calls.push(gsap.delayedCall(maxEnd + 0.4, () => {
+      introDone = true;
+      gsap.to(lensGate, { v: 1, duration: 0.8, onStart: ringShow, onUpdate: ringShow });
+      // The visitor may have scrolled on while the intro played.
+      if (wanted !== 0) go(wanted);
+    }));
   }
 
   /* ---------- frame loop ---------- */
   const tq = new THREE.Quaternion(), te = new THREE.Euler(), tv = new THREE.Vector3(), tv2 = new THREE.Vector3();
   const camPos = new THREE.Vector3(), camTgt = new THREE.Vector3(), camR = new THREE.Vector3(), camU = new THREE.Vector3(), camF = new THREE.Vector3();
   const UP = V(0, 1, 0);
-  let last = performance.now(), T = 0;
+  let last = performance.now(), T = 0, lastOffX = 0;
   const R0 = 0.115; // lens radius as a share of stage width
 
   function segDist(px: number, py: number, ax: number, ay: number, bx: number, by: number) {
@@ -633,7 +645,16 @@ void main(){
     camPos.addScaledVector(camU, (-ptr.sy * 0.9 + Math.sin(T * 0.07 + 1.3) * 0.3 * drift) * cam.par);
     camTgt.addScaledVector(camR, ptr.sx * 0.35 * cam.par);
     camera.position.copy(camPos); camera.lookAt(camTgt);
-    if (Math.abs(camera.fov - cam.fov) > 1e-3) { camera.fov = cam.fov; camera.updateProjectionMatrix(); }
+    // The shots were framed for 16:9. On narrower screens widen the lens so the
+    // horizontal framing holds (up to a limit, so portrait phones don't distort).
+    const widen = Math.max(1, Math.min(2.2, (16 / 9) / (SW / SH)));
+    const fov = 2 * Math.atan(Math.tan(cam.fov * Math.PI / 360) * widen) * 180 / Math.PI;
+    if (Math.abs(camera.fov - fov) > 1e-3) { camera.fov = fov; camera.updateProjectionMatrix(); }
+    const offX = SW / SH > 1.2 ? cam.shift * LAY_SHIFT * SW : 0;
+    if (offX !== lastOffX) {
+      if (offX) camera.setViewOffset(SW, SH, -offX, 0, SW, SH); else camera.clearViewOffset();
+      lastOffX = offX;
+    }
     camera.updateMatrixWorld();
     const dist = camPos.distanceTo(camTgt);
     mOutline.uniforms.uFogN.value = dist * 0.8; mOutline.uniforms.uFogF.value = dist * 1.65;
@@ -711,6 +732,18 @@ void main(){
   });
   io.observe(stage);
 
+  // Scrolling through the pinned section moves through the three states in thirds.
+  const st = ScrollTrigger.create({
+    trigger: el.frame,
+    start: 'top top',
+    end: 'bottom bottom',
+    onUpdate: self => {
+      const next = Math.min(2, Math.floor(self.progress * 3));
+      if (next !== wanted) go(next, { x: SW / 2, y: SH / 2 });
+    },
+  });
+  wanted = Math.min(2, Math.floor(st.progress * 3));
+
   /* ---------- go ---------- */
   const fontsReady = document.fonts
     ? Promise.race([document.fonts.load(`800 100px ${el.fontFamily}`), new Promise(r => setTimeout(r, 1500))])
@@ -721,12 +754,13 @@ void main(){
 
   return () => {
     disposed = true;
+    st.kill();
     ac.abort();
     cancelAnimationFrame(raf);
     io.disconnect();
     ro.disconnect();
     calls.forEach(c => c.kill());
-    gsap.killTweensOf([cam, markObj, lensGate, ...parts, ...tagLines, el.spark, cursorEl, ringEl, crossEl]);
+    gsap.killTweensOf([cam, markObj, lensGate, ...parts, ...allLines, el.scrim, el.spark, cursorEl, ringEl, crossEl]);
     parts.forEach(p => { p.mesh.geometry.dispose(); p.mat.dispose(); });
     [partMat, mOutline, mDown, mCopy, mBlur, mFinal].forEach(m => m.dispose());
     quad.geometry.dispose();

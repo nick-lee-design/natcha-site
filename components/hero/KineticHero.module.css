@@ -1,5 +1,5 @@
-/* The hero fills the viewport below the site header (84px), letterboxing a 16:9
-   stage; on narrow screens the frame shrinks to the stage so there are no bars. */
+/* A tall section with the scene pinned full screen inside it. Scrolling
+   through it moves the assembly through its three states. */
 .frame {
   --hero-void: #0c0e11;
   --hero-ink: #d5dae1;
@@ -7,20 +7,16 @@
   --hero-blue: #3d8bff;
   --hero-neon: #cfe7ff;
   --hero-font: var(--font-outfit), 'Avenir Next', 'Futura', system-ui, sans-serif;
-  height: min(calc(100svh - 84px), 56.25vw);
-  min-height: 0;
-  container-type: size;
-  display: grid;
-  place-items: center;
+  position: relative;
+  height: 300svh;
   background: var(--paper);
 }
 .stage {
-  position: relative; width: min(100cqw, calc(100cqh * 16 / 9)); aspect-ratio: 16/9;
+  position: sticky; top: 0;
+  width: 100%; height: 100svh;
   overflow: hidden; background: var(--hero-void); container-type: size; isolation: isolate;
   cursor: none; touch-action: pan-y; user-select: none; -webkit-user-select: none;
-  outline: none;
 }
-.stage:focus-visible { box-shadow: inset 0 0 0 1px var(--hero-neon); }
 @media (pointer: coarse) { .stage { cursor: auto; } }
 .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
@@ -31,15 +27,37 @@
   text-shadow: 0 0 6px var(--hero-void), 0 0 2px var(--hero-void), 0 0 14px var(--hero-void);
 }
 
-.mark { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; overflow: visible; }
+/* Text protection: darkens the lower left, where the copy sits. */
+.scrim {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0;
+  background:
+    linear-gradient(90deg, rgba(5, 6, 8, .9) 0%, rgba(5, 6, 8, .7) 30%, rgba(5, 6, 8, 0) 58%),
+    linear-gradient(0deg, rgba(5, 6, 8, .75) 0%, rgba(5, 6, 8, 0) 50%);
+}
+
+/* The three blocks of copy share one spot and swap as the state changes. */
+.copy {
+  position: absolute; z-index: 3; pointer-events: none;
+  left: max(var(--pad), 5cqw); right: var(--pad); bottom: clamp(48px, 13cqh, 150px);
+  display: grid; align-items: end;
+  font-family: var(--hero-font);
+}
+.copy > * { grid-area: 1 / 1; }
+.copy p, .copy h1 {
+  margin: 0; opacity: 0;
+  text-shadow: 0 0 18px var(--hero-void), 0 0 4px var(--hero-void);
+  will-change: transform, opacity, clip-path;
+}
+
+.mark { display: block; width: clamp(200px, 27cqw, 600px); height: auto; overflow: visible; margin-left: -1.2%; }
 .mark text { font-family: var(--hero-font); font-weight: 800; font-size: 236px; letter-spacing: -3px; fill: none; stroke-linejoin: round; opacity: 0; }
 .mark .glow { stroke: var(--hero-blue); stroke-width: 10; }
 .mark .core { stroke: var(--hero-neon); stroke-width: 2.6; }
 
-.tag { position: absolute; left: 6.45cqw; top: 64.4cqh; width: 28cqw; z-index: 3; pointer-events: none; font-family: var(--hero-font); }
-.tag p { margin: 0; opacity: 0; text-shadow: 0 0 10px var(--hero-void), 0 0 3px var(--hero-void); will-change: transform, opacity, clip-path; }
-.tag .line { font-weight: 500; font-size: 2.05cqw; line-height: 1.15; letter-spacing: -0.012em; color: #e4e9ef; }
-.tag .body { margin-top: 1.1cqw; font-weight: 300; font-size: max(11px, 1.06cqw); line-height: 1.55; color: #8e98a5; max-width: 25.5cqw; text-wrap: pretty; }
+.copy .line { margin-top: clamp(10px, 1.4cqw, 22px); }
+.line { font-weight: 500; font-size: clamp(22px, 2.3cqw, 44px); line-height: 1.15; letter-spacing: -0.012em; color: #e4e9ef; }
+.headline { font-weight: 500; font-size: clamp(34px, 5cqw, 92px); line-height: 1.02; letter-spacing: -0.025em; color: #eef1f5; max-width: 13ch; text-wrap: balance; }
+.para { font-weight: 300; font-size: clamp(17px, 1.55cqw, 28px); line-height: 1.5; color: #c3cbd5; max-width: 32ch; text-wrap: pretty; }
 
 .cursor { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 6; will-change: transform; }
 .cursor .ring {
@@ -58,7 +76,3 @@
 }
 
 .fail { position: absolute; inset: 0; display: none; place-items: center; color: var(--hero-ink); z-index: 9; text-align: center; padding: 4cqw; }
-
-@container (max-width: 640px) {
-  .tag .body { display: none; }
-}

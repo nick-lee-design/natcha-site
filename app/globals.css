@@ -29,7 +29,8 @@ a{color:inherit}
 .link:hover{color:var(--accent)}
 
 /* Header */
-.site-header{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-block:22px}
+/* Sits over the full-screen hero */
+.site-header{position:absolute;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:24px;padding-block:22px}
 .brand{display:inline-flex;align-items:center;gap:12px;font:600 1.25rem var(--display);font-stretch:96%;letter-spacing:.01em;text-decoration:none}
 .brand img{display:block}
 .header-right{display:flex;align-items:center;gap:32px}
