@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import Services from './Services';
+import ServicesBench from './services/ServicesBench';
 
 // The headline and intro copy now live in the kinetic hero above.
 export default function Hero() {
@@ -16,7 +16,7 @@ export default function Hero() {
       </div>
 
       <div className="wrap">
-        <Services />
+        <ServicesBench />
       </div>
     </section>
   );

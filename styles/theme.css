@@ -23,6 +23,8 @@
   --brand-lit: var(--bronze-10);
   --brand-ink: var(--bronze-11);
   --brand-glow: var(--bronze-12);
+  --brand-wash: var(--bronze-3);
+  --brand-dim: var(--bronze-6);
 
   --bg:
     radial-gradient(900px 620px at 88% 0, color-mix(in srgb, var(--brand-lit) 16%, transparent), transparent 70%),

@@ -1,5 +1,16 @@
 export type NodeId = 'a1' | 'a2' | 'a3' | 'a4' | 't1' | 't2' | 't3' | 't4';
 
+export type Step = {
+  title: string;
+  body: string;
+  tag?: string;
+  who?: string;
+  get?: string;
+  optional?: boolean;
+};
+
+export type Phase = { name: string; count: number; loop?: string };
+
 export type Service = {
   label: string;
   on: NodeId[];
@@ -7,7 +18,12 @@ export type Service = {
   talo: string;
   back: string;
   stepsTitle?: string;
-  steps?: string[];
+  phases?: Phase[];
+  steps?: Step[];
+  // Which step adds each of the nine parts of the isometric figure (plan, columns,
+  // frame, ductwork, pipework, valve, hangers, dimensions, monitoring unit).
+  // Without it the parts spread evenly across the steps.
+  build?: number[];
   downloadLabel?: string;
   downloadFile?: string;
 };
@@ -27,16 +43,22 @@ export const services: Service[] = [
     talo: 'Has the implementation agent configure the right AI agents and tools on your automation platform, wired into your BIM model.',
     back: 'A working AI tools implementation, tuned to your project.',
     stepsTitle: 'How TALO Engine implements AI tools into your organisation',
+    phases: [
+      { name: 'Scope', count: 3 },
+      { name: 'Build', count: 2 },
+      { name: 'Refine', count: 2, loop: 'until reliable' },
+      { name: 'Hand over', count: 2 },
+    ],
     steps: [
-      'Discovery call — understand your current BIM software, model structure, standards, and where your coordination workflow slows down or breaks.',
-      'Access and audit — Natcha reviews your live model and project documents against what the AI agents need to work reliably.',
-      'Fee proposal — based on the audit, the engagement is scoped and priced, with the agents and tools chosen to fit your project, for you to sign off.',
-      'Install and configure — the chosen AI agents and software are set up inside your environment, wired into your BIM model.',
-      'Test on a live task — the workflow is run against a real piece of your work, so the first results are something your team can actually use.',
-      'Review together — you and Natcha walk through the output, catch anything that needs adjusting, and refine the configuration.',
-      'Refine and re-test — the setup is tightened until it is reliably producing output you can rely on.',
-      'Handover — Natcha continues running it directly for you, or your team takes it over with a short written record of what has been set up.',
-      'Ongoing support — optional check-ins if you want the engagement to continue beyond initial setup.',
+      { title: 'Discovery call', body: 'Understand your current BIM software, model structure, standards, and where your coordination workflow slows down or breaks.', who: 'You and Natcha', get: 'A map of where your workflow breaks' },
+      { title: 'Access and audit', body: 'Natcha reviews your live model and project documents against what the AI agents need to work reliably.', who: 'Natcha', get: 'What your model needs before the agents go in' },
+      { title: 'Fee proposal', body: 'Based on the audit, the engagement is scoped and priced, with the agents and tools chosen to fit your project, for you to sign off.', who: 'Natcha, then your sign-off', get: 'A scoped, priced proposal' },
+      { title: 'Install and configure', body: 'The chosen AI agents and software are set up inside your environment, wired into your BIM model.', who: 'Natcha', get: 'AI agents running in your environment' },
+      { title: 'Test on a live task', body: 'The workflow is run against a real piece of your work, so the first results are something your team can actually use.', who: 'Natcha, on your work', get: 'First results your team can use' },
+      { title: 'Review together', body: 'You and Natcha walk through the output, catch anything that needs adjusting, and refine the configuration.', who: 'You and Natcha', get: 'Agreed adjustments' },
+      { title: 'Refine and re-test', body: 'The setup is tightened until it is reliably producing output you can rely on.', who: 'Natcha', get: 'Output you can rely on' },
+      { title: 'Handover', body: 'Natcha continues running it directly for you, or your team takes it over with a short written record of what has been set up.', who: 'Natcha or your team', get: 'A short written record of the setup' },
+      { title: 'Ongoing support', body: 'Optional check-ins if you want the engagement to continue beyond initial setup.', who: 'You and Natcha', get: 'Check-ins beyond initial setup', optional: true },
     ],
   },
   {
@@ -53,13 +75,20 @@ export const services: Service[] = [
     talo: 'Directs the training agent to build a programme from the BIM model, with materials tailored to your team.',
     back: 'A training programme ready to roll out to your team.',
     stepsTitle: 'A full day with TALO Engine',
+    // Welcome: plan. Orchestrator: columns and frame. Spec search: ductwork. Calculations: pipework and valve. Running it: hangers and monitoring. Wrap-up: dimensions.
+    build: [0, 1, 1, 2, 3, 3, 4, 5, 4],
+    phases: [
+      { name: 'Open', count: 1 },
+      { name: 'Modules', count: 4 },
+      { name: 'Close', count: 1 },
+    ],
     steps: [
-      'Welcome and introductions — goals for the day, quick tour of your current workflow.',
-      'Module 1: The orchestrator — how TALO’s AI agents connect to your BIM model and tools.',
-      'Module 2: Spec search and model checking — hands-on, using your own project.',
-      'Module 3: Calculations and schedules — running the sizing and schedule agents live.',
-      'Module 4: Running it independently — your team drives the workflow themselves, Natcha troubleshoots.',
-      'Wrap-up, Q&A, and what’s next.',
+      { title: 'Welcome and introductions', body: 'Goals for the day, quick tour of your current workflow.' },
+      { title: 'The orchestrator', tag: 'Module 1', body: 'How TALO’s AI agents connect to your BIM model and tools.' },
+      { title: 'Spec search and model checking', tag: 'Module 2', body: 'Hands-on, using your own project.' },
+      { title: 'Calculations and schedules', tag: 'Module 3', body: 'Running the sizing and schedule agents live.' },
+      { title: 'Running it independently', tag: 'Module 4', body: 'Your team drives the workflow themselves, Natcha troubleshoots.' },
+      { title: 'Wrap-up', body: 'Q&A, and what’s next.' },
     ],
     downloadLabel: 'Download Full Day programme',
     downloadFile: 'Corporate-Training-Programme.pdf',
@@ -73,7 +102,7 @@ export const services: Service[] = [
   },
 ];
 
-type WheelNode = {
+export type WheelNode = {
   id: NodeId;
   kind: 'agent' | 'tool';
   spoke: [number, number, number, number];
