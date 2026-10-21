@@ -1,0 +1,30 @@
+/* Colour scales, in Radix UI Colors format (12 steps each).
+   To switch a scale, replace its import with a stock Radix one, e.g.
+   @import "@radix-ui/colors/blue-dark.css"; instead of talo-blue-dark.css. */
+@import "./colors/talo-gray-dark.css";
+@import "./colors/talo-blue-dark.css";
+@import "./colors/talo-bronze-dark.css";
+
+/* Semantic roles. Components use these, never the raw scale steps. */
+.dark {
+  --paper: var(--gray-1);
+  --panel: var(--gray-2);
+  --panel-2: var(--gray-3);
+  --panel-line: var(--gray-6);
+  --ink-muted: var(--gray-9);
+  --ink-soft: var(--gray-11);
+  --ink: var(--gray-12);
+  --line: color-mix(in srgb, var(--gray-12) 20%, transparent);
+  --on-solid: var(--gray-1);
+
+  --accent: var(--blue-9);
+
+  --brand: var(--bronze-9);
+  --brand-lit: var(--bronze-10);
+  --brand-ink: var(--bronze-11);
+  --brand-glow: var(--bronze-12);
+
+  --bg:
+    radial-gradient(900px 620px at 88% 0, color-mix(in srgb, var(--brand-lit) 16%, transparent), transparent 70%),
+    linear-gradient(180deg, #000000 0%, #0C1016 55%, #1D2631 100%);
+}

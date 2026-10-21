@@ -1,0 +1,16 @@
+/* TALO gray, dark. Neutral scale. Steps 1, 2, 3, 6, 11 and 12 are the original site colours; the rest are interpolated.
+   Same variable names and selector as @radix-ui/colors/gray-dark.css, so either file can replace the other. */
+.dark, .dark-theme {
+  --gray-1: #050608;
+  --gray-2: #10141a;
+  --gray-3: #1a2028;
+  --gray-4: #202730;
+  --gray-5: #262e38;
+  --gray-6: #2c3540;
+  --gray-7: #3b444f;
+  --gray-8: #565f6b;
+  --gray-9: #666e7a;
+  --gray-10: #747d89;
+  --gray-11: #b4bcc8;
+  --gray-12: #eef1f5;
+}

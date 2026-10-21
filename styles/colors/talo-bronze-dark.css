@@ -1,0 +1,16 @@
+/* TALO bronze, dark. Brand scale. Steps 9 to 12 are the original bronze colours; steps 1 to 8 follow Radix brown, re-hued to match.
+   Same variable names and selector as @radix-ui/colors/bronze-dark.css, so either file can replace the other. */
+.dark, .dark-theme {
+  --bronze-1: #12110e;
+  --bronze-2: #1d1814;
+  --bronze-3: #29211a;
+  --bronze-4: #34291d;
+  --bronze-5: #403121;
+  --bronze-6: #503b25;
+  --bronze-7: #65492c;
+  --bronze-8: #815e33;
+  --bronze-9: #d39a55;
+  --bronze-10: #d9a05a;
+  --bronze-11: #e2ae71;
+  --bronze-12: #f2c88a;
+}

@@ -1,0 +1,16 @@
+/* TALO blue, dark. Accent scale. Step 9 is the logo blue (#638DB7); other steps follow Radix blue, re-hued to match.
+   Same variable names and selector as @radix-ui/colors/blue-dark.css, so either file can replace the other. */
+.dark, .dark-theme {
+  --blue-1: #111519;
+  --blue-2: #16191f;
+  --blue-3: #1e2935;
+  --blue-4: #233446;
+  --blue-5: #2c4155;
+  --blue-6: #384e64;
+  --blue-7: #475e77;
+  --blue-8: #56728f;
+  --blue-9: #638db7;
+  --blue-10: #799fc4;
+  --blue-11: #99b6d2;
+  --blue-12: #d4e3ed;
+}
