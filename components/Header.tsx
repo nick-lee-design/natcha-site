@@ -1,20 +1,38 @@
+'use client';
+
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
+  // Pinned to the top; picks up a backdrop once the page scrolls under it
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <header className="wrap site-header">
-      <a className="brand" href="#top" aria-label="TALO Engine, home">
-        <Image src="/logo.png" width={40} height={40} alt="" priority />
-        TALO Engine
-      </a>
-      <div className="header-right">
-        <ul className="nav-links">
-          <li><a href="#manifesto">Manifesto</a></li>
-          <li><a href="#name">Why TALO</a></li>
-          <li><a href="#work">Case studies</a></li>
-          <li><a href="#people">People</a></li>
-        </ul>
-        <a className="btn" href="#contact">Get in touch</a>
+    <header className={`site-header${scrolled ? ' is-scrolled' : ''}`}>
+      <div className="wrap site-header-inner">
+        <div className="header-left">
+          <a className="brand" href="#top" aria-label="TALO Engine, home">
+            <Image src="/logo.png" width={40} height={40} alt="" priority />
+            TALO Engine
+          </a>
+          <a className="pill" href="/experiments/ncw-corridor.html" target="_blank" rel="noopener">Experiments</a>
+        </div>
+        <div className="header-right">
+          <ul className="nav-links">
+            <li><a href="#manifesto">Manifesto</a></li>
+            <li><a href="#name">Why TALO</a></li>
+            <li><a href="#work">Case studies</a></li>
+            <li><a href="#people">People</a></li>
+          </ul>
+          <a className="btn" href="#contact">Get in touch</a>
+        </div>
       </div>
     </header>
   );
