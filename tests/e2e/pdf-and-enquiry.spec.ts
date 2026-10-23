@@ -19,9 +19,6 @@ test('the PDF has one 16:9 page per slide, selectable text and a fillable enquir
   // The contact slide's boxes are form fields, with the services from the packages table
   const fields = doc.getForm().getFields().map((f) => f.getName());
   expect(fields).toEqual(expect.arrayContaining(['name', 'company', 'email', 'details', 'services: BIM management']));
-
-  const again = await request.get(`/api/pitch/pdf/${DECK}`);
-  expect(again.headers()['x-pitch-pdf']).toBe('hit');
 });
 
 test('the enquiry endpoint validates, sends with the deck id, and ignores bots', async ({ request }) => {

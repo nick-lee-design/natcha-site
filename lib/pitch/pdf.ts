@@ -1,26 +1,8 @@
-import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import fontkit from '@pdf-lib/fontkit';
 import { PDFDocument, rgb } from 'pdf-lib';
 import type { Deck } from './schema';
-import { storage, type PdfMeta } from './storage';
-
-const STARTED = Date.now();
-
-function buildId() {
-  if (process.env.VERCEL_GIT_COMMIT_SHA) return process.env.VERCEL_GIT_COMMIT_SHA;
-  try {
-    return readFileSync(path.join(process.cwd(), '.next', 'BUILD_ID'), 'utf8').trim();
-  } catch {
-    return `dev-${STARTED}`;
-  }
-}
-
-// A new PDF only when the deck or the app changed
-export function pdfKey(deck: Deck) {
-  return createHash('sha256').update(JSON.stringify(deck)).update(buildId()).digest('hex').slice(0, 16);
-}
 
 const words = (s: string) =>
   s
@@ -48,10 +30,10 @@ async function launch() {
 type FieldBox = { name: string; kind: 'text' | 'multiline' | 'checkbox'; value: string; page: number; x: number; y: number; w: number; h: number };
 
 // Headless Chromium prints the print route, so the PDF is the same render the browser shows
-async function render(origin: string, deckId: string) {
+async function render(origin: string, deckId: string, access: Record<string, string>) {
   const browser = await launch();
   try {
-    const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
+    const page = await browser.newPage({ viewport: { width: 1600, height: 900 }, extraHTTPHeaders: access });
     await page.goto(`${origin}/pitch/print/${deckId}`, { waitUntil: 'networkidle', timeout: 45_000 });
     await page.waitForSelector('[data-print-ready]', { timeout: 30_000 });
     const fields = await page.$$eval('[data-pdf-field]', (els) => {
@@ -109,23 +91,18 @@ async function addFormFields(pdf: Uint8Array, boxes: FieldBox[]) {
   return doc.save();
 }
 
-const inflight = new Map<string, Promise<Uint8Array>>();
+// Made fresh for each download and never stored
+export async function deckPdf(deck: Deck, origin: string, access: Record<string, string> = {}) {
+  return { data: await render(origin, deck.id, access), filename: pdfFilename(deck) };
+}
 
-export async function deckPdf(deck: Deck, origin: string) {
-  const key = pdfKey(deck);
-  const filename = pdfFilename(deck);
-  const cached = await storage.getPdf(deck.id, key);
-  if (cached) return { data: cached, filename, key, cached: true };
-
-  let job = inflight.get(key);
-  if (!job) {
-    job = render(origin, deck.id).then(async (data) => {
-      const meta: PdfMeta = { key, filename, createdAt: new Date().toISOString(), size: data.byteLength };
-      await storage.putPdf(deck.id, data, meta);
-      return data;
-    });
-    inflight.set(key, job);
-    job.finally(() => inflight.delete(key)).catch(() => {});
-  }
-  return { data: await job, filename, key, cached: false };
+// What lets the request through Vercel's deployment protection (previews sit behind a login),
+// so headless Chromium sees the print page and not the login screen
+export function accessHeaders(req: Request): Record<string, string> {
+  const out: Record<string, string> = {};
+  const cookie = req.headers.get('cookie');
+  const bypass = req.headers.get('x-vercel-protection-bypass');
+  if (cookie) out.cookie = cookie;
+  if (bypass) out['x-vercel-protection-bypass'] = bypass;
+  return out;
 }

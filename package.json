@@ -6,7 +6,6 @@
     "build": "next build",
     "start": "next start",
     "test": "next build && playwright test",
-    "pdfs": "node scripts/build-pdfs.mjs",
     "assembly-still": "node scripts/build-assembly-still.mjs"
   },
   "dependencies": {

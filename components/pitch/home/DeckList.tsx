@@ -69,9 +69,6 @@ export function DeckList({ decks, editable }: { decks: DeckSummary[]; editable: 
               >
                 {copied === d.id ? 'Copied' : `${origin}/pitch/d/${d.id}`}
               </button>
-              <Link className={action} href={`/pitch/archive/${d.id}`}>
-                PDFs
-              </Link>
               <DeckMenu
                 items={[
                   ...(editable ? [{ label: 'Duplicate for client', run: () => setDuplicating(d) }] : []),
