@@ -1,0 +1,1248 @@
+{
+  "id": "talo-base",
+  "schemaVersion": 2,
+  "name": "TALO Engine base deck",
+  "client": {
+    "name": "",
+    "company": ""
+  },
+  "date": "2026-10-23",
+  "reference": "",
+  "format": "16:9",
+  "theme": "talo",
+  "motion": {
+    "speed": "normal",
+    "style": "gentle",
+    "stagger": "normal",
+    "transition": "fade",
+    "buildsInShare": true
+  },
+  "slides": [
+    {
+      "id": "cover",
+      "template": "cover",
+      "variant": "assembly",
+      "hidden": false,
+      "buildMode": "auto",
+      "hideText": false,
+      "notes": "",
+      "slots": {
+        "title": [
+          {
+            "id": "cover-title",
+            "build": "auto",
+            "showIn": "both",
+            "type": "title",
+            "content": "Talo Engine"
+          }
+        ],
+        "client": [
+          {
+            "id": "cover-client",
+            "build": "auto",
+            "showIn": "both",
+            "type": "label",
+            "content": "Prepared for {{client.company}} · {{date}}"
+          }
+        ]
+      }
+    },
+    {
+      "id": "about",
+      "template": "split-image",
+      "variant": "image-right",
+      "hidden": false,
+      "buildMode": "auto",
+      "hideText": false,
+      "notes": "",
+      "slots": {
+        "text": [
+          {
+            "id": "about-title",
+            "build": "auto",
+            "showIn": "both",
+            "type": "title",
+            "content": "About Talo testing 123"
+          },
+          {
+            "id": "about-p1",
+            "build": "auto",
+            "showIn": "both",
+            "type": "paragraph",
+            "content": "Talo Engine is a digital engineering consultancy and studio specialising in MEP engineering, with a broader focus on digital design and asset creation. Talo optimises the creation of industry-standard drawings, technical details, and digital models, delivering precise, project-specific outputs across a range of technical disciplines."
+          },
+          {
+            "id": "about-p2",
+            "build": "auto",
+            "showIn": "both",
+            "type": "paragraph",
+            "content": "Founded by Natcha Kucita, an MEP/BIM engineer with over a decade of experience delivering residential and commercial projects across the UK, Talo Engine combines engineering expertise, BIM proficiency, and emerging technologies to advance design workflows and technical delivery."
+          }
+        ],
+        "media": [
+          {
+            "id": "about-image",
+            "build": "auto",
+            "showIn": "both",
+            "type": "image",
+            "src": "/decks/talo-base/plant-room-iso.jpg",
+            "alt": "Isometric plant room model",
+            "width": 2000,
+            "height": 2647,
+            "fit": "cover"
+          }
+        ]
+      }
+    },
+    {
+      "id": "work-with-talo",
+      "template": "hub-diagram",
+      "variant": "ring",
+      "hidden": false,
+      "buildMode": "auto",
+      "hideText": false,
+      "notes": "",
+      "slots": {
+        "title": [
+          {
+            "id": "hub-title",
+            "build": "auto",
+            "showIn": "both",
+            "type": "title",
+            "content": "Work with Talo"
+          }
+        ],
+        "diagram": [
+          {
+            "id": "hub",
+            "build": "auto",
+            "showIn": "both",
+            "type": "hub-diagram",
+            "centre": "Talo Engine",
+            "benefits": [
+              {
+                "id": "drawings",
+                "content": "Generate drawings, schedules and specifications with AI-powered tools",
+                "icon": "document"
+              },
+              {
+                "id": "library",
+                "content": "Grow your digital asset / BIM library",
+                "icon": "layers"
+              },
+              {
+                "id": "iteration",
+                "content": "Speed up design iteration and options",
+                "icon": "forward"
+              },
+              {
+                "id": "time",
+                "content": "Save modelling and drafting time",
+                "icon": "clock"
+              }
+            ],
+            "roles": [
+              {
+                "id": "mep",
+                "content": "MEP consultancy"
+              },
+              {
+                "id": "contractor",
+                "content": "Principal contractor"
+              },
+              {
+                "id": "architect",
+                "content": "Architect"
+              },
+              {
+                "id": "specialist",
+                "content": "Specialist designer"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "digital-asset",
+      "template": "asset-grid",
+      "variant": "5x5",
+      "hidden": false,
+      "buildMode": "auto",
+      "hideText": false,
+      "notes": "",
+      "slots": {
+        "title": [
+          {
+            "id": "asset-title",
+            "build": "auto",
+            "showIn": "both",
+            "type": "title",
+            "content": "Build robust digital asset"
+          }
+        ],
+        "grid": [
+          {
+            "id": "assets",
+            "build": "auto",
+            "showIn": "both",
+            "type": "image-grid",
+            "items": [
+              {
+                "id": "a1",
+                "src": "/decks/talo-base/assets/asset-1.jpg",
+                "alt": "Gas range with oven"
+              },
+              {
+                "id": "a2",
+                "src": "/decks/talo-base/assets/asset-2.jpg",
+                "alt": "Colander"
+              },
+              {
+                "id": "a3",
+                "src": "/decks/talo-base/assets/asset-3.jpg",
+                "alt": "Microwave"
+              },
+              {
+                "id": "a4",
+                "src": "/decks/talo-base/assets/asset-4.jpg",
+                "alt": "Stock pot"
+              },
+              {
+                "id": "a5",
+                "src": "/decks/talo-base/assets/asset-5.jpg",
+                "alt": "Wine glass"
+              },
+              {
+                "id": "a6",
+                "src": "/decks/talo-base/assets/asset-6.jpg",
+                "alt": "Double-door refrigerator"
+              },
+              {
+                "id": "a7",
+                "src": "/decks/talo-base/assets/asset-7.jpg",
+                "alt": "Planetary mixer"
+              },
+              {
+                "id": "a8",
+                "src": "/decks/talo-base/assets/asset-8.jpg",
+                "alt": "Frying pan"
+              },
+              {
+                "id": "a9",
+                "src": "/decks/talo-base/assets/asset-9.jpg",
+                "alt": "Contact grill"
+              },
+              {
+                "id": "a10",
+                "src": "/decks/talo-base/assets/asset-10.jpg",
+                "alt": "Food processor on stand"
+              },
+              {
+                "id": "a11",
+                "src": "/decks/talo-base/assets/asset-11.jpg",
+                "alt": "Double sink unit"
+              },
+              {
+                "id": "a12",
+                "src": "/decks/talo-base/assets/asset-12.jpg",
+                "alt": "Saucepan"
+              },
+              {
+                "id": "a13",
+                "src": "/decks/talo-base/assets/asset-13.jpg",
+                "alt": "Soup kettle"
+              },
+              {
+                "id": "a14",
+                "src": "/decks/talo-base/assets/asset-14.jpg",
+                "alt": "Open base cabinet"
+              },
+              {
+                "id": "a15",
+                "src": "/decks/talo-base/assets/asset-15.jpg",
+                "alt": "Three-tier trolley"
+              },
+              {
+                "id": "a16",
+                "src": "/decks/talo-base/assets/asset-16.jpg",
+                "alt": "Combination oven"
+              },
+              {
+                "id": "a17",
+                "src": "/decks/talo-base/assets/asset-17.jpg",
+                "alt": "Countertop oven"
+              },
+              {
+                "id": "a18",
+                "src": "/decks/talo-base/assets/asset-18.jpg",
+                "alt": "Six-burner range"
+              },
+              {
+                "id": "a19",
+                "src": "/decks/talo-base/assets/asset-19.jpg",
+                "alt": "Heated display"
+              },
+              {
+                "id": "a20",
+                "src": "/decks/talo-base/assets/asset-20.jpg",
+                "alt": "Pass-through dishwasher"
+              },
+              {
+                "id": "a21",
+                "src": "/decks/talo-base/assets/asset-21.jpg",
+                "alt": "Work table with undershelf"
+              },
+              {
+                "id": "a22",
+                "src": "/decks/talo-base/assets/asset-22.jpg",
+                "alt": "Twin-tank fryer"
+              },
+              {
+                "id": "a23",
+                "src": "/decks/talo-base/assets/asset-23.jpg",
+                "alt": "Convection oven"
+              },
+              {
+                "id": "a24",
+                "src": "/decks/talo-base/assets/asset-24.jpg",
+                "alt": "Whisk"
+              },
+              {
+                "id": "a25",
+                "src": "/decks/talo-base/assets/asset-25.jpg",
+                "alt": "Teapot"
+              }
+            ]
+          }
+        ],
+        "caption": [
+          {
+            "id": "asset-caption",
+            "build": "auto",
+            "showIn": "both",
+            "type": "caption",
+            "content": "Talo can assist you to grow your digital asset and customise them along the way to suit your project and business needs."
+          }
+        ]
+      }
+    },
+    {
+      "id": "plant-room",
+      "template": "hero-case-study",
+      "variant": "full-width",
+      "hidden": false,
+      "buildMode": "auto",
+      "hideText": false,
+      "notes": "",
+      "slots": {
+        "title": [
+          {
+            "id": "plant-title",
+            "build": "auto",
+            "showIn": "both",
+            "type": "title",
+            "content": "Coordinated plant room example"
+          }
+        ],
+        "media": [
+          {
+            "id": "plant-image",
+            "build": "auto",
+            "showIn": "both",
+            "type": "image",
+            "src": "/decks/talo-base/plant-room-ambient-loop.jpg",
+            "alt": "3D view of the ambient loop plant room",
+            "width": 3000,
+            "height": 1572,
+            "fit": "contain"
+          }
+        ],
+        "view": [
+          {
+            "id": "plant-view",
+            "build": "auto",
+            "showIn": "both",
+            "type": "label",
+            "content": "3D view",
+            "note": "Scale: NTS"
+          }
+        ],
+        "heading": [
+          {
+            "id": "plant-case",
+            "build": "auto",
+            "showIn": "both",
+            "type": "subtitle",
+            "content": "Ambient Loop Plant Room | RIBA Stage 5 – Construction"
+          }
+        ],
+        "text": [
+          {
+            "id": "plant-text",
+            "build": "auto",
+            "showIn": "both",
+            "type": "paragraph",
+            "content": "A glimpse into one of our latest Stage 5 projects, featuring an Ambient Loop Plant Room serving a 900-bedroom hotel, currently under construction. Working within the tight spatial constraints of an existing building presented significant design and coordination challenges. Through detailed 3D BIM coordination, careful planning, and collaborative problem-solving, we successfully overcame these constraints to deliver a coordinated and buildable solution."
+          }
+        ]
+      }
+    },
+    {
+      "id": "kitchen",
+      "template": "multi-view-case-study",
+      "variant": "standard",
+      "hidden": false,
+      "buildMode": "auto",
+      "hideText": false,
+      "notes": "",
+      "slots": {
+        "title": [
+          {
+            "id": "kitchen-title",
+            "build": "auto",
+            "showIn": "both",
+            "type": "title",
+            "content": "Commercial kitchen example"
+          }
+        ],
+        "plan": [
+          {
+            "id": "kitchen-plan",
+            "build": "auto",
+            "showIn": "both",
+            "type": "image",
+            "src": "/decks/talo-base/kitchen-plan.jpg",
+            "alt": "Plan of the commercial kitchen",
+            "width": 448,
+            "height": 1658,
+            "fit": "contain"
+          }
+        ],
+        "plan-label": [
+          {
+            "id": "kitchen-plan-label",
+            "build": "auto",
+            "showIn": "both",
+            "type": "label",
+            "content": "Plan view",
+            "note": "Scale: NTS"
+          }
+        ],
+        "key": [
+          {
+            "id": "kitchen-key",
+            "build": "auto",
+            "showIn": "both",
+            "type": "key-list",
+            "heading": "Equipment key",
+            "items": [
+              {
+                "id": "k1",
+                "number": 1,
+                "content": "Wall-mounted stainless steel shelf"
+              },
+              {
+                "id": "k2",
+                "number": 2,
+                "content": "Ambient storage racking"
+              },
+              {
+                "id": "k3",
+                "number": 3,
+                "content": "Upright refrigerator / freezer (2 no. single-door)"
+              },
+              {
+                "id": "k4",
+                "number": 4,
+                "content": "Stainless steel work table"
+              },
+              {
+                "id": "k5",
+                "number": 5,
+                "content": "Wash hand basin (WHB) / countertop appliance"
+              },
+              {
+                "id": "k6",
+                "number": 6,
+                "content": "Countertop griddle / chargrill"
+              },
+              {
+                "id": "k7",
+                "number": 7,
+                "content": "Single-bowl sink unit with mixer tap, cupboard under"
+              },
+              {
+                "id": "k8",
+                "number": 8,
+                "content": "Bain-marie / prep well, cupboard under"
+              },
+              {
+                "id": "k9",
+                "number": 9,
+                "content": "Undercounter appliance space"
+              },
+              {
+                "id": "k10",
+                "number": 10,
+                "content": "Stainless steel work table"
+              },
+              {
+                "id": "k11",
+                "number": 11,
+                "content": "Planetary mixer on mobile stand"
+              },
+              {
+                "id": "k12",
+                "number": 12,
+                "content": "Undercounter appliance space"
+              },
+              {
+                "id": "k13",
+                "number": 13,
+                "content": "Convection oven on stand / GN tray rack"
+              },
+              {
+                "id": "k14",
+                "number": 14,
+                "content": "Deep fat fryer / combination oven"
+              },
+              {
+                "id": "k15",
+                "number": 15,
+                "content": "Tilting kettle / bratt pan"
+              },
+              {
+                "id": "k16",
+                "number": 16,
+                "content": "Two-burner boiling top"
+              },
+              {
+                "id": "k17",
+                "number": 17,
+                "content": "Extraction canopy"
+              }
+            ],
+            "markers": [
+              {
+                "id": "p1",
+                "view": "plan",
+                "x": 26.23,
+                "y": 3.02,
+                "label": "1",
+                "items": [
+                  "k1"
+                ]
+              },
+              {
+                "id": "p2",
+                "view": "plan",
+                "x": 71.32,
+                "y": 8.38,
+                "label": "2",
+                "items": [
+                  "k2"
+                ]
+              },
+              {
+                "id": "p3",
+                "view": "plan",
+                "x": 70.2,
+                "y": 21.32,
+                "label": "3",
+                "items": [
+                  "k3"
+                ]
+              },
+              {
+                "id": "p4",
+                "view": "plan",
+                "x": 70.65,
+                "y": 33.66,
+                "label": "4",
+                "items": [
+                  "k4"
+                ]
+              },
+              {
+                "id": "p5",
+                "view": "plan",
+                "x": 76,
+                "y": 39.96,
+                "label": "5",
+                "items": [
+                  "k5"
+                ]
+              },
+              {
+                "id": "p6",
+                "view": "plan",
+                "x": 71.32,
+                "y": 45.81,
+                "label": "6",
+                "items": [
+                  "k6"
+                ]
+              },
+              {
+                "id": "p7",
+                "view": "plan",
+                "x": 71.32,
+                "y": 50.69,
+                "label": "7",
+                "items": [
+                  "k7"
+                ]
+              },
+              {
+                "id": "p8",
+                "view": "plan",
+                "x": 71.32,
+                "y": 55.76,
+                "label": "8",
+                "items": [
+                  "k8"
+                ]
+              },
+              {
+                "id": "p9",
+                "view": "plan",
+                "x": 71.32,
+                "y": 60.83,
+                "label": "9",
+                "items": [
+                  "k9"
+                ]
+              },
+              {
+                "id": "p10",
+                "view": "plan",
+                "x": 71.32,
+                "y": 67.28,
+                "label": "10",
+                "items": [
+                  "k10"
+                ]
+              },
+              {
+                "id": "p11",
+                "view": "plan",
+                "x": 67.19,
+                "y": 74.1,
+                "label": "11",
+                "items": [
+                  "k11"
+                ]
+              },
+              {
+                "id": "p12",
+                "view": "plan",
+                "x": 71.32,
+                "y": 78.98,
+                "label": "12",
+                "items": [
+                  "k12"
+                ]
+              },
+              {
+                "id": "p13",
+                "view": "plan",
+                "x": 71.32,
+                "y": 84.98,
+                "label": "13",
+                "items": [
+                  "k13"
+                ]
+              },
+              {
+                "id": "p14",
+                "view": "plan",
+                "x": 21.54,
+                "y": 93.67,
+                "label": "14",
+                "items": [
+                  "k14"
+                ]
+              },
+              {
+                "id": "p15",
+                "view": "plan",
+                "x": 46.76,
+                "y": 93.67,
+                "label": "15",
+                "items": [
+                  "k15"
+                ]
+              },
+              {
+                "id": "p16",
+                "view": "plan",
+                "x": 78.91,
+                "y": 93.67,
+                "label": "16",
+                "items": [
+                  "k16"
+                ]
+              },
+              {
+                "id": "p17",
+                "view": "plan",
+                "x": 6.36,
+                "y": 98.1,
+                "label": "17",
+                "items": [
+                  "k17"
+                ]
+              },
+              {
+                "id": "s1",
+                "view": "section",
+                "x": 3.41,
+                "y": 25.5,
+                "label": "1",
+                "items": [
+                  "k1"
+                ]
+              },
+              {
+                "id": "s2",
+                "view": "section",
+                "x": 8.29,
+                "y": 53.78,
+                "label": "2",
+                "items": [
+                  "k2"
+                ]
+              },
+              {
+                "id": "s3",
+                "view": "section",
+                "x": 21.26,
+                "y": 50.05,
+                "label": "3",
+                "items": [
+                  "k3"
+                ]
+              },
+              {
+                "id": "s4",
+                "view": "section",
+                "x": 33.83,
+                "y": 78.38,
+                "label": "4",
+                "items": [
+                  "k4"
+                ]
+              },
+              {
+                "id": "s5",
+                "view": "section",
+                "x": 40.94,
+                "y": 73.45,
+                "label": "5",
+                "items": [
+                  "k5"
+                ]
+              },
+              {
+                "id": "s6",
+                "view": "section",
+                "x": 46.11,
+                "y": 73.45,
+                "label": "6",
+                "items": [
+                  "k6"
+                ]
+              },
+              {
+                "id": "s7",
+                "view": "section",
+                "x": 51.18,
+                "y": 78.38,
+                "label": "7",
+                "items": [
+                  "k7"
+                ]
+              },
+              {
+                "id": "s8",
+                "view": "section",
+                "x": 56.05,
+                "y": 78.38,
+                "label": "8",
+                "items": [
+                  "k8"
+                ]
+              },
+              {
+                "id": "s9",
+                "view": "section",
+                "x": 61.01,
+                "y": 78.38,
+                "label": "9",
+                "items": [
+                  "k9"
+                ]
+              },
+              {
+                "id": "s10",
+                "view": "section",
+                "x": 67.85,
+                "y": 78.38,
+                "label": "10",
+                "items": [
+                  "k10"
+                ]
+              },
+              {
+                "id": "s11",
+                "view": "section",
+                "x": 74.56,
+                "y": 80.85,
+                "label": "11",
+                "items": [
+                  "k11"
+                ]
+              },
+              {
+                "id": "s12",
+                "view": "section",
+                "x": 79.93,
+                "y": 78.38,
+                "label": "12",
+                "items": [
+                  "k12"
+                ]
+              },
+              {
+                "id": "s13",
+                "view": "section",
+                "x": 85.58,
+                "y": 79.59,
+                "label": "13",
+                "items": [
+                  "k13"
+                ]
+              },
+              {
+                "id": "s17",
+                "view": "section",
+                "x": 93.08,
+                "y": 19.36,
+                "label": "17",
+                "items": [
+                  "k17"
+                ]
+              },
+              {
+                "id": "s14-16",
+                "view": "section",
+                "x": 94.06,
+                "y": 80.06,
+                "label": "14–16",
+                "items": [
+                  "k14",
+                  "k15",
+                  "k16"
+                ]
+              }
+            ]
+          }
+        ],
+        "view": [
+          {
+            "id": "kitchen-3d",
+            "build": "auto",
+            "showIn": "both",
+            "type": "image",
+            "src": "/decks/talo-base/kitchen-3d.jpg",
+            "alt": "3D view of the commercial kitchen",
+            "width": 2384,
+            "height": 1614,
+            "fit": "contain"
+          }
+        ],
+        "view-label": [
+          {
+            "id": "kitchen-3d-label",
+            "build": "auto",
+            "showIn": "both",
+            "type": "label",
+            "content": "3D view",
+            "note": "Scale: NTS"
+          }
+        ],
+        "section": [
+          {
+            "id": "kitchen-section",
+            "build": "auto",
+            "showIn": "both",
+            "type": "image",
+            "src": "/decks/talo-base/kitchen-section.jpg",
+            "alt": "Section through the commercial kitchen",
+            "width": 2400,
+            "height": 951,
+            "fit": "contain"
+          }
+        ],
+        "section-label": [
+          {
+            "id": "kitchen-section-label",
+            "build": "auto",
+            "showIn": "both",
+            "type": "label",
+            "content": "Section view",
+            "note": "Scale: NTS"
+          }
+        ],
+        "text": [
+          {
+            "id": "kitchen-p1",
+            "build": "auto",
+            "showIn": "both",
+            "type": "paragraph",
+            "content": "An example of a commercial kitchen equipment layout, generated parametrically in 3D within minutes from initial concept sketch to detailed technical design."
+          },
+          {
+            "id": "kitchen-p2",
+            "build": "auto",
+            "showIn": "both",
+            "type": "paragraph",
+            "content": "The model is compatible with AutoCAD 3D, with reusable blocks that can be imported into Revit and other BIM platforms, enabling a seamless transition from concept development to detailed design."
+          },
+          {
+            "id": "kitchen-p3",
+            "build": "auto",
+            "showIn": "both",
+            "type": "paragraph",
+            "content": "Every prompt generates more than equipment. It helps grow your digital asset library. Each new piece of equipment becomes a reusable asset, building a valuable collection of parametric 3D models that evolves and expands with every project."
+          }
+        ]
+      }
+    },
+    {
+      "id": "ffe",
+      "template": "three-view",
+      "variant": "three",
+      "hidden": false,
+      "buildMode": "auto",
+      "hideText": false,
+      "notes": "",
+      "slots": {
+        "title": [
+          {
+            "id": "ffe-title",
+            "build": "auto",
+            "showIn": "both",
+            "type": "title",
+            "content": "Bespoke FFE example"
+          }
+        ],
+        "view-1": [
+          {
+            "id": "ffe-plan",
+            "build": "auto",
+            "showIn": "both",
+            "type": "image",
+            "src": "/decks/talo-base/ffe-plan.jpg",
+            "alt": "Plan of the plate trolley",
+            "width": 1514,
+            "height": 1515,
+            "fit": "contain"
+          }
+        ],
+        "view-1-label": [
+          {
+            "id": "ffe-plan-label",
+            "build": "auto",
+            "showIn": "both",
+            "type": "label",
+            "content": "Plan view",
+            "note": "Scale: NTS"
+          }
+        ],
+        "view-2": [
+          {
+            "id": "ffe-3d",
+            "build": "auto",
+            "showIn": "both",
+            "type": "image",
+            "src": "/decks/talo-base/ffe-3d.jpg",
+            "alt": "3D view of the plate trolley",
+            "width": 1085,
+            "height": 2150,
+            "fit": "contain"
+          }
+        ],
+        "view-2-label": [
+          {
+            "id": "ffe-3d-label",
+            "build": "auto",
+            "showIn": "both",
+            "type": "label",
+            "content": "3D view",
+            "note": "Scale: NTS"
+          }
+        ],
+        "view-3": [
+          {
+            "id": "ffe-render",
+            "build": "auto",
+            "showIn": "both",
+            "type": "image",
+            "src": "/decks/talo-base/ffe-render.jpg",
+            "alt": "Render of the plate trolley",
+            "width": 1160,
+            "height": 2235,
+            "fit": "contain"
+          }
+        ],
+        "view-3-label": [
+          {
+            "id": "ffe-render-label",
+            "build": "auto",
+            "showIn": "both",
+            "type": "label",
+            "content": "Render image"
+          }
+        ],
+        "text": [
+          {
+            "id": "ffe-p1",
+            "build": "auto",
+            "showIn": "both",
+            "type": "paragraph",
+            "content": "We can work with you to build a bespoke, ever-growing digital asset library of furniture and equipment tailored to your specific requirements."
+          },
+          {
+            "id": "ffe-p2",
+            "build": "auto",
+            "showIn": "both",
+            "type": "paragraph",
+            "content": "Save time spent modifying CAD blocks or searching for manufacturers’ 3D models. Simply provide a basic sketch and key dimensions, and we can generate custom 3D models ready to integrate into your design workflow."
+          }
+        ]
+      }
+    },
+    {
+      "id": "services",
+      "template": "pricing",
+      "variant": "both",
+      "hidden": false,
+      "buildMode": "auto",
+      "hideText": false,
+      "notes": "",
+      "slots": {
+        "title": [
+          {
+            "id": "services-title",
+            "build": "auto",
+            "showIn": "both",
+            "type": "title",
+            "content": "Services package"
+          },
+          {
+            "id": "services-sub",
+            "build": "auto",
+            "showIn": "both",
+            "type": "subtitle",
+            "content": "Pricing"
+          }
+        ],
+        "stages": [
+          {
+            "id": "stages-caption",
+            "build": "auto",
+            "showIn": "both",
+            "type": "label",
+            "content": "BIM Coordination & Technical Drawing Production – Project Fee Guidelines"
+          },
+          {
+            "id": "stages",
+            "build": "auto",
+            "showIn": "both",
+            "type": "table",
+            "columns": [
+              {
+                "id": "stage",
+                "label": "RIBA stage",
+                "width": 22,
+                "role": "key"
+              },
+              {
+                "id": "scope",
+                "label": "Scope of services",
+                "width": 33,
+                "role": "text"
+              },
+              {
+                "id": "pricing",
+                "label": "Pricing approach",
+                "width": 45,
+                "role": "text"
+              }
+            ],
+            "rows": [
+              {
+                "id": "stage-3",
+                "cells": [
+                  "Stage 3 – Spatial Coordination",
+                  "BIM model development, multidisciplinary coordination, clash reviews, coordinated GA drawings and design updates",
+                  "Fixed project fee based on estimated hours and deliverables"
+                ]
+              },
+              {
+                "id": "stage-4",
+                "cells": [
+                  "Stage 4 – Technical Design",
+                  "Detailed BIM coordination, technical drawing production, model updates, detailed drawings, schedules and issue management",
+                  "Fixed project fee based on drawing volume, complexity and coordination requirements"
+                ]
+              },
+              {
+                "id": "stage-5",
+                "cells": [
+                  "Stage 5 – Manufacturing & Construction",
+                  "Construction-stage model updates, drawing revisions, coordination meetings, RFIs and construction support",
+                  "Fixed fee for an agreed programme and scope, with additional services charged separately"
+                ]
+              }
+            ],
+            "services": false
+          }
+        ],
+        "packages": [
+          {
+            "id": "packages-caption",
+            "build": "auto",
+            "showIn": "both",
+            "type": "label",
+            "content": "Packages"
+          },
+          {
+            "id": "packages",
+            "build": "auto",
+            "showIn": "both",
+            "type": "table",
+            "columns": [
+              {
+                "id": "number",
+                "label": "No.",
+                "width": 6,
+                "role": "text"
+              },
+              {
+                "id": "package",
+                "label": "Package",
+                "width": 35,
+                "role": "name"
+              },
+              {
+                "id": "scope",
+                "label": "Scope",
+                "width": 45,
+                "role": "text"
+              },
+              {
+                "id": "fee",
+                "label": "Fee",
+                "width": 14,
+                "role": "fee"
+              }
+            ],
+            "rows": [
+              {
+                "id": "audit-projects",
+                "cells": [
+                  "1",
+                  "Digital asset audit and creation + up to 2 projects",
+                  "Audit of existing CAD/BIM assets, creation of parametric 3D models for up to 2 projects",
+                  "£4,000 pcm"
+                ]
+              },
+              {
+                "id": "revit-support",
+                "cells": [
+                  "2",
+                  "Revit support",
+                  "Modelling / coordination / clash detection / sheets generation / schedule creation",
+                  "£600 / day"
+                ]
+              },
+              {
+                "id": "audit",
+                "cells": [
+                  "3",
+                  "Digital asset audit and creation",
+                  "Audit of existing CAD/BIM assets and creation of parametric 3D models",
+                  "£1,500"
+                ]
+              },
+              {
+                "id": "bim-management",
+                "cells": [
+                  "4",
+                  "BIM management",
+                  "BIM execution planning / standards and protocols / model audits / coordination management",
+                  "£800 / day"
+                ]
+              }
+            ],
+            "services": true
+          }
+        ],
+        "footnote": [
+          {
+            "id": "services-note",
+            "build": "auto",
+            "showIn": "both",
+            "type": "caption",
+            "content": "All fees exclude VAT and are subject to terms and conditions."
+          }
+        ]
+      }
+    },
+    {
+      "id": "contact",
+      "template": "contact",
+      "variant": "form",
+      "hidden": false,
+      "buildMode": "auto",
+      "hideText": false,
+      "notes": "",
+      "slots": {
+        "title": [
+          {
+            "id": "contact-title",
+            "build": "auto",
+            "showIn": "both",
+            "type": "title",
+            "content": "Contact"
+          }
+        ],
+        "details": [
+          {
+            "id": "natcha",
+            "build": "auto",
+            "showIn": "both",
+            "type": "contact-details",
+            "name": "Natcha Kucita",
+            "role": "Director | Engineer",
+            "phone": "07850 091982",
+            "email": "natcha@taloengine.com"
+          }
+        ],
+        "form": [
+          {
+            "id": "enquiry",
+            "build": "auto",
+            "showIn": "both",
+            "type": "enquiry-form",
+            "heading": "Enquiry form",
+            "intro": "Interested in working with Talo? Complete the form below and we will be in touch."
+          }
+        ]
+      }
+    }
+  ]
+}

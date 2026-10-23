@@ -4,3 +4,10 @@ node_modules
 next-env.d.ts
 *.tsbuildinfo
 .DS_Store
+
+# Generated deck PDFs (local archive)
+.pitch-archive/
+
+# Playwright output
+/test-results/
+/playwright-report/

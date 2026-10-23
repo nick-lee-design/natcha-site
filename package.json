@@ -4,20 +4,54 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "next build && playwright test",
+    "pdfs": "node scripts/build-pdfs.mjs",
+    "assembly-still": "node scripts/build-assembly-still.mjs"
   },
   "dependencies": {
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0",
+    "@dnd-kit/utilities": "3.2.2",
+    "@pdf-lib/fontkit": "1.1.1",
     "@radix-ui/colors": "3.0.0",
+    "@sparticuz/chromium": "153.0.0",
+    "@tiptap/core": "3.32.0",
+    "@tiptap/extension-bold": "3.32.0",
+    "@tiptap/extension-document": "3.32.0",
+    "@tiptap/extension-italic": "3.32.0",
+    "@tiptap/extension-link": "3.32.0",
+    "@tiptap/extension-paragraph": "3.32.0",
+    "@tiptap/extension-text": "3.32.0",
+    "@tiptap/pm": "3.32.0",
+    "@tiptap/react": "3.32.0",
+    "@vercel/blob": "2.8.2",
     "gsap": "3.15.0",
+    "motion": "14.6.0",
     "next": "16.4.2",
+    "pdf-lib": "1.17.1",
+    "playwright-core": "1.62.0",
+    "qrcode": "1.5.4",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "three": "0.186.1"
+    "react-hook-form": "7.90.0",
+    "three": "0.186.1",
+    "zod": "4.6.7",
+    "zundo": "2.3.0",
+    "zustand": "5.0.16"
   },
   "devDependencies": {
+    "@playwright/test": "1.62.0",
+    "@tailwindcss/postcss": "4.3.3",
     "@types/node": "26.6.5",
+    "@types/pngjs": "6.0.5",
+    "@types/qrcode": "1.5.6",
     "@types/react": "19.3.0",
     "@types/three": "0.186.0",
+    "pixelmatch": "8.0.0",
+    "pngjs": "7.0.0",
+    "postcss": "8.5.31",
+    "tailwindcss": "4.3.3",
     "typescript": "5.9.3"
   }
 }

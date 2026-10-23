@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
-import { display, inter, mono, outfit, text } from './fonts';
-import './globals.css';
+import { display, inter, mono, outfit, text } from '../fonts';
+import '../globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://taloengine.com'),
