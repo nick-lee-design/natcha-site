@@ -26,6 +26,8 @@ export type Service = {
   build?: number[];
   downloadLabel?: string;
   downloadFile?: string;
+  // Its steps stay open in their own section below the list, whichever service is selected
+  pinned?: boolean;
 };
 
 export const services: Service[] = [
@@ -75,6 +77,7 @@ export const services: Service[] = [
     talo: 'Directs the training agent to build a programme from the BIM model, with materials tailored to your team.',
     back: 'A training programme ready to roll out to your team.',
     stepsTitle: 'A full day with TALO Engine',
+    pinned: true,
     // Welcome: plan. Orchestrator: columns and frame. Spec search: ductwork. Calculations: pipework and valve. Running it: hangers and monitoring. Wrap-up: dimensions.
     build: [0, 1, 1, 2, 3, 3, 4, 5, 4],
     phases: [

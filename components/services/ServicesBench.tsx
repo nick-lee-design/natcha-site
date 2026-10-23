@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { startServices } from './bench';
 import './services.css';
 
-// The skeleton; bench.ts fills in the list, wheel nodes, rail, card and figure.
+// The skeleton; bench.ts fills in the list, wheel nodes, rails, cards and figures.
 export default function ServicesBench() {
   const root = useRef<HTMLDivElement>(null);
 
@@ -40,26 +40,34 @@ export default function ServicesBench() {
           <p className="legend">Circle: AI agent. Square: digital tool. Bronze ring: TALO.</p>
         </div>
 
-        <div className="run" id="svc-run" hidden>
-          <div className="run-top">
-            <h3 className="run-h" id="svc-run-h" />
-            <a className="btn" id="svc-run-dl" download hidden />
-          </div>
-          <div className="rail" id="svc-rail" />
-          <span className="leader" id="svc-leader" aria-hidden="true" />
-          <div className="card" id="svc-card">
-            <figure className="c-fig" aria-hidden="true"><svg className="kit" id="svc-kit" xmlns="http://www.w3.org/2000/svg" /></figure>
-            <div className="c-head" id="svc-c-head" />
-            <div className="c-main" id="svc-c-main" />
-            <div className="c-nav">
-              <button className="btn" type="button" id="svc-back">Back</button>
-              <div className="ruler" id="svc-ruler" aria-hidden="true" />
-              <button className="btn btn--solid" type="button" id="svc-next">Next</button>
-            </div>
-          </div>
-          <p className="sr-only" id="svc-announce" aria-live="polite" />
-        </div>
+        <Run kind="selected" />
+        <Run kind="pinned" />
       </section>
+    </div>
+  );
+}
+
+// A step-by-step run: one follows the selected service, one (pinned) always shows below
+function Run({ kind }: { kind: 'selected' | 'pinned' }) {
+  return (
+    <div className={`run run--${kind}`} data-run={kind} hidden>
+      <div className="run-top">
+        <h3 className="run-h" />
+        <a className="btn run-dl" download hidden />
+      </div>
+      <div className="rail" />
+      <span className="leader" aria-hidden="true" />
+      <div className="card">
+        <figure className="c-fig" aria-hidden="true"><svg className="kit" xmlns="http://www.w3.org/2000/svg" /></figure>
+        <div className="c-head" />
+        <div className="c-main" />
+        <div className="c-nav">
+          <button className="btn run-back" type="button">Back</button>
+          <div className="ruler" aria-hidden="true" />
+          <button className="btn btn--solid run-next" type="button">Next</button>
+        </div>
+      </div>
+      <p className="sr-only run-announce" aria-live="polite" />
     </div>
   );
 }

@@ -9,15 +9,11 @@ type Animated = Element & { _a?: Animation };
 
 export function startServices(root: HTMLElement): () => void {
   const $ = <T extends Element = HTMLElement>(id: string) => root.querySelector<T>(`#svc-${id}`)!;
-  const bench = $('bench'), tasksEl = $('tasks'), nodesEl = $<SVGGElement>('nodes'), runEl = $('run'), railEl = $('rail'), cardEl = $('card');
-  const headEl = $('c-head'), mainEl = $('c-main'), backBtn = $<HTMLButtonElement>('back'), nextBtn = $<HTMLButtonElement>('next'), rulerEl = $('ruler');
-  const leader = $('leader'), kitSvg = $<SVGSVGElement>('kit'), announce = $('announce'), ringEl = $<SVGCircleElement>('ring');
+  const bench = $('bench'), tasksEl = $('tasks'), nodesEl = $<SVGGElement>('nodes'), ringEl = $<SVGCircleElement>('ring');
 
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const CAN_ANIMATE = !REDUCED && 'IntersectionObserver' in window && 'animate' in Element.prototype;
   let selected = 1;
-  let current = 0;
-  let prev = 0;
   let booted = false;
 
   const timers = new Set<number>();
@@ -149,173 +145,206 @@ export function startServices(root: HTMLElement): () => void {
     previewWheel(null);
     if (!initial || !CAN_ANIMATE) lightWheel(s.on, booted && CAN_ANIMATE);
 
-    const wasHidden = runEl.hidden;
-    runEl.hidden = !s.steps;
-    if (!s.steps) return;
-
-    $('run-h').textContent = s.stepsTitle ?? '';
-    const dl = $<HTMLAnchorElement>('run-dl');
-    dl.hidden = !s.downloadFile;
-    if (s.downloadFile) { dl.href = `/files/${s.downloadFile}`; dl.textContent = s.downloadLabel ?? ''; }
-
+    // Pinned steps already sit in their own section below, so only the others follow the selection
+    const steps = s.steps && !s.pinned;
+    const wasHidden = selectedRun.el.hidden;
+    selectedRun.el.hidden = !steps;
+    if (!steps) return;
     const animate = booted && CAN_ANIMATE;
-    if (animate && wasHidden) play(runEl, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 380, easing: 'cubic-bezier(.22,1,.36,1)' });
-    buildRun(s, animate);
+    if (animate && wasHidden) play(selectedRun.el, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 380, easing: 'cubic-bezier(.22,1,.36,1)' });
+    selectedRun.show(s, animate);
   }
 
   /* ================================================================ run: rail, card, figure */
-  let buttons: HTMLButtonElement[] = [], phaseEls: HTMLElement[] = [], ticks: HTMLElement[] = [], stepPhase: number[] = [];
-  let fig: Figure | null = null;
+  type Run = { el: HTMLElement; show: (s: Service, animate: boolean) => void; reveal: () => void; settle: () => void; placeLeader: (instant: boolean) => void };
 
-  function buildRun(s: Service, animate: boolean) {
-    const steps = s.steps!, phases = s.phases!;
-    stepPhase = [];
-    phases.forEach((p, pi) => { for (let k = 0; k < p.count; k++) stepPhase.push(pi); });
-    let start = 0;
-    railEl.style.gridTemplateColumns = phases.map((p) => `${p.count}fr`).join(' ');
-    railEl.innerHTML = phases.map((p, pi) => {
-      const idx = Array.from({ length: p.count }, (_, k) => start + k);
-      start += p.count;
-      const range = p.count > 1 ? `${idx[0] + 1}–${idx[idx.length - 1] + 1}` : `${idx[0] + 1}`;
-      return `
-        <div class="phase" data-phase="${pi}">
-          <h4 class="phase-h">${p.name}<span class="range">${range}</span>${p.loop ? `<span class="loop"><span class="loop-ic" aria-hidden="true">↻</span> ${p.loop}</span>` : ''}</h4>
-          <ol class="steps" start="${idx[0] + 1}">
-            ${idx.map((k) => `
-              <li><button class="step${steps[k].optional ? ' optional' : ''}" type="button" data-k="${k}" style="--i:${k}" aria-label="Step ${k + 1}: ${steps[k].title}">
-                <span class="wire" aria-hidden="true"></span><span class="dot">${k + 1}</span><span class="name">${steps[k].title}</span>
-              </button></li>`).join('')}
-          </ol>
-        </div>`;
-    }).join('');
-    buttons = [...railEl.querySelectorAll<HTMLButtonElement>('.step')];
-    phaseEls = [...railEl.querySelectorAll<HTMLElement>('.phase')];
+  // One step-by-step run. There are two: one follows the selected service, one is pinned below.
+  function makeRun(runEl: HTMLElement): Run {
+    const q = <T extends Element = HTMLElement>(cls: string) => runEl.querySelector<T>(`.${cls}`)!;
+    const railEl = q('rail'), cardEl = q('card'), headEl = q('c-head'), mainEl = q('c-main'), rulerEl = q('ruler');
+    const backBtn = q<HTMLButtonElement>('run-back'), nextBtn = q<HTMLButtonElement>('run-next');
+    const leader = q('leader'), kitSvg = q<SVGSVGElement>('kit'), announce = q('run-announce');
+    let svc: Service | null = null;
+    let current = 0;
+    let prev = 0;
+    let buttons: HTMLButtonElement[] = [], phaseEls: HTMLElement[] = [], ticks: HTMLElement[] = [], stepPhase: number[] = [];
+    let fig: Figure | null = null;
 
-    const n = steps.length;
-    rulerEl.innerHTML = '<span class="r-fill"></span>' +
-      steps.map((_, i) => `<span class="tk${i === 0 || i === n - 1 ? ' end' : ''}" style="left:${(i / (n - 1)) * 100}%"></span>`).join('') +
-      '<span class="r-node"></span>';
-    ticks = [...rulerEl.querySelectorAll<HTMLElement>('.tk')];
-
-    fig = makeAssembly(kitSvg, s);
-    current = 0; prev = 0;
-    render(false, true);
-
-    if (animate) {
-      runEl.classList.remove('in'); void runEl.offsetWidth; runEl.classList.add('in');
-      const t = fig.drawGhosts();
-      later(() => fig!.set(current, -1, true), Math.min(t, 520));
-      later(() => runEl.classList.remove('in'), 1300);
-    } else if (!bench.classList.contains('pre')) fig.set(current, -1, false);
-  }
-
-  function render(focusRail: boolean, fresh?: boolean) {
-    const s = services[selected];
-    const steps = s.steps!;
-    const step = steps[current];
-    const n = steps.length;
-    const pi = stepPhase[current];
-    const phase = s.phases![pi];
-    const moved = !fresh && current !== prev;
-    const dir = current >= prev ? 1 : -1;
-
-    buttons.forEach((b, k) => {
-      const wasDone = !fresh && k < prev, isDone = k < current;
-      if (isDone !== wasDone) b.style.setProperty('--wd', `${(isDone ? k - prev : prev - 1 - k) * 60}ms`);
-      b.classList.toggle('done', isDone);
-      b.tabIndex = k === current ? 0 : -1;
-      if (k === current) b.setAttribute('aria-current', 'step');
-      else b.removeAttribute('aria-current');
-    });
-    later(() => buttons.forEach((b) => b.style.removeProperty('--wd')), 900);
-    if (moved) { const b = buttons[current]; b.classList.remove('snap'); void b.offsetWidth; b.classList.add('snap'); }
-
-    phaseEls.forEach((el, j) => { el.classList.toggle('is-current', j === pi); el.classList.toggle('is-done', j < pi); });
-    if (moved && phase.loop && (stepPhase[prev] !== pi || current > prev)) {
-      phaseEls[pi].querySelectorAll('.loop-ic').forEach((ic) => { ic.classList.remove('spin'); void (ic as HTMLElement).offsetWidth; ic.classList.add('spin'); });
+    function show(s: Service, animate: boolean) {
+      svc = s;
+      q('run-h').textContent = s.stepsTitle ?? '';
+      const dl = q<HTMLAnchorElement>('run-dl');
+      dl.hidden = !s.downloadFile;
+      if (s.downloadFile) { dl.href = `/files/${s.downloadFile}`; dl.textContent = s.downloadLabel ?? ''; }
+      buildRun(s, animate);
     }
-    if (focusRail) buttons[current].focus();
+    function buildRun(s: Service, animate: boolean) {
+      const steps = s.steps!, phases = s.phases!;
+      stepPhase = [];
+      phases.forEach((p, pi) => { for (let k = 0; k < p.count; k++) stepPhase.push(pi); });
+      let start = 0;
+      railEl.style.gridTemplateColumns = phases.map((p) => `${p.count}fr`).join(' ');
+      railEl.innerHTML = phases.map((p, pi) => {
+        const idx = Array.from({ length: p.count }, (_, k) => start + k);
+        start += p.count;
+        const range = p.count > 1 ? `${idx[0] + 1}–${idx[idx.length - 1] + 1}` : `${idx[0] + 1}`;
+        return `
+          <div class="phase" data-phase="${pi}">
+            <h4 class="phase-h">${p.name}<span class="range">${range}</span>${p.loop ? `<span class="loop"><span class="loop-ic" aria-hidden="true">↻</span> ${p.loop}</span>` : ''}</h4>
+            <ol class="steps" start="${idx[0] + 1}">
+              ${idx.map((k) => `
+                <li><button class="step${steps[k].optional ? ' optional' : ''}" type="button" data-k="${k}" style="--i:${k}" aria-label="Step ${k + 1}: ${steps[k].title}">
+                  <span class="wire" aria-hidden="true"></span><span class="dot">${k + 1}</span><span class="name">${steps[k].title}</span>
+                </button></li>`).join('')}
+            </ol>
+          </div>`;
+      }).join('');
+      buttons = [...railEl.querySelectorAll<HTMLButtonElement>('.step')];
+      phaseEls = [...railEl.querySelectorAll<HTMLElement>('.phase')];
 
-    const sw = moved ? ' swap' : '';
-    cardEl.style.setProperty('--dir', String(dir));
-    const tags = [step.tag, step.optional && 'Optional', phase.loop && `<span class="loop-ic${moved ? ' spin' : ''}" aria-hidden="true">↻</span> Repeats ${phase.loop}`].filter(Boolean);
-    headEl.innerHTML = `
-      <p class="c-meta${sw}" style="--d:0">Step ${current + 1} of ${n} · ${phase.name}</p>
-      <h4 class="c-title${sw}" style="--d:1">${step.title}</h4>
-      <div class="c-tags${sw}" style="--d:2">${tags.map((t) => `<span class="c-tag">${t}</span>`).join('')}</div>`;
-    mainEl.innerHTML = `
-      <p class="c-body${sw}" style="--d:2">${step.body}</p>
-      ${step.who ? `<dl class="c-facts${sw}" style="--d:3"><dt>Who</dt><dd>${step.who}</dd><dt>You get</dt><dd>${step.get}</dd></dl>` : ''}`;
+      const n = steps.length;
+      rulerEl.innerHTML = '<span class="r-fill"></span>' +
+        steps.map((_, i) => `<span class="tk${i === 0 || i === n - 1 ? ' end' : ''}" style="left:${(i / (n - 1)) * 100}%"></span>`).join('') +
+        '<span class="r-node"></span>';
+      ticks = [...rulerEl.querySelectorAll<HTMLElement>('.tk')];
 
-    const atStart = current === 0, atEnd = current === n - 1;
-    if (atStart && document.activeElement === backBtn) nextBtn.focus();
-    if (atEnd && document.activeElement === nextBtn) backBtn.focus();
-    backBtn.disabled = atStart;
-    nextBtn.disabled = atEnd;
+      fig = makeAssembly(kitSvg, s);
+      current = 0; prev = 0;
+      render(false, true);
 
-    rulerEl.style.setProperty('--p', String(current / (n - 1)));
-    ticks.forEach((t, i) => t.classList.toggle('on', i <= current));
+      if (animate) {
+        runEl.classList.remove('in'); void runEl.offsetWidth; runEl.classList.add('in');
+        const t = fig.drawGhosts();
+        later(() => fig!.set(current, -1, true), Math.min(t, 520));
+        later(() => runEl.classList.remove('in'), 1300);
+      } else if (!bench.classList.contains('pre')) fig.set(current, -1, false);
+    }
 
-    if (moved) fig!.set(current, prev, CAN_ANIMATE);
-    placeLeader(!!fresh);
-    if (moved) announce.textContent = `${step.title}. Step ${current + 1} of ${n}, ${phase.name}.`;
-    prev = current;
+    function render(focusRail: boolean, fresh?: boolean) {
+      const s = svc!;
+      const steps = s.steps!;
+      const step = steps[current];
+      const n = steps.length;
+      const pi = stepPhase[current];
+      const phase = s.phases![pi];
+      const moved = !fresh && current !== prev;
+      const dir = current >= prev ? 1 : -1;
+
+      buttons.forEach((b, k) => {
+        const wasDone = !fresh && k < prev, isDone = k < current;
+        if (isDone !== wasDone) b.style.setProperty('--wd', `${(isDone ? k - prev : prev - 1 - k) * 60}ms`);
+        b.classList.toggle('done', isDone);
+        b.tabIndex = k === current ? 0 : -1;
+        if (k === current) b.setAttribute('aria-current', 'step');
+        else b.removeAttribute('aria-current');
+      });
+      later(() => buttons.forEach((b) => b.style.removeProperty('--wd')), 900);
+      if (moved) { const b = buttons[current]; b.classList.remove('snap'); void b.offsetWidth; b.classList.add('snap'); }
+
+      phaseEls.forEach((el, j) => { el.classList.toggle('is-current', j === pi); el.classList.toggle('is-done', j < pi); });
+      if (moved && phase.loop && (stepPhase[prev] !== pi || current > prev)) {
+        phaseEls[pi].querySelectorAll('.loop-ic').forEach((ic) => { ic.classList.remove('spin'); void (ic as HTMLElement).offsetWidth; ic.classList.add('spin'); });
+      }
+      if (focusRail) buttons[current].focus();
+
+      const sw = moved ? ' swap' : '';
+      cardEl.style.setProperty('--dir', String(dir));
+      const tags = [step.tag, step.optional && 'Optional', phase.loop && `<span class="loop-ic${moved ? ' spin' : ''}" aria-hidden="true">↻</span> Repeats ${phase.loop}`].filter(Boolean);
+      headEl.innerHTML = `
+        <p class="c-meta${sw}" style="--d:0">Step ${current + 1} of ${n} · ${phase.name}</p>
+        <h4 class="c-title${sw}" style="--d:1">${step.title}</h4>
+        <div class="c-tags${sw}" style="--d:2">${tags.map((t) => `<span class="c-tag">${t}</span>`).join('')}</div>`;
+      mainEl.innerHTML = `
+        <p class="c-body${sw}" style="--d:2">${step.body}</p>
+        ${step.who ? `<dl class="c-facts${sw}" style="--d:3"><dt>Who</dt><dd>${step.who}</dd><dt>You get</dt><dd>${step.get}</dd></dl>` : ''}`;
+
+      const atStart = current === 0, atEnd = current === n - 1;
+      if (atStart && document.activeElement === backBtn) nextBtn.focus();
+      if (atEnd && document.activeElement === nextBtn) backBtn.focus();
+      backBtn.disabled = atStart;
+      nextBtn.disabled = atEnd;
+
+      rulerEl.style.setProperty('--p', String(current / (n - 1)));
+      ticks.forEach((t, i) => t.classList.toggle('on', i <= current));
+
+      if (moved) fig!.set(current, prev, CAN_ANIMATE);
+      placeLeader(!!fresh);
+      if (moved) announce.textContent = `${step.title}. Step ${current + 1} of ${n}, ${phase.name}.`;
+      prev = current;
+    }
+
+    function go(k: number, focusRail = false) {
+      const next = Math.max(0, Math.min(svc!.steps!.length - 1, k));
+      if (next === current) return;
+      current = next;
+      render(focusRail);
+    }
+
+    const stepOf = (t: EventTarget | null) => (t as Element | null)?.closest<HTMLButtonElement>('.step');
+    railEl.addEventListener('click', (e) => {
+      const b = stepOf(e.target);
+      if (b) go(+b.dataset.k!);
+    }, on);
+    railEl.addEventListener('keydown', (e) => {
+      const keys: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+      if (e.key in keys) { e.preventDefault(); go(current + keys[e.key], true); }
+      else if (e.key === 'Home') { e.preventDefault(); go(0, true); }
+      else if (e.key === 'End') { e.preventDefault(); go(Infinity, true); }
+    }, on);
+    railEl.addEventListener('pointerover', (e) => { const b = stepOf(e.target); if (fig) fig.highlight(b ? +b.dataset.k! : -1); }, on);
+    railEl.addEventListener('pointerleave', () => fig && fig.highlight(-1), on);
+    railEl.addEventListener('focusin', (e) => { const b = stepOf(e.target); if (b && fig && (e.target as Element).matches(':focus-visible')) fig.highlight(+b.dataset.k!); }, on);
+    railEl.addEventListener('focusout', () => fig && fig.highlight(-1), on);
+    backBtn.addEventListener('click', () => go(current - 1), on);
+    nextBtn.addEventListener('click', () => go(current + 1), on);
+
+    // Swipe between steps on touch screens
+    let swipe: { x: number; y: number } | null = null;
+    cardEl.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'touch' || (e.target as Element).closest('button,a')) return;
+      swipe = { x: e.clientX, y: e.clientY };
+    }, on);
+    cardEl.addEventListener('pointerup', (e) => {
+      if (!swipe) return;
+      const dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+      swipe = null;
+      if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) go(current + (dx < 0 ? 1 : -1));
+    }, on);
+    cardEl.addEventListener('pointercancel', () => { swipe = null; }, on);
+
+    function placeLeader(instant: boolean) {
+      if (runEl.hidden || getComputedStyle(leader).display === 'none' || !buttons.length) return;
+      const rr = runEl.getBoundingClientRect();
+      const br = buttons[current].getBoundingClientRect();
+      const dot = buttons[current].querySelector('.dot')!.getBoundingClientRect();
+      const cr = cardEl.getBoundingClientRect();
+      const x = dot.left + dot.width / 2 - rr.left;
+      const y = br.bottom - rr.top + 8;
+      const h = Math.max(0, cr.top - rr.top - y);
+      if (instant) leader.classList.add('still');
+      leader.style.transform = `translate(${x}px,${y}px)`;
+      leader.style.height = `${h}px`;
+      if (!bench.classList.contains('pre')) leader.classList.add('on');
+      if (instant) requestAnimationFrame(() => leader.classList.remove('still'));
+    }
+
+    // The first view: the blueprint draws, then the parts up to the current step build
+    function reveal() {
+      if (runEl.hidden || !fig) return;
+      runEl.classList.add('in');
+      const t = fig.drawGhosts();
+      later(() => fig!.set(current, -1, true), Math.min(t, 700));
+      later(() => runEl.classList.remove('in'), 1500);
+    }
+    const settle = () => fig?.set(current, -1, false);
+
+    return { el: runEl, show, reveal, settle, placeLeader };
   }
 
-  function go(k: number, focusRail = false) {
-    const next = Math.max(0, Math.min(services[selected].steps!.length - 1, k));
-    if (next === current) return;
-    current = next;
-    render(focusRail);
-  }
-
-  const stepOf = (t: EventTarget | null) => (t as Element | null)?.closest<HTMLButtonElement>('.step');
-  railEl.addEventListener('click', (e) => {
-    const b = stepOf(e.target);
-    if (b) go(+b.dataset.k!);
-  }, on);
-  railEl.addEventListener('keydown', (e) => {
-    const keys: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
-    if (e.key in keys) { e.preventDefault(); go(current + keys[e.key], true); }
-    else if (e.key === 'Home') { e.preventDefault(); go(0, true); }
-    else if (e.key === 'End') { e.preventDefault(); go(Infinity, true); }
-  }, on);
-  railEl.addEventListener('pointerover', (e) => { const b = stepOf(e.target); if (fig) fig.highlight(b ? +b.dataset.k! : -1); }, on);
-  railEl.addEventListener('pointerleave', () => fig && fig.highlight(-1), on);
-  railEl.addEventListener('focusin', (e) => { const b = stepOf(e.target); if (b && fig && (e.target as Element).matches(':focus-visible')) fig.highlight(+b.dataset.k!); }, on);
-  railEl.addEventListener('focusout', () => fig && fig.highlight(-1), on);
-  backBtn.addEventListener('click', () => go(current - 1), on);
-  nextBtn.addEventListener('click', () => go(current + 1), on);
-
-  // Swipe between steps on touch screens
-  let swipe: { x: number; y: number } | null = null;
-  cardEl.addEventListener('pointerdown', (e) => {
-    if (e.pointerType !== 'touch' || (e.target as Element).closest('button,a')) return;
-    swipe = { x: e.clientX, y: e.clientY };
-  }, on);
-  cardEl.addEventListener('pointerup', (e) => {
-    if (!swipe) return;
-    const dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
-    swipe = null;
-    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) go(current + (dx < 0 ? 1 : -1));
-  }, on);
-  cardEl.addEventListener('pointercancel', () => { swipe = null; }, on);
-
-  function placeLeader(instant: boolean) {
-    if (runEl.hidden || getComputedStyle(leader).display === 'none' || !buttons.length) return;
-    const rr = runEl.getBoundingClientRect();
-    const br = buttons[current].getBoundingClientRect();
-    const dot = buttons[current].querySelector('.dot')!.getBoundingClientRect();
-    const cr = cardEl.getBoundingClientRect();
-    const x = dot.left + dot.width / 2 - rr.left;
-    const y = br.bottom - rr.top + 8;
-    const h = Math.max(0, cr.top - rr.top - y);
-    if (instant) leader.classList.add('still');
-    leader.style.transform = `translate(${x}px,${y}px)`;
-    leader.style.height = `${h}px`;
-    if (!bench.classList.contains('pre')) leader.classList.add('on');
-    if (instant) requestAnimationFrame(() => leader.classList.remove('still'));
-  }
+  const selectedRun = makeRun(root.querySelector<HTMLElement>('[data-run="selected"]')!);
+  const pinned = services.find((s) => s.pinned && s.steps);
+  const pinnedRun = makeRun(root.querySelector<HTMLElement>('[data-run="pinned"]')!);
+  const runs = [selectedRun, pinnedRun];
 
   /* ================================================================ figure: isometric build-up, parts added step by step */
   function makeAssembly(svg: SVGSVGElement, svc: Service): Figure {
@@ -494,41 +523,51 @@ export function startServices(root: HTMLElement): () => void {
   }
 
   /* ================================================================ boot */
-  const ro = new ResizeObserver(() => placeLeader(true));
+  const placeLeaders = (instant: boolean) => runs.forEach((r) => r.placeLeader(instant));
+  const ro = new ResizeObserver(() => placeLeaders(true));
   ro.observe(bench);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!ac.signal.aborted) placeLeader(true); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!ac.signal.aborted) placeLeaders(true); });
 
-  let io: IntersectionObserver | null = null;
+  pinnedRun.el.hidden = !pinned;
+  if (pinned) pinnedRun.show(pinned, false);
+
+  const ios: IntersectionObserver[] = [];
   if (CAN_ANIMATE) {
     bench.classList.add('pre');
     select(selected, true);
     booted = true;
-    io = new IntersectionObserver((entries) => {
+    const io = new IntersectionObserver((entries) => {
       if (!entries.some((en) => en.isIntersecting)) return;
-      io!.disconnect();
+      io.disconnect();
       bench.classList.replace('pre', 'in');
-      placeLeader(true);
+      placeLeaders(true);
       // The wheel draws itself, then TALO calls the agents and tools for the selected service
       later(() => lightWheel(services[selected].on, true), 1450);
-      if (services[selected].steps) {
-        runEl.classList.add('in');
-        const t = fig!.drawGhosts();
-        later(() => fig!.set(current, -1, true), Math.min(t, 700));
-        later(() => runEl.classList.remove('in'), 1500);
-      }
+      selectedRun.reveal();
       later(() => bench.classList.remove('in'), 1800);
     }, { threshold: 0.2 });
     io.observe(bench);
+    ios.push(io);
+    // The pinned run sits lower down, so it builds when it scrolls into view
+    if (pinned) {
+      const pio = new IntersectionObserver((entries) => {
+        if (!entries.some((en) => en.isIntersecting)) return;
+        pio.disconnect();
+        pinnedRun.reveal();
+      }, { threshold: 0.3 });
+      pio.observe(pinnedRun.el);
+      ios.push(pio);
+    }
   } else {
     select(selected, true);
-    if (fig) (fig as Figure).set(current, -1, false);
+    runs.forEach((r) => r.settle());
     booted = true;
   }
 
   return () => {
     ac.abort();
     ro.disconnect();
-    io?.disconnect();
+    ios.forEach((o) => o.disconnect());
     timers.forEach((t) => clearTimeout(t));
     timers.clear();
   };

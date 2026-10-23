@@ -13,7 +13,7 @@
 .svc button{font:inherit;color:inherit}
 
 /* Bench */
-.svc .bench{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);grid-template-areas:"h fig" "ctl fig" "run run";grid-template-rows:auto 1fr auto;align-items:start;gap:0 clamp(24px,4vw,56px);background:var(--panel);border-radius:4px;padding:clamp(20px,3.5vw,44px)}
+.svc .bench{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);grid-template-areas:"h fig" "ctl fig" "run run" "pinned pinned";grid-template-rows:auto 1fr auto auto;align-items:start;gap:0 clamp(24px,4vw,56px);background:var(--panel);border-radius:4px;padding:clamp(20px,3.5vw,44px)}
 .svc .bench-h{grid-area:h;margin:0;font:600 clamp(1.45rem,2.5vw,1.9rem)/1.12 var(--display);letter-spacing:-.02em}
 .svc .bench-ctl{grid-area:ctl}
 .svc .bench-fig{grid-area:fig;align-self:center;position:sticky;top:88px}
@@ -82,6 +82,7 @@
 
 /* Run: the steps for the chosen service */
 .svc .run{grid-area:run;position:relative;margin-top:clamp(28px,4vw,40px);padding-top:clamp(24px,3.5vw,36px);border-top:1px solid var(--panel-line)}
+.svc .run--pinned{grid-area:pinned}
 .svc .run-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 24px}
 .svc .run-h{margin:0;font:600 1.15rem/1.25 var(--display);letter-spacing:-.01em;text-wrap:balance}
 
@@ -224,7 +225,7 @@
   .svc .card{grid-template-columns:minmax(150px,2fr) minmax(0,3fr);grid-template-areas:"fig head" "fig main" "nav nav"}
 }
 @media (max-width:900px){
-  .svc .bench{grid-template-columns:minmax(0,1fr);grid-template-areas:"h" "fig" "ctl" "run"}
+  .svc .bench{grid-template-columns:minmax(0,1fr);grid-template-areas:"h" "fig" "ctl" "run" "pinned"}
   .svc .bench-fig{position:static;margin-top:16px}
   .svc .fig-svg{max-width:380px}
   .svc .node-label{font-size:20px}
