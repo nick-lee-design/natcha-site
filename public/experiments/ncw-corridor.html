@@ -11,7 +11,7 @@
 :root{
   --paper:#F2F4F3; --panel:#FAFBFA; --ink:#1C2228; --muted:#57636E; --rule:#D5DBDF; --rule-strong:#97A2AC;
   --canvas:#E6EAE9; --accent:#C8136A; --accent-soft:rgba(200,19,106,.10); --clash:#D9361C; --warn:#A86A12; --ok:#2C7A4B; --focus:#2457D6;
-  --tip:#1C2228; --tip-ink:#F2F4F3;
+  --tip:#1C2228; --tip-ink:#F2F4F3; --bwh:#0F8B8D; --prop:#7C3AED;
   --sans:"Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --cond:"Barlow Semi Condensed", "Arial Narrow", "Segoe UI", Arial, sans-serif;
   color-scheme: light;
@@ -21,13 +21,13 @@
   :root:not([data-theme="light"]){
     --paper:#1A2027; --panel:#1F262E; --ink:#E5E9EC; --muted:#9AA6B1; --rule:#313B46; --rule-strong:#59667372;
     --canvas:#242B34; --accent:#FF5BA6; --accent-soft:rgba(255,91,166,.14); --clash:#FF6A48; --warn:#E3A43A; --ok:#5EC08B; --focus:#86A9FF;
-    --tip:#E5E9EC; --tip-ink:#1A2027; color-scheme: dark;
+    --tip:#E5E9EC; --tip-ink:#1A2027; --bwh:#3CC4C6; --prop:#A98BFA; color-scheme: dark;
   }
 }
 :root[data-theme="dark"]{
   --paper:#1A2027; --panel:#1F262E; --ink:#E5E9EC; --muted:#9AA6B1; --rule:#313B46; --rule-strong:#596673;
   --canvas:#242B34; --accent:#FF5BA6; --accent-soft:rgba(255,91,166,.14); --clash:#FF6A48; --warn:#E3A43A; --ok:#5EC08B; --focus:#86A9FF;
-  --tip:#E5E9EC; --tip-ink:#1A2027; color-scheme: dark;
+  --tip:#E5E9EC; --tip-ink:#1A2027; --bwh:#3CC4C6; --prop:#A98BFA; color-scheme: dark;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{height:100%; scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -101,7 +101,11 @@ dl.kv dd{margin:0; overflow-wrap:anywhere}
 .chip{display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted)}
 .chip i{width:10px; height:10px; border-radius:2px; display:inline-block}
 .sev{font-family:var(--cond); font-weight:600; font-size:12.5px; padding:1px 7px; border-radius:20px; border:1px solid currentColor; white-space:nowrap}
-.sev.major{color:var(--clash)} .sev.minor{color:var(--warn)} .sev.touch{color:var(--muted)} .sev.penetration{color:var(--muted)} .sev.nohole{color:var(--warn)}
+.sev.major{color:var(--clash)} .sev.minor{color:var(--warn)} .sev.touch{color:var(--muted)} .sev.penetration{color:var(--muted)} .sev.nohole{color:var(--prop)}
+.sev.modelled{color:var(--bwh)} .sev.proposed{color:var(--prop)} .sev.ok{color:var(--ok)} .sev.tight{color:var(--warn)} .sev.clash{color:var(--clash)}
+.views.filter{margin:10px 0 2px; width:max-content; max-width:100%}
+.views.filter button{padding:4px 9px; font-size:13.5px}
+table.t td.chk{width:22px; padding-right:2px} table.t td.chk input{margin:0; accent-color:var(--ink); width:15px; height:15px; cursor:pointer}
 .empty{color:var(--muted); padding:28px 16px}
 .link{background:none; border:0; padding:0; color:var(--ink); text-decoration:underline; text-underline-offset:2px; cursor:pointer; font:inherit}
 .link:hover{color:var(--accent)}
@@ -136,7 +140,7 @@ details.grp summary .ct{color:var(--muted); font-variant-numeric:tabular-nums}
 .tag.cl.minor{background:var(--warn); border-color:var(--warn)}
 .tag.cl.touch{background:var(--panel); color:var(--muted); border-color:var(--rule-strong)}
 .tag.wx{border-left-width:1px; border-radius:10px; padding:2px 6px; font-size:11px; color:var(--muted)}
-.tag.wx.nohole{color:var(--warn); border-color:var(--warn)}
+.tag.wx.nohole{color:var(--prop); border-color:var(--prop)}
 #tip{position:absolute; pointer-events:none; background:var(--tip); color:var(--tip-ink); padding:6px 9px; border-radius:4px; font-size:12.5px; line-height:1.35; max-width:300px; display:none; z-index:4}
 #tip b{font-family:var(--cond); font-weight:600; font-size:14px}
 #hint{position:absolute; left:12px; bottom:10px; font-size:12px; color:var(--muted); pointer-events:none; max-width:calc(100% - 380px)}
@@ -196,7 +200,7 @@ details.grp summary .ct{color:var(--muted); font-variant-numeric:tabular-nums}
       <button class="btn" id="fitBtn" title="Fit the visible model (F fits the selection)">Fit</button>
       <button class="btn" id="projBtn" aria-pressed="false" title="Switch between perspective and orthographic">Orthographic</button>
       <label class="sel"><span class="lbl">Tags</span>
-        <select id="tagSel" aria-label="Component tags"><option value="off">None</option><option value="eq" selected>Equipment</option><option value="all">All parts</option></select></label>
+        <select id="tagSel" aria-label="Component tags"><option value="off">None</option><option value="eq" selected>Equipment</option><option value="bwh">Openings</option><option value="bwhxy">Openings with X, Y</option><option value="all">All parts</option></select></label>
       <label class="sel"><span class="lbl">Markers</span>
         <select id="mkSel" aria-label="Issue markers"><option value="off">None</option><option value="cl" selected>Clashes</option><option value="all">Clashes and walls</option></select></label>
       <button class="btn" id="measureBtn" aria-pressed="false" title="Click two points to measure">Measure</button>
@@ -245,6 +249,7 @@ details.grp summary .ct{color:var(--muted); font-variant-numeric:tabular-nums}
     <div class="tabs" role="tablist">
       <button role="tab" data-tab="sel">Selection</button>
       <button role="tab" data-tab="parts">Parts</button>
+      <button role="tab" data-tab="open">Openings</button>
       <button role="tab" data-tab="diag" class="on">Diagnostic</button>
     </div>
     <div class="tabpane" id="tab-sel"></div>
@@ -254,6 +259,7 @@ details.grp summary .ct{color:var(--muted); font-variant-numeric:tabular-nums}
       </div>
       <div id="partList" style="padding:0 12px 16px"></div>
     </div>
+    <div class="tabpane" id="tab-open"></div>
     <div class="tabpane on" id="tab-diag"></div>
   </aside>
 </div>
@@ -292,7 +298,7 @@ const LAYER = {
   'A-WALL':{col:'#8E959C', name:'Walls', desc:'Architectural and structural links'},
   'I-WALL':{col:'#C4BCAF', name:'Interior walls', desc:'Architectural link'},
   'M-HVAC-DUCT':{col:'#2F7FC1', name:'Ductwork', desc:'Ducts, insulation and dampers'},
-  'P-PIPE':{col:'#2E9E55', name:'Pipework', desc:'Pipes, fittings and wall holes'},
+  'P-PIPE':{col:'#2E9E55', name:'Pipework', desc:'Pipes and fittings'},
   'E-CABL-TRAY':{col:'#E07B1A', name:'Cable tray', desc:'Tray, LV ladder and rungs'},
   'E-LITE':{col:'#E3BD12', name:'Detectors', desc:'PIR presence detectors'},
   'E-LITE-EQPM':{col:'#B08E00', name:'Lighting', desc:'Downlights and exit sign'},
@@ -306,9 +312,9 @@ const SRC = {MEP:{name:'MEP model', desc:'Host file, all services'},
              STR:{name:'Structural link', desc:'NCW-FRM-ZZ-ZZ-M3-S-106-151, P04'}};
 const SYS_LABEL = {'Copper, press-fit':'Copper, press-fit', 'Fire protection, Victaulic grooved':'Fire protection, Victaulic grooved', 'Geberit HDPE drainage':'Geberit HDPE drainage', 'Stainless steel, welded':'Stainless steel, welded'};
 const EQUIP = new Set(['Downlight','PIR detector','Exit sign','Fused connection unit','Fire damper','Volume control damper','Fire escape sign']);
-const DISC = {LITE:-0.9, WALL:0, DUCT:0.9, TRAY:1.8, PIPE:2.7};
+const DISC = {LITE:-0.9, WALL:0, BWH:0, DUCT:0.9, TRAY:1.8, PIPE:2.7};
 const CAT_ORDER = ['Duct segment','Duct insulation (inferred)','Duct fitting','Duct side plate (purpose unclear)','Fire damper','Volume control damper',
-  'Pipe segment','Pipe insulation (inferred)','Pipe fitting','Wall penetration (builder’s work hole)',
+  'Pipe segment','Pipe insulation (inferred)','Pipe fitting','Builders’ work hole, modelled','Builders’ work hole, proposed',
   'Cable tray segment','Cable tray fitting','LV ladder fitting','Cable ladder rung',
   'Downlight','PIR detector','Exit sign','Fused connection unit','Fire escape sign',
   'Wall group (architectural link)','Interior wall group (architectural link)','Wall group (structural link)'];
@@ -316,6 +322,14 @@ const CL = M.clashes;
 const byId = {}; CL.forEach(c => byId[c.id] = c);
 const elClashes = {}; CL.forEach(c => { (elClashes[c.a] ||= []).push(c); (elClashes[c.b] ||= []).push(c); });
 const dupOf = {}; M.dups.forEach(d => { dupOf[d.mep] = d; dupOf[d.arch] = d; });
+
+/* builders' work holes get their own layer; proposed ones are added once the meshes exist */
+const BWH_MOD = 'Builders’ work hole, modelled', BWH_PROP = 'Builders’ work hole, proposed';
+const PROP_COL = '#7C3AED';
+LAYER.BWH = {col:'#0F8B8D', name:'Builders’ work holes', desc:'Modelled and proposed openings'};
+const BWH_L = M.layers.push('BWH') - 1;
+E.forEach(d => { if (d.c === 'Wall penetration (builder’s work hole)'){ d.c = BWH_MOD; d.l = BWH_L; d.g = 'BWH'; } });
+const nFile = E.length;
 
 const fmt = n => Math.round(n).toLocaleString('en-GB');
 const esc = s => String(s ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
@@ -356,6 +370,13 @@ const selMat = mkMat('#C8136A', {emissive:new THREE.Color('#5a0430')});
 const pairMat = mkMat('#E0391F', {emissive:new THREE.Color('#4a1006')});
 const dupMat = mkMat('#C8136A', {transparent:true, opacity:0.45, depthWrite:false});
 const ghostMat = M.layers.map(L => mkMat(LAYER[L].col, {transparent:true, opacity:0.11, depthWrite:false}));
+const bwhMat = {modelled:mkMat(LAYER.BWH.col, {transparent:true, opacity:0.62, depthWrite:false}),
+                proposed:mkMat(PROP_COL, {transparent:true, opacity:0.58, depthWrite:false})};
+const bwhHover = {modelled:mkMat(LAYER.BWH.col, {emissive:new THREE.Color(LAYER.BWH.col).multiplyScalar(0.55)}),
+                  proposed:mkMat(PROP_COL, {emissive:new THREE.Color(PROP_COL).multiplyScalar(0.55)})};
+const bwhEdge = {modelled:new THREE.LineBasicMaterial({color:'#0A5E60', clippingPlanes:clipPlanes}),
+                 proposed:new THREE.LineBasicMaterial({color:'#4C1D95', clippingPlanes:clipPlanes})};
+const greyMat = mkMat('#9AA3AB', {transparent:true, opacity:0.12, depthWrite:false});
 const WALLS = new Set([M.layers.indexOf('A-WALL'), M.layers.indexOf('I-WALL')]);
 function setWallOpacity(a){
   WALLS.forEach(i => [layerMat[i], hoverMat[i]].forEach(m => { m.transparent = a < 0.99; m.opacity = a; m.depthWrite = a >= 0.99; m.needsUpdate = true; }));
@@ -375,6 +396,7 @@ for (const d of E){
   const m = new THREE.Mesh(g, layerMat[d.l]);
   m.userData.i = d.i;
   if (WALLS.has(d.l)) m.renderOrder = 2;
+  if (d.g === 'BWH') m.renderOrder = 3;
   group.add(m); meshes.push(m);
   d.cw = new THREE.Vector3(mmToW((d.b[0]+d.b[3])/2,0), mmToW((d.b[1]+d.b[4])/2,1), mmToW((d.b[2]+d.b[5])/2,2));
   d.off = new THREE.Vector3();
@@ -405,9 +427,187 @@ const mDots = [0,1].map(() => { const s = new THREE.Mesh(new THREE.SphereGeometr
 const W0 = new THREE.Vector3(mmToW(M.bmin[0],0), mmToW(M.bmin[1],1), mmToW(M.bmin[2],2));
 const W1 = new THREE.Vector3(mmToW(M.bmax[0],0), mmToW(M.bmax[1],1), mmToW(M.bmax[2],2));
 
+/* ---------- builders' work holes ---------- */
+const NEED = {PIPE:25, DUCT:50, TRAY:50};                      // clearance all round, mm
+const AXN = ['X','Y','Z'];
+const isService = d => (d.g === 'PIPE' || d.g === 'DUCT' || d.g === 'TRAY') && d.c !== 'Cable ladder rung' && !/insulation/.test(d.c);
+const crossAx = ax => ax === 2 ? [0,1] : [ax === 0 ? 1 : 0, 2];
+const boxHit = (a, b, t=0) => [0,1,2].every(ax => a[ax] < b[ax+3]-t && a[ax+3] > b[ax]+t);
+const up25 = v => Math.ceil(v/25)*25;
+// a service's cross-section within a slab along ax, from its vertices; the whole bounding box when no vertex falls inside
+function slabSection(i, ax, a0, a1){
+  const p = meshes[i].geometry.attributes.position.array, [u,v] = crossAx(ax);
+  const r = [Infinity,-Infinity,Infinity,-Infinity];
+  for (let k=0; k<p.length; k+=3){
+    const t = wToMm(p[k+ax], ax); if (t < a0 || t > a1) continue;
+    const pu = wToMm(p[k+u], u), pv = wToMm(p[k+v], v);
+    if (pu < r[0]) r[0] = pu; if (pu > r[1]) r[1] = pu; if (pv < r[2]) r[2] = pv; if (pv > r[3]) r[3] = pv;
+  }
+  const b = E[i].b;
+  return (r[1]-r[0] > 5 && r[3]-r[2] > 5) ? r : [b[u], b[u+3], b[v], b[v+3]];
+}
+// section of a service plus its insulation
+function svcSection(i, ax, a0, a1){
+  const r = slabSection(i, ax, a0, a1), d = E[i];
+  if (d.hasins == null) return r;
+  const q = slabSection(d.hasins, ax, a0, a1);
+  return [Math.min(r[0],q[0]), Math.max(r[1],q[1]), Math.min(r[2],q[2]), Math.max(r[3],q[3])];
+}
+function svcSize(i, ax, a0, a1){
+  const d = E[i], r = slabSection(i, ax, a0, a1), w = r[1]-r[0], h = r[3]-r[2];
+  let t = !/bounding box/.test(d.z) ? d.z.split(', ')[0].replace(' outside', '')
+        : d.g === 'PIPE' && Math.abs(w-h) < 0.15*Math.max(w,h) ? 'Ø' + fmt(Math.max(w,h)) : fmt(w) + ' × ' + fmt(h);
+  if (d.hasins != null){ const q = slabSection(d.hasins, ax, a0, a1); t += ', insulated to ' + (d.g === 'PIPE' ? 'Ø' + fmt(Math.max(q[1]-q[0], q[3]-q[2])) : fmt(q[1]-q[0]) + ' × ' + fmt(q[3]-q[2])); }
+  return t;
+}
+// clearance of each service to the opening edge, and the verdict against the rule
+function clearance(o){
+  const [u,v] = crossAx(o.ax), a0 = o.s0, a1 = o.s1;
+  const cu = (o.b[u]+o.b[u+3])/2, cv = (o.b[v]+o.b[v+3])/2;
+  o.gaps = o.services.map(i => {
+    const r = svcSection(i, o.ax, a0, a1);
+    let g;
+    if (o.shape === 'circ'){
+      const R = o.dia/2, su = (r[0]+r[1])/2, sv = (r[2]+r[3])/2;
+      g = R - (Math.hypot(su-cu, sv-cv) + Math.max(r[1]-r[0], r[3]-r[2])/2);
+    } else g = Math.min(r[0]-o.b[u], o.b[u+3]-r[1], r[2]-o.b[v], o.b[v+3]-r[3]);
+    return {i, g, need:E[i].c === 'Fire damper' ? 0 : NEED[E[i].g]};
+  });
+  o.minGap = o.gaps.length ? Math.min(...o.gaps.map(x => x.g)) : null;
+  o.need = o.gaps.length ? Math.max(...o.gaps.map(x => x.need)) : 0;
+  o.verdict = !o.gaps.length ? 'empty' : o.gaps.some(x => x.g < 0) ? 'clash' : o.gaps.some(x => x.g < x.need) ? 'tight' : 'ok';
+}
+function addEdges(i, status){
+  const m = meshes[i];
+  const e = new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry, 30), bwhEdge[status]);
+  e.renderOrder = 4; m.add(e); m.userData.edge = e;
+}
+const OPEN = [];
+const PEN = CL.filter(c => c.sev === 'penetration' && isService(E[c.a]));
+// wall faces met by a ray along ax, grouped into solid spans (gaps under 250 mm count as the same wall)
+const ray0 = new THREE.Raycaster();
+function spansAlong(pt, ax, from, to, walls){
+  const o = pt.slice(); o[ax] = from;
+  const dir = new THREE.Vector3(); dir.setComponent(ax, 1);
+  ray0.set(new THREE.Vector3(mmToW(o[0],0), mmToW(o[1],1), mmToW(o[2],2)), dir); ray0.far = (to-from)/1000;
+  const ts = walls.flatMap(w => ray0.intersectObject(meshes[w], false).map(h => from + h.distance*1000)).sort((a,b) => a-b);
+  const spans = [];
+  for (const t of ts){ const s = spans[spans.length-1]; if (s && t - s[1] < 250) s[1] = t; else spans.push([t,t]); }
+  return spans.filter(s => s[1]-s[0] >= 12 && s[1]-s[0] <= 450);
+}
+// a service passes through an opening when the centre of its section in the wall lies inside the opening
+function passes(o, i){
+  const [u,v] = crossAx(o.ax), r = svcSection(i, o.ax, o.s0, o.s1), su = (r[0]+r[1])/2, sv = (r[2]+r[3])/2;
+  return su > o.b[u] && su < o.b[u+3] && sv > o.b[v] && sv < o.b[v+3];
+}
+// modelled holes: the wall span sets the through axis and depth; services are what passes through that slab
+for (const h of E.filter(d => d.g === 'BWH')){
+  const hb = h.b, circ = /Circular/i.test(h.f || '');
+  const dims = [0,1,2].map(ax => hb[ax+3]-hb[ax]), cen = [0,1,2].map(ax => (hb[ax]+hb[ax+3])/2);
+  const walls = [...new Set(CL.filter(c => c.sev === 'penetration' && c.hole === h.i).map(c => c.b))];
+  if (!walls.length) E.filter(d => d.k === 'wall' && boxHit(d.b, hb)).forEach(d => walls.push(d.i));
+  const spanAt = ax => spansAlong(cen, ax, cen[ax]-700, cen[ax]+700, walls).find(s => s[0]-30 < cen[ax] && s[1]+30 > cen[ax]);
+  let ax = circ ? [0,1,2].find(k => { const [j1,j2] = crossAx(k); return Math.abs(dims[j1]-dims[j2]) < 2; }) : undefined;
+  if (ax === undefined){
+    let best = Infinity;
+    [0,1,2].forEach(k => { const s = spanAt(k); if (s && Math.abs(s[1]-s[0]-dims[k]) < best){ best = Math.abs(s[1]-s[0]-dims[k]); ax = k; } });
+  }
+  if (ax === undefined) ax = dims.indexOf(Math.min(...dims));
+  const sp = spanAt(ax), s0 = sp ? Math.max(sp[0], hb[ax]) : hb[ax], s1 = sp ? Math.min(sp[1], hb[ax+3]) : hb[ax+3];
+  const [u,v] = crossAx(ax);
+  h.bwh = {status:'modelled', shape:circ ? 'circ' : 'rect', ax, b:hb, s0, s1, depth:dims[ax], w:dims[u], h:dims[v], dia:circ ? (dims[u]+dims[v])/2 : null, services:[], walls, crossings:[]};
+  h.bwh.services = E.filter(d => isService(d) && boxHit(d.b, hb, 2) && Math.min(d.b[ax+3], s1) - Math.max(d.b[ax], s0) > Math.min(20, (s1-s0)/2) && passes(h.bwh, d.i)).map(d => d.i);
+  clearance(h.bwh); addEdges(h.i, 'modelled'); OPEN.push(h.i);
+}
+const inHole = pt => OPEN.find(i => [0,1,2].every(ax => pt[ax] > E[i].b[ax]-20 && pt[ax] < E[i].b[ax+3]+20));
+// through-wall spans of a service along ax, cast at the crossing point against the wall's mesh
+function wallSpans(c, ax){
+  const d = E[c.a], lo = c.p[ax] - c.ov[ax]/2 - 30, hi = c.p[ax] + c.ov[ax]/2 + 30;
+  return spansAlong(c.p, ax, d.b[ax]-20, d.b[ax+3]+20, [c.b]).filter(s => s[1] > lo && s[0] < hi);
+}
+const cand = [];
+for (const c of PEN){
+  const d = E[c.a];
+  if (c.hole != null && E[c.hole].bwh.services.includes(c.a)){ c.open = c.hole; E[c.hole].bwh.crossings.push(c.id); continue; }
+  const order = [0,1,2].sort((x,y) => (d.b[y+3]-d.b[y]) - (d.b[x+3]-d.b[x]));
+  let ax = -1, spans = [];
+  for (const k of order){ spans = wallSpans(c, k); if (spans.length){ ax = k; break; } }
+  if (ax < 0){ c.open = null; continue; }
+  for (const sp of spans){
+    const pt = c.p.slice(); pt[ax] = (sp[0]+sp[1])/2;
+    const h = inHole(pt);
+    if (h != null && (E[h].bwh.services.includes(c.a) || passes(E[h].bwh, c.a))){ c.open = h; const o = E[h].bwh; if (!o.services.includes(c.a)){ o.services.push(c.a); clearance(o); } o.crossings.push(c.id); continue; }
+    const same = cand.find(q => q.ax === ax && q.services.includes(c.a) && Math.abs((q.a0+q.a1)/2 - pt[ax]) < 150);
+    if (same){ same.a0 = Math.min(same.a0, sp[0]); same.a1 = Math.max(same.a1, sp[1]); if (!same.walls.includes(c.b)) same.walls.push(c.b); same.crossings.push(c); continue; }
+    cand.push({ax, a0:sp[0], a1:sp[1], services:[c.a], walls:[c.b], crossings:[c]});
+  }
+}
+// services whose openings would overlap share one rectangular opening
+const rectOf = q => { const need = Math.max(...q.services.map(i => NEED[E[i].g])); const r = q.services.map(i => svcSection(i, q.ax, q.a0, q.a1)).reduce((a,b) => [Math.min(a[0],b[0]), Math.max(a[1],b[1]), Math.min(a[2],b[2]), Math.max(a[3],b[3])]); return {r, need}; };
+for (let merged = true; merged;){
+  merged = false;
+  for (let x=0; x<cand.length && !merged; x++) for (let y=x+1; y<cand.length && !merged; y++){
+    const A = cand[x], B = cand[y];
+    if (A.ax !== B.ax || Math.abs((A.a0+A.a1)/2 - (B.a0+B.a1)/2) > 150) continue;
+    const ra = rectOf(A), rb = rectOf(B), na = ra.need, nb = rb.need;
+    if (ra.r[0]-na < rb.r[1]+nb && ra.r[1]+na > rb.r[0]-nb && ra.r[2]-na < rb.r[3]+nb && ra.r[3]+na > rb.r[2]-nb){
+      A.a0 = Math.min(A.a0,B.a0); A.a1 = Math.max(A.a1,B.a1);
+      B.services.forEach(i => A.services.includes(i) || A.services.push(i));
+      B.walls.forEach(i => A.walls.includes(i) || A.walls.push(i));
+      A.crossings.push(...B.crossings); cand.splice(y,1); merged = true;
+    }
+  }
+}
+cand.sort((a,b) => { const ca = rectOf(a).r, cb = rectOf(b).r, pa = a.ax === 0 ? (a.a0+a.a1)/2 : (ca[0]+ca[1])/2, pb = b.ax === 0 ? (b.a0+b.a1)/2 : (cb[0]+cb[1])/2; return pa - pb; });
+cand.forEach((q, n) => {
+  const {r, need} = rectOf(q), ax = q.ax, [u,v] = crossAx(ax);
+  const pipeOnly = q.services.length === 1 && E[q.services[0]].g === 'PIPE';
+  const depth = Math.max(q.a1-q.a0, 12), cu = (r[0]+r[1])/2, cv = (r[2]+r[3])/2;
+  const dia = pipeOnly ? up25(Math.max(r[1]-r[0], r[3]-r[2]) + 2*need) : null;
+  const W = pipeOnly ? dia : up25(r[1]-r[0] + 2*need), H = pipeOnly ? dia : up25(r[3]-r[2] + 2*need);
+  const b = [0,0,0,0,0,0];
+  b[ax] = q.a0; b[ax+3] = q.a0 + depth; b[u] = cu-W/2; b[u+3] = cu+W/2; b[v] = cv-H/2; b[v+3] = cv+H/2;
+  const sz = [0,0,0]; sz[ax] = depth/1000; sz[u] = W/1000; sz[v] = H/1000;
+  let g;
+  if (pipeOnly){ g = new THREE.CylinderGeometry(dia/2000, dia/2000, depth/1000, 32); if (ax === 0) g.rotateZ(-Math.PI/2); if (ax === 2) g.rotateX(Math.PI/2); }
+  else g = new THREE.BoxGeometry(sz[0], sz[1], sz[2]);
+  const cw = new THREE.Vector3(mmToW((b[0]+b[3])/2,0), mmToW((b[1]+b[4])/2,1), mmToW((b[2]+b[5])/2,2));
+  g.translate(cw.x, cw.y, cw.z); g.computeBoundingBox(); g.computeBoundingSphere();
+  const i = E.length;
+  const d = {i, m:'BWH-' + (n+1), l:BWH_L, g:'BWH', s:'MEP', c:BWH_PROP, k:'bwh', prop:true, b, cw, off:new THREE.Vector3(), nf:g.index ? g.index.count/3 : 12,
+    z:(pipeOnly ? 'Ø' + dia : W + ' × ' + H) + ' × ' + fmt(depth) + ' deep'};
+  d.cat = d.c;
+  d.bwh = {status:'proposed', shape:pipeOnly ? 'circ' : 'rect', ax, b, s0:q.a0, s1:q.a1, depth, w:W, h:H, dia, services:q.services, walls:q.walls, crossings:q.crossings.map(c => c.id)};
+  q.crossings.forEach(c => c.open = i);
+  clearance(d.bwh);
+  E.push(d);
+  const m = new THREE.Mesh(g, bwhMat.proposed); m.userData.i = i; m.renderOrder = 3;
+  group.add(m); meshes.push(m); addEdges(i, 'proposed'); OPEN.push(i);
+});
+// fire dampers sitting in each opening, and proposed openings that run into a modelled one
+OPEN.forEach(i => { const o = E[i].bwh, bb = o.b.slice(); bb[o.ax] -= 200; bb[o.ax+3] += 200;
+  o.dampers = E.filter(d => d.c === 'Fire damper' && boxHit(d.b, bb)).map(d => d.i);
+  o.overlaps = E[i].prop ? OPEN.filter(k => !E[k].prop && boxHit(E[k].b, o.b)) : []; });
+// one reference per opening, numbered along the corridor; a hole family keeps its model mark alongside
+OPEN.sort((a,b) => { const A = E[a].b, B = E[b].b; return (A[0]+A[3]) - (B[0]+B[3]) || (A[1]+A[4]) - (B[1]+B[4]); });
+OPEN.forEach((i, n) => { const d = E[i]; if (!d.prop) d.mk0 = d.m; d.m = 'BWH-' + (n+1); });
+const setOut = o => [0,1,2].map(ax => Math.round((o.b[ax]+o.b[ax+3])/2));
+function fireFor(i, o){
+  const d = E[i];
+  if (d.c === 'Fire damper') return 'Fire damper, fixed to its tested installation frame';
+  if (d.g === 'DUCT') return o.dampers.length ? 'Fire damper ' + o.dampers.map(k => E[k].m).join(', ') + ' in the wall line' : 'Needs a fire damper or fire-rated ductwork. None found at this opening';
+  if (d.g === 'TRAY') return 'Coated mineral wool batt, intumescent sealant around tray and cables';
+  if (/HDPE/.test(d.sy || '')) return 'Intumescent pipe collar on both faces';
+  if (d.sy) return d.hasins != null ? 'Intumescent wrap over the insulation, annular gap sealed with fire-rated mastic' : 'Fire-rated intumescent mastic to the annular gap';
+  return 'Pipe material not recorded. Confirm before choosing a collar or mastic';
+}
+const reviewBy = o => [...new Set(o.walls.map(w => E[w].s === 'STR' ? 'Structural engineer' : 'Architect'))].sort((a,b) => a < b ? 1 : -1).join(', ') || 'Architect';
+const openSize = o => o.shape === 'circ' ? 'Ø' + fmt(o.dia) : fmt(o.w) + ' × ' + fmt(o.h);
+const VERDICT = {ok:'Sufficient', tight:'Below rule', clash:'Service hits the edge', empty:'No service found'};
+
 /* ---------- state ---------- */
 const st = {layerOn: M.layers.map(()=>true), lineOn:{'P-PIPE-CNTR':true,'G-ANNO-SYMB':true}, srcOn:{MEP:true,ARCH:true,STR:true},
-  hidden:new Set(), isolate:null, sel:null, selClash:null, hover:null, exDisc:0, exElem:0, tags:'eq', markers:'cl', measure:false, mPts:[],
+  hidden:new Set(), isolate:null, bwhIso:null, sel:null, selClash:null, hover:null, exDisc:0, exElem:0, tags:'eq', markers:'cl', measure:false, mPts:[],
   clip:[0,1000,0,1000,0,1000], ghost:true, focus:null};
 
 function visible(d){
@@ -419,26 +619,32 @@ function focusSet(){
     const f = new Set([st.sel]), d = E[st.sel];
     if (d.ins != null) f.add(d.ins); if (d.hasins != null) f.add(d.hasins);
     if (dupOf[st.sel]){ f.add(dupOf[st.sel].mep); f.add(dupOf[st.sel].arch); }
+    if (d.bwh) d.bwh.services.forEach(k => { f.add(k); if (E[k].hasins != null) f.add(E[k].hasins); });
     return f;
   }
   return null;
 }
+function baseMat(d, hov){
+  if (d.bwh) return (hov ? bwhHover : bwhMat)[d.bwh.status];
+  return (hov ? hoverMat : layerMat)[d.l];
+}
 function matFor(d){
   if (st.sel === d.i) return selMat;
   if (st.sel != null && (E[st.sel].ins === d.i || E[st.sel].hasins === d.i)) return dupMat;
-  if (st.ghost && st.focus && !st.focus.has(d.i)) return st.hover === d.i ? hoverMat[d.l] : ghostMat[d.l];
+  if (st.bwhIso && !st.bwhIso.has(d.i)) return st.hover === d.i ? baseMat(d, true) : greyMat;
+  if (st.ghost && st.focus && !st.focus.has(d.i)) return st.hover === d.i ? baseMat(d, true) : ghostMat[d.l];
   if (st.selClash && (st.selClash.a === d.i)) return selMat;
   if (st.selClash && (st.selClash.b === d.i)) return pairMat;
   if (st.sel != null && dupOf[st.sel] && (dupOf[st.sel].mep === d.i || dupOf[st.sel].arch === d.i)) return dupMat;
-  if (st.hover === d.i) return hoverMat[d.l];
-  return layerMat[d.l];
+  if (st.hover === d.i) return baseMat(d, true);
+  return baseMat(d, false);
 }
 function refresh(){
   st.focus = focusSet();
-  for (const d of E){ const m = meshes[d.i]; m.visible = visible(d); m.material = matFor(d); }
+  for (const d of E){ const m = meshes[d.i]; m.visible = visible(d); m.material = matFor(d); if (m.userData.edge) m.userData.edge.visible = !st.bwhIso || st.bwhIso.has(d.i); }
   lineObjs['P-PIPE-CNTR'].visible = st.lineOn['P-PIPE-CNTR'] && st.srcOn.MEP && !st.isolate;
   lineObjs['G-ANNO-SYMB'].visible = st.lineOn['G-ANNO-SYMB'] && !st.isolate;
-  lineObjs['P-PIPE-CNTR'].material.opacity = (st.exElem > 0.02) ? 0 : (st.ghost && st.focus ? 0.18 : 0.85);
+  lineObjs['P-PIPE-CNTR'].material.opacity = (st.exElem > 0.02) ? 0 : ((st.ghost && st.focus) || st.bwhIso ? 0.18 : 0.85);
   updateSelEdges();
   req();
 }
@@ -558,7 +764,7 @@ function fitTo(box){
   flyTo(fb.c, fb.pos, fb.half);
 }
 function zoomToEl(i){
-  const d = E[i]; const bb = meshes[i].geometry.boundingBox.clone().translate(d.off).expandByScalar(0.12);
+  const d = E[i]; const bb = meshes[i].geometry.boundingBox.clone().translate(d.off).expandByScalar(d.bwh ? 0.6 : 0.12);
   fitTo(bb);
 }
 function setProjection(toOrtho){
@@ -624,6 +830,7 @@ function placeLabels(){
     for (const c of list){
       const A = E[c.a], B = E[c.b];
       if (!meshes[c.a].visible && !meshes[c.b].visible) continue;
+      if (st.bwhIso && !st.bwhIso.has(c.a)) continue;
       const wp = new THREE.Vector3(mmToW(c.p[0],0), mmToW(c.p[1],1), mmToW(c.p[2],2)).add(A.off);
       if (!insideClip(wp)) continue;
       const s = project(wp); if (!s) continue;
@@ -633,9 +840,9 @@ function placeLabels(){
       if (pen){ if (!fits(s[0]-wd/2, s[1]-ht-4, wd, ht)) continue; }
       else { const tries = [0,-20,20,-40,40,-60]; dy = tries.find(t => fits(s[0]-wd/2, s[1]-ht-4+t, wd, ht)); if (dy === undefined) dy = 0; }
       const el = getLabel();
-      el.className = 'tag ' + (pen ? 'wx' + (c.hole == null ? ' nohole' : '') : 'cl ' + c.sev);
+      el.className = 'tag ' + (pen ? 'wx' + (c.open != null && E[c.open].prop ? ' nohole' : '') : 'cl ' + c.sev);
       el.textContent = c.id; el.dataset.k = 'c' + c.id;
-      el.title = pen ? (c.hole == null ? 'Wall crossing, no hole modelled nearby' : 'Wall crossing with a modelled hole') : (c.sev[0].toUpperCase()+c.sev.slice(1)) + ' clash: ' + A.m + ' and ' + B.m;
+      el.title = pen ? (c.open == null ? 'Service runs along a wall' : 'Wall crossing, ' + (E[c.open].prop ? 'proposed opening ' : 'modelled hole ') + E[c.open].m) : (c.sev[0].toUpperCase()+c.sev.slice(1)) + ' clash: ' + A.m + ' and ' + B.m;
       el.style.removeProperty('--c');
       el.style.opacity = (st.selClash && st.selClash !== c) || (st.sel != null && c.a !== st.sel && c.b !== st.sel) ? '.45' : '';
       el.style.outline = st.selClash === c ? '2px solid var(--ink)' : '';
@@ -647,6 +854,8 @@ function placeLabels(){
     for (const d of E){
       if (!meshes[d.i].visible || d.k === 'wall') continue;
       if (st.tags === 'eq' && !EQUIP.has(d.c)) continue;
+      if (st.tags.startsWith('bwh') && !d.bwh) continue;
+      if (st.bwhIso && !st.bwhIso.has(d.i)) continue;
       const wp = d.cw.clone().add(d.off);
       if (!insideClip(wp)) continue;
       cand.push([wp.distanceToSquared(camPos), d, wp]);
@@ -656,11 +865,12 @@ function placeLabels(){
     for (const [,d,wp] of cand){
       if (poolUsed > 320) break;
       const s = project(wp); if (!s) continue;
-      const wd = d.m.length*7 + 14, ht = 18;
+      const txt = st.tags === 'bwhxy' ? d.m + '  X ' + fmt(setOut(d.bwh)[0]) + '  Y ' + fmt(setOut(d.bwh)[1]) : d.m;
+      const wd = txt.length*7 + 14, ht = 18;
       if (!fits(s[0]-wd/2, s[1]-ht-4, wd, ht)) continue;
       const el = getLabel();
-      el.className = 'tag'; el.textContent = d.m; el.dataset.k = 'e' + d.i; el.title = d.c; el.style.opacity = ''; el.style.outline = st.sel === d.i ? '2px solid var(--accent)' : '';
-      el.style.setProperty('--c', LAYER[layerOf(d)].col);
+      el.className = 'tag'; el.textContent = txt; el.dataset.k = 'e' + d.i; el.title = d.c; el.style.opacity = ''; el.style.outline = st.sel === d.i ? '2px solid var(--accent)' : '';
+      el.style.setProperty('--c', d.bwh ? (d.bwh.verdict === 'clash' ? 'var(--clash)' : d.prop ? PROP_COL : LAYER.BWH.col) : LAYER[layerOf(d)].col);
       el.style.transform = `translate(${s[0]}px,${s[1]}px) translate(-50%,-120%)`; el.style.display = 'block';
     }
   }
@@ -687,8 +897,9 @@ function pick(cx, cy){
     if (!insideClip(h.point)) continue;
     const d = E[h.object.userData.i];
     if (wallsGhost && WALLS.has(d.l) && hits.some(o => o !== h && !WALLS.has(E[o.object.userData.i].l) && insideClip(o.point))) continue;
-    if (st.ghost && st.focus && !st.focus.has(d.i)){
-      const f = hits.find(o => st.focus.has(o.object.userData.i) && insideClip(o.point));
+    const pref = st.bwhIso || (st.ghost && st.focus);
+    if (pref && !pref.has(d.i)){
+      const f = hits.find(o => pref.has(o.object.userData.i) && insideClip(o.point));
       if (f) return {d:E[f.object.userData.i], point:f.point.clone()};
     }
     return {d, point:h.point.clone()};
@@ -716,7 +927,8 @@ canvas.addEventListener('pointermove', e => {
     setHover(h.d.i);
     canvas.style.cursor = st.measure ? 'crosshair' : 'pointer';
     const d = h.d, r = stage.getBoundingClientRect();
-    tip.innerHTML = `<b>${esc(d.m)}</b> ${esc(d.c)}<br>${esc(d.f ? d.f + (d.t ? ', ' + d.t : '') : sizeShort(d))}${d.sy ? '<br>' + esc(d.sy) + ' (inferred)' : ''}${elClashes[d.i] ? '<br>' + issueLine(d.i) : ''}`;
+    if (d.bwh){ const o = d.bwh; tip.innerHTML = `<b>${esc(d.m)}</b> ${esc(d.c)}<br>${openSize(o)}, ${fmt(o.depth)} deep<br>${o.services.length ? o.services.map(k => esc(E[k].m)).join(', ') + ', ' + VERDICT[o.verdict].toLowerCase() : VERDICT.empty}`; }
+    else tip.innerHTML = `<b>${esc(d.m)}</b> ${esc(d.c)}<br>${esc(d.f ? d.f + (d.t ? ', ' + d.t : '') : sizeShort(d))}${d.sy ? '<br>' + esc(d.sy) + ' (inferred)' : ''}${elClashes[d.i] ? '<br>' + issueLine(d.i) : ''}`;
     tip.style.display = 'block';
     const x = Math.min(e.clientX - r.left + 14, r.width - tip.offsetWidth - 8), y = Math.min(e.clientY - r.top + 14, r.height - tip.offsetHeight - 8);
     tip.style.left = x + 'px'; tip.style.top = y + 'px';
@@ -778,7 +990,7 @@ function showTab(t){
 function selectEl(i, zoom){
   st.sel = i; st.selClash = null;
   if (!visible(E[i])){ st.layerOn[E[i].l] = true; st.srcOn[E[i].s] = true; st.hidden.delete(i); if (st.isolate) st.isolate.add(i); syncLayerUI(); }
-  refresh(); renderSel(); showTab('sel'); markPart(i);
+  refresh(); renderSel(); showTab('sel'); markPart(i); $('#right').scrollTop = 0;
   if (zoom) zoomToEl(i);
 }
 function selectClash(id, zoom){
@@ -799,13 +1011,48 @@ function srcLine(d){ const s = SRC[d.s]; return `${esc(s.name)}<br><span class="
 function elLink(i){ const d=E[i]; return `<button class="link" data-el="${i}">${esc(d.m)}</button>`; }
 function clashRow(c, other){
   const pen = c.sev === 'penetration';
-  const lab = pen ? (c.hole == null ? '<span class="sev nohole">no hole</span>' : '<span class="sev penetration">hole</span>') : `<span class="sev ${c.sev}">${c.sev}</span>`;
+  const lab = pen ? (c.open == null ? '<span class="sev penetration">along wall</span>' : E[c.open].prop ? '<span class="sev nohole">proposed hole</span>' : '<span class="sev penetration">hole</span>') : `<span class="sev ${c.sev}">${c.sev}</span>`;
   return `<tr class="click" data-cl="${c.id}"><td><b>${c.id}</b></td><td>${lab}</td><td>${pen ? 'Wall crossing, ' : ''}${esc(E[other].m)} <span class="small">${esc(E[other].c)}</span></td></tr>`;
 }
 function ghostToggle(){ return `<label class="layer" style="grid-template-columns:18px 1fr;margin-top:10px"><input type="checkbox" id="ghostChk" ${st.ghost ? 'checked' : ''}><span>Fade other parts</span></label>`; }
 selPaneChange();
 function selPaneChange(){ document.addEventListener('change', e => { if (e.target.id === 'ghostChk'){ st.ghost = e.target.checked; refresh(); } }); }
+function renderBwh(d){
+  const o = d.bwh, [u,v] = crossAx(o.ax), a0 = o.s0, a1 = o.s1;
+  const col = d.prop ? PROP_COL : LAYER.BWH.col;
+  const cen = [0,1,2].map(ax => (o.b[ax]+o.b[ax+3])/2);
+  let h = `<section class="sec"><div class="chip"><i style="background:${col}"></i>Builders’ work hole</div>
+    <div style="display:flex;align-items:baseline;gap:10px;margin:8px 0 4px"><span class="mark">${esc(d.m)}</span><span class="sev ${o.status}">${d.prop ? 'Proposed' : 'Modelled'}</span><span class="sev ${o.verdict === 'empty' ? 'touch' : o.verdict}">${VERDICT[o.verdict]}</span></div>
+    <div class="rowbtns"><button class="btn" data-act="zoom">Zoom to</button><button class="btn" data-act="biso">Isolate</button><button class="btn" data-act="hide">Hide</button><button class="btn" data-act="box">Section box</button></div></section>
+    <section class="sec"><h2>Opening</h2><dl class="kv">
+    <dt>Shape</dt><dd>${o.shape === 'circ' ? 'Circular, Ø' + fmt(o.dia) : 'Rectangular, ' + fmt(o.w) + ' wide × ' + fmt(o.h) + (o.ax === 2 ? ' long' : ' high')}</dd>
+    <dt>Depth</dt><dd>${fmt(o.depth)} mm, ${o.ax === 2 ? 'vertical through the slab' : 'horizontal along ' + AXN[o.ax]}</dd>
+    <dt>Setting out</dt><dd><b>X ${fmt(cen[0])}, Y ${fmt(cen[1])}</b></dd>
+    <dt>Height</dt><dd>Centre Z ${fmt(cen[2])}, underside Z ${fmt(o.b[2])}</dd>
+    <dt>Wall</dt><dd>${o.walls.length ? o.walls.map(w => `${elLink(w)} <span class="small">${esc(SRC[E[w].s].name)}</span>`).join('<br>') : '<span class="small">Not found</span>'}</dd>`;
+  if (d.mk0) h += `<dt>Model mark</dt><dd>${esc(d.mk0)}</dd>`;
+  if (d.f) h += `<dt>Family</dt><dd>${esc(d.f)}</dd>`;
+  if (d.r) h += `<dt>Revit ID</dt><dd>${esc(d.r)}</dd>`;
+  if (d.prop) h += `<dt>Sized</dt><dd>Service plus ${o.need} mm all round, rounded up to 25 mm</dd>`;
+  h += `</dl></section><section class="sec"><h2>Services through it</h2>`;
+  if (o.services.length){
+    h += `<div class="tablewrap"><table class="t"><thead><tr><th>Mark</th><th>Service</th><th>Size mm</th><th class="n">Gap mm</th></tr></thead><tbody>${o.gaps.map(x => { const s = E[x.i];
+      return `<tr class="click" data-el="${x.i}"><td><b>${esc(s.m)}</b></td><td>${esc(s.c)}${s.sy ? '<br><span class="small">' + esc(s.sy) + '</span>' : ''}</td><td>${svcSize(x.i, o.ax, a0, a1)}</td><td class="n"><span class="sev ${x.g < 0 ? 'clash' : x.g < x.need ? 'tight' : 'ok'}">${fmt(x.g)}</span></td></tr>`; }).join('')}</tbody></table></div>
+      <p class="small">Smallest gap ${fmt(o.minGap)} mm against ${o.need} mm needed all round. Rule: 25 mm for pipes, 50 mm for ducts and cable tray.</p>`;
+  } else h += `<p class="small">No service passes through this hole in the model.</p>`;
+  h += `</section><section class="sec"><h2>Fire-stopping</h2><dl class="kv"><dt>Wall rating</dt><dd>Not recorded in the model</dd>`;
+  o.services.forEach(i => { h += `<dt>${esc(E[i].m)}</dt><dd>${esc(fireFor(i, o))}</dd>`; });
+  h += `</dl><p class="small">Proposed from the service type. Confirm against the wall’s fire rating and the project fire strategy.</p></section>
+    <section class="sec"><h2>Coordination</h2><dl class="kv">
+    <dt>Status</dt><dd>${d.prop ? 'Not in the MEP model yet' : 'Modelled in the MEP model'}</dd>
+    <dt>Review by</dt><dd>${reviewBy(o)}</dd>
+    ${o.overlaps.length ? `<dt>Overlaps</dt><dd>${o.overlaps.map(elLink).join(', ')}, modelled hole</dd>` : ''}
+    <dt>Crossings</dt><dd>${o.crossings.length ? o.crossings.map(id => `<button class="link" data-cl="${id}">${id}</button>`).join(', ') : '<span class="small">None</span>'}</dd>
+    </dl></section>`;
+  selPane.innerHTML = h;
+}
 function renderSel(){
+  if (st.sel != null && E[st.sel].bwh) return renderBwh(E[st.sel]);
   if (st.sel == null){ selPane.innerHTML = `<div class="empty">Click any part in the model, or pick one from Parts. Clash markers and diagnostic rows also open here.</div>`; return; }
   const d = E[st.sel], L = layerOf(d);
   const bb = d.b;
@@ -847,7 +1094,7 @@ function renderClash(c){
     <dt>Location</dt><dd>X ${fmt(c.p[0])}, Y ${fmt(c.p[1])}, Z ${fmt(c.p[2])}</dd>
     <dt>Overlap</dt><dd>${c.ov.map(fmt).join(' × ')} mm<br><span class="small">Intersection of the two bounding boxes, X × Y × Z</span></dd>
     <dt>Contacts</dt><dd>${c.n} triangle contact${c.n>1?'s':''}</dd>`;
-  if (pen) h += `<dt>Hole</dt><dd>${c.hole == null ? 'No builder’s work hole family within 60 mm' : elLink(c.hole) + ' within 60 mm'}</dd>`;
+  if (pen) h += `<dt>Opening</dt><dd>${c.open == null ? 'None. The service runs along the wall rather than through it' : elLink(c.open) + (E[c.open].prop ? ', proposed' : ', modelled')}</dd>`;
   h += `</dl></section>`;
   selPane.innerHTML = h;
 }
@@ -857,6 +1104,7 @@ selPane.addEventListener('click', e => {
   if (t.dataset.cl) return selectClash(t.dataset.cl, true);
   const a = t.dataset.act;
   if (a === 'zoom') zoomToEl(st.sel);
+  if (a === 'biso') bwhIsolate([st.sel]);
   if (a === 'iso'){ st.isolate = new Set([st.sel]); if (E[st.sel].hasins != null) st.isolate.add(E[st.sel].hasins); if (E[st.sel].ins != null) st.isolate.add(E[st.sel].ins); refresh(); zoomToEl(st.sel); showIsoBanner(); }
   if (a === 'hide'){ st.hidden.add(st.sel); st.sel = null; refresh(); renderSel(); showIsoBanner(); }
   if (a === 'box') boxAround(E[st.sel].b, 150);
@@ -866,10 +1114,10 @@ selPane.addEventListener('click', e => {
   if (a === 'cbox'){ const r = Math.max(...c.ov)/2 + 250; boxAround([c.p[0]-r,c.p[1]-r,c.p[2]-r,c.p[0]+r,c.p[1]+r,c.p[2]+r], 0); }
 });
 function showIsoBanner(){
-  const on = st.isolate || st.hidden.size;
+  const on = st.isolate || st.hidden.size || st.bwhIso;
   let b = $('#isoBanner');
   if (on && !b){ b = document.createElement('div'); b.id='isoBanner'; b.style.cssText='position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:3'; b.innerHTML='<button class="btn" style="background:var(--panel)">Show everything again</button>'; stage.appendChild(b);
-    b.firstChild.addEventListener('click', () => { st.isolate = null; st.hidden.clear(); refresh(); showIsoBanner(); }); }
+    b.firstChild.addEventListener('click', () => { st.isolate = null; st.bwhIso = null; st.hidden.clear(); refresh(); showIsoBanner(); renderOpenings(); }); }
   if (!on && b) b.remove();
 }
 function boxAround(b, pad){
@@ -911,12 +1159,12 @@ function buildLayers(){
   });
   $('#layerList').addEventListener('click', e => {
     const b = e.target.closest('[data-solo]'); if (!b) return; e.preventDefault();
-    const l = +b.dataset.solo; st.layerOn = st.layerOn.map((_,k) => k === l || (WALLS.has(k) && WALLS.has(l)) ); syncLayerUI(); refresh();
+    const l = +b.dataset.solo; st.layerOn = st.layerOn.map((_,k) => k === l || (WALLS.has(k) && (WALLS.has(l) || l === BWH_L)) ); syncLayerUI(); refresh();
   });
   $('#allLayers').onclick = () => { st.layerOn = st.layerOn.map(()=>true); st.lineOn = {'P-PIPE-CNTR':true,'G-ANNO-SYMB':true}; st.srcOn = {MEP:true,ARCH:true,STR:true}; syncLayerUI(); refresh(); };
   let s = '';
   for (const k of ['MEP','ARCH','STR']){
-    const n = E.filter(d => d.s === k).length;
+    const n = E.filter(d => d.s === k && !d.prop).length;
     s += `<label class="layer" data-s="${k}" style="grid-template-columns:18px 1fr auto"><input type="checkbox" checked><span class="nm">${esc(SRC[k].name)}<small>${esc(SRC[k].desc)}</small></span><span class="code">${n}</span></label>`;
   }
   $('#srcList').innerHTML = s;
@@ -954,7 +1202,7 @@ function buildParts(){
     h += `<details class="grp" data-cat="${esc(c)}"><summary><span class="nm"><span class="chip" style="color:inherit"><i style="background:${col}"></i>${esc(c)}</span></span><span class="ct">${items.length}</span></summary>`;
     for (const d of items){
       const sub = d.sy ? d.sy + ', ' + sizeShort(d) : (d.f ? d.f + (d.r ? ', ID ' + d.r : '') : sizeShort(d));
-      const hay = [d.m, d.c, d.f, d.t, d.r, d.z, d.sy, layerOf(d)].join(' ').toLowerCase();
+      const hay = [d.m, d.mk0, d.c, d.f, d.t, d.r, d.z, d.sy, layerOf(d)].join(' ').toLowerCase();
       h += `<button class="part" data-el="${d.i}" data-hay="${esc(hay)}"><b>${esc(d.m)}</b><span>${esc(sub)}</span></button>`;
     }
     h += `</details>`;
@@ -979,15 +1227,155 @@ function markPart(i){
   const p = document.querySelector(`.part[data-el="${i}"]`); if (p){ p.classList.add('on'); }
 }
 
+/* ---------- openings ---------- */
+const bw = {filter:'all', checked:new Set()};
+const bwhRows = () => OPEN.filter(i => { const o = E[i].bwh; return bw.filter === 'all' || (bw.filter === 'issue' ? o.verdict !== 'ok' : o.status === bw.filter); });
+function bwhIsolate(list){
+  const set = new Set();
+  list.forEach(i => { set.add(i); E[i].bwh.services.forEach(k => { set.add(k); if (E[k].hasins != null) set.add(E[k].hasins); }); });
+  st.bwhIso = set; st.isolate = null; st.layerOn[BWH_L] = true; st.srcOn.MEP = true; syncLayerUI(); refresh();
+  const box = new THREE.Box3(); set.forEach(i => box.union(meshes[i].geometry.boundingBox.clone().translate(E[i].off)));
+  fitTo(box.expandByScalar(0.25)); showIsoBanner(); renderOpenings();
+}
+function renderOpenings(){
+  const list = bwhRows(), nP = OPEN.filter(i => E[i].prop).length, nIss = OPEN.filter(i => E[i].bwh.verdict !== 'ok').length;
+  const nChk = [...bw.checked].filter(i => list.includes(i)).length;
+  const F = [['all','All'],['proposed','Proposed'],['modelled','Modelled'],['issue','Below rule']];
+  $('#tab-open').innerHTML = `<section class="sec"><h2>Builders’ work holes</h2>
+    <p class="small">${OPEN.length - nP} modelled, ${nP} proposed where a service crosses a wall with no hole. ${nIss} fall short of the clearance rule.</p>
+    <nav class="views filter" aria-label="Filter openings">${F.map(([k,t]) => `<button data-bf="${k}" class="${bw.filter === k ? 'on' : ''}">${t}</button>`).join('')}</nav>
+    <div class="rowbtns"><button class="btn" data-bact="iso" aria-pressed="${!!st.bwhIso}">${st.bwhIso ? 'End isolation' : nChk ? 'Isolate ' + nChk + ' checked' : 'Isolate ' + list.length}</button><button class="btn" data-bact="xlsx">Download Excel schedule</button></div></section>
+    <div class="tablewrap" style="padding:0 12px 16px"><table class="t"><thead><tr><th></th><th>Mark</th><th>Opening mm</th><th>Services</th><th class="n">Gap mm</th></tr></thead><tbody>
+    ${list.map(i => { const d = E[i], o = d.bwh;
+      return `<tr class="click" data-el="${i}"><td class="chk"><input type="checkbox" data-chk="${i}" ${bw.checked.has(i) ? 'checked' : ''} aria-label="Select ${esc(d.m)}"></td>
+        <td><b>${esc(d.m)}</b><br><span class="sev ${o.status}">${d.prop ? 'proposed' : 'modelled'}</span></td>
+        <td>${openSize(o)}<br><span class="small">${fmt(o.depth)} deep</span></td>
+        <td>${o.services.map(k => esc(E[k].m)).join(', ') || '<span class="small">None</span>'}</td>
+        <td class="n">${o.minGap == null ? '' : `<span class="sev ${o.verdict}">${fmt(o.minGap)}</span>`}</td></tr>`; }).join('')}
+    </tbody></table></div>`;
+}
+/* Excel schedule: a minimal .xlsx (stored zip of SpreadsheetML parts) */
+const xesc = v => String(v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const colName = n => { let t = ''; for (n++; n; n = Math.floor((n-1)/26)) t = String.fromCharCode(65 + (n-1)%26) + t; return t; };
+// rows are arrays of [value, style]; numbers become numeric cells
+function sheetXml(rows, widths, opt={}){
+  const body = rows.map((r, y) => `<row r="${y+1}">${r.map(([v, st], x) => {
+    if (v === '' || v == null) return st ? `<c r="${colName(x)}${y+1}" s="${st}"/>` : '';
+    const ref = `${colName(x)}${y+1}"${st ? ` s="${st}"` : ''}`;
+    return typeof v === 'number' ? `<c r="${ref}><v>${v}</v></c>` : `<c r="${ref} t="inlineStr"><is><t xml:space="preserve">${xesc(v)}</t></is></c>`;
+  }).join('')}</row>`).join('');
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>
+<sheetViews><sheetView workbookViewId="0">${opt.freeze ? `<pane ySplit="${opt.freeze}" topLeftCell="A${opt.freeze+1}" activePane="bottomLeft" state="frozen"/>` : ''}</sheetView></sheetViews>
+<cols>${widths.map((w, x) => `<col min="${x+1}" max="${x+1}" width="${w}" customWidth="1"/>`).join('')}</cols>
+<sheetData>${body}</sheetData>${opt.filter ? `<autoFilter ref="${opt.filter}"/>` : ''}
+<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup paperSize="8" orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>`;
+}
+const CRC = (() => { const t = new Uint32Array(256); for (let n=0; n<256; n++){ let c = n; for (let k=0; k<8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = b => { let c = 0xFFFFFFFF; for (let k=0; k<b.length; k++) c = CRC[(c ^ b[k]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function zipStore(files){
+  const enc = new TextEncoder(), now = new Date();
+  const date = ((now.getFullYear()-1980) << 9) | ((now.getMonth()+1) << 5) | now.getDate();
+  const parts = [], central = []; let off = 0;
+  for (const [name, text] of files){
+    const nm = enc.encode(name), data = enc.encode(text), crc = crc32(data);
+    const h = new DataView(new ArrayBuffer(30));
+    [[0,0x04034b50,4],[4,20,2],[6,0x0800,2],[8,0,2],[10,0,2],[12,date,2],[14,crc,4],[18,data.length,4],[22,data.length,4],[26,nm.length,2],[28,0,2]].forEach(([o,v,n]) => n === 4 ? h.setUint32(o,v,true) : h.setUint16(o,v,true));
+    const c = new DataView(new ArrayBuffer(46));
+    [[0,0x02014b50,4],[4,20,2],[6,20,2],[8,0x0800,2],[10,0,2],[12,0,2],[14,date,2],[16,crc,4],[20,data.length,4],[24,data.length,4],[28,nm.length,2],[30,0,2],[32,0,2],[34,0,2],[36,0,2],[38,0,4],[42,off,4]].forEach(([o,v,n]) => n === 4 ? c.setUint32(o,v,true) : c.setUint16(o,v,true));
+    parts.push(h, nm, data); central.push(c, nm); off += 30 + nm.length + data.length;
+  }
+  const size = central.reduce((a, p) => a + p.byteLength, 0), e = new DataView(new ArrayBuffer(22));
+  [[0,0x06054b50,4],[4,0,2],[6,0,2],[8,files.length,2],[10,files.length,2],[12,size,4],[16,off,4],[20,0,2]].forEach(([o,v,n]) => n === 4 ? e.setUint32(o,v,true) : e.setUint16(o,v,true));
+  return new Blob([...parts, ...central, e], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+function bwhXLSX(){
+  const T = 4, H = 1, P = 2, N = 3, W = 6, B = 5;                // styles: title, header, plain, number, wrapped text, bold text
+  const nP = OPEN.filter(i => E[i].prop).length;
+  const issued = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+  const head = ['Ref','Status','Shape','Size mm','Width mm','Height mm','Diameter mm','Depth mm','X mm','Y mm','Z centre mm','Z underside mm','Wall','Wall source','Services','Service sizes mm','Smallest gap mm','Gap needed mm','Clearance','Fire-stopping (proposed)','Review by','Model mark','Revit ID','Wall crossings','Overlaps','Site check'];
+  const widths = [10,11,12,13,10,10,11,10,10,10,12,14,18,18,16,30,13,13,20,46,20,11,11,14,11,14];
+  const rows = [
+    [['NCW coordinated corridor, builders’ work hole schedule', T]],
+    [[`Issued ${issued}. ${OPEN.length} openings: ${OPEN.length - nP} modelled, ${nP} proposed.`, 0]],
+    [['X, Y and Z are model coordinates in mm from NCW_COORDINATED_CORRIDOR.dwg. Check them against the setting-out grid before marking out.', 0]],
+    head.map(t => [t, H])];
+  OPEN.forEach(i => { const d = E[i], o = d.bwh, c = setOut(o), circ = o.shape === 'circ';
+    rows.push([[d.m, B], [d.prop ? 'Proposed' : 'Modelled', P], [circ ? 'Circular' : 'Rectangular', P], [circ ? 'Ø' + Math.round(o.dia) : Math.round(o.w) + ' × ' + Math.round(o.h), P],
+      [circ ? '' : Math.round(o.w), N], [circ ? '' : Math.round(o.h), N], [circ ? Math.round(o.dia) : '', N], [Math.round(o.depth), N],
+      [c[0], N], [c[1], N], [c[2], N], [Math.round(o.b[2]), N],
+      [o.walls.map(w => E[w].m).join(', '), W], [[...new Set(o.walls.map(w => SRC[E[w].s].name))].join(', '), W],
+      [o.services.map(k => E[k].m).join(', '), W], [o.services.map(k => E[k].m + ' ' + svcSize(k, o.ax, o.s0, o.s1)).join('\n'), W],
+      [o.minGap == null ? '' : Math.round(o.minGap), N], [o.services.length ? o.need : '', N], [VERDICT[o.verdict], P],
+      [o.services.map(k => E[k].m + ': ' + fireFor(k, o)).join('\n'), W], [reviewBy(o), W], [d.mk0 || '', P], [d.r || '', P],
+      [o.crossings.join(', '), W], [o.overlaps.map(k => E[k].m).join(', '), W], ['', P]]); });
+  const notes = [[['Notes', T]], ...[
+    ['Ref', 'One reference per opening, numbered along the corridor from low X to high X. The same reference tags the opening in the model viewer.'],
+    ['Location', 'X and Y set out the centre of the opening on plan. Z centre and Z underside give its height. All values are model coordinates in mm.'],
+    ['Status', 'Modelled openings are hole families in the MEP model. Proposed openings mark services that cross a wall with no hole modelled, sized to the service.'],
+    ['Clearance', 'Gap from the service, or its insulation, to the opening edge. Needed: 25 mm all round for pipes, 50 mm for ducts and cable tray.'],
+    ['Fire-stopping', 'Proposed from the service type. Wall fire ratings are not recorded in the model. Confirm against the fire strategy before installation.'],
+    ['Site check', 'Initial and date once the opening is marked out and checked against this schedule.']].map(([k, v]) => [[k, B], [v, W]])];
+  const types = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+<Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`;
+  const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
+  const last = colName(head.length-1);
+  const book = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Schedule" sheetId="1" r:id="rId1"/><sheet name="Notes" sheetId="2" r:id="rId2"/></sheets>
+<definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">Schedule!$A$4:$${last}$${rows.length}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="0">Schedule!$4:$4</definedName></definedNames></workbook>`;
+  const bookRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+  const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="#,##0"/></numFmts>
+<fonts count="3"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="14"/><name val="Calibri"/><family val="2"/></font></fonts>
+<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE6EAE9"/><bgColor indexed="64"/></patternFill></fill></fills>
+<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color rgb="FF97A2AC"/></bottom><diagonal/></border></borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="7"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top"/></xf>
+<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top"/></xf>
+<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyAlignment="1"><alignment vertical="top"/></xf>
+<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf></cellXfs>
+<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+  const sheet1 = sheetXml(rows, widths, {freeze:4, filter:`A4:${last}${rows.length}`});
+  const sheet2 = sheetXml(notes, [16, 110]);
+  const blob = zipStore([['[Content_Types].xml', types], ['_rels/.rels', rels], ['xl/workbook.xml', book], ['xl/_rels/workbook.xml.rels', bookRels], ['xl/styles.xml', styles],
+    ['xl/worksheets/sheet1.xml', sheet1], ['xl/worksheets/sheet2.xml', sheet2]]);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'NCW corridor, builders work hole schedule.xlsx'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+$('#tab-open').addEventListener('click', e => {
+  const chk = e.target.closest('[data-chk]');
+  if (chk){ const i = +chk.dataset.chk; chk.checked ? bw.checked.add(i) : bw.checked.delete(i); renderOpenings(); return; }
+  const f = e.target.closest('[data-bf]'); if (f){ bw.filter = f.dataset.bf; renderOpenings(); return; }
+  const b = e.target.closest('[data-bact]');
+  if (b){
+    if (b.dataset.bact === 'xlsx') return bwhXLSX();
+    if (st.bwhIso){ st.bwhIso = null; refresh(); showIsoBanner(); renderOpenings(); return; }
+    const list = bwhRows(), chosen = list.filter(i => bw.checked.has(i));
+    return bwhIsolate(chosen.length ? chosen : list);
+  }
+  const r = e.target.closest('[data-el]'); if (r) selectEl(+r.dataset.el, true);
+});
+
 /* ---------- diagnostic report ---------- */
 function buildDiag(){
-  const nMEP = E.filter(d=>d.s==='MEP').length;
+  const nMEP = E.filter(d=>d.s==='MEP' && !d.prop).length;
   const sev = s => CL.filter(c => c.sev === s);
   const major = sev('major'), minor = sev('minor'), touch = sev('touch'), pen = sev('penetration');
-  const penNo = pen.filter(c => c.hole == null);
+  const penAlong = pen.filter(c => c.open === null), penProp = pen.filter(c => c.open != null && E[c.open].prop), penMod = pen.filter(c => c.open != null && !E[c.open].prop);
   const zones = {}; CL.filter(c => c.zone).forEach(c => (zones[c.zone] ||= []).push(c));
   const catCount = {}; E.forEach(d => catCount[d.c] = (catCount[d.c]||0)+1);
-  const cats = CAT_ORDER.filter(c => catCount[c]);
+  const cats = CAT_ORDER.filter(c => catCount[c] && c !== BWH_PROP);
   const ext = [0,1,2].map(ax => (M.bmax[ax]-M.bmin[ax])/1000);
   const rowsCl = list => list.map(c => `<tr class="click" data-cl="${c.id}"><td><b>${c.id}</b></td><td><span class="sev ${c.sev}">${c.sev}</span></td><td>${esc(E[c.a].m)} and ${esc(E[c.b].m)}<br><span class="small">${esc(E[c.a].c)}, ${esc(E[c.b].c)}</span></td><td class="n">${fmt(Math.min(...c.ov))}</td></tr>`).join('');
   let h = `<section class="sec">
@@ -1020,10 +1408,10 @@ function buildDiag(){
     </tbody></table></div>
 
     <h3>Services crossing walls</h3>
-    <p>Services meet the linked walls at ${pen.length} points. ${pen.length - penNo.length} of them have a builder’s work hole family within 60 mm. The other ${penNo.length} have none, made up of ${penNo.filter(c=>c.pair==='PIPE-WALL').length} pipe, ${penNo.filter(c=>c.pair==='TRAY-WALL').length} cable tray and ${penNo.filter(c=>c.pair==='DUCT-WALL').length} duct crossings.</p>
-    <p>A hole counts as present even when it was modelled for a neighbouring service, so treat the first figure as a ceiling. Set markers to “Clashes and walls” to see them all. Amber markers have no hole nearby.</p>
-    <div class="tablewrap"><table class="t"><thead><tr><th>ID</th><th>Service</th><th>Wall</th></tr></thead><tbody>
-      ${penNo.map(c => `<tr class="click" data-cl="${c.id}"><td><b>${c.id}</b></td><td>${esc(E[c.a].m)} <span class="small">${esc(E[c.a].c)}</span></td><td>${esc(E[c.b].m)}</td></tr>`).join('')}
+    <p>Services meet the linked walls at ${PEN.length} points. ${penMod.length} pass through a modelled builder’s work hole. ${penProp.length} have no hole, and now carry ${OPEN.filter(i => E[i].prop).length} proposed openings sized to the service. ${penAlong.length} run along a wall face rather than through it.</p>
+    <p>Every opening, with its services, clearance and fire-stopping, is in <button class="link" data-tabgo="open">Openings</button>. Violet markers are crossings with a proposed opening.</p>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Opening</th><th>Service</th><th>Wall</th></tr></thead><tbody>
+      ${OPEN.filter(i => E[i].prop).map(i => { const o = E[i].bwh; return `<tr class="click" data-el="${i}"><td><b>${esc(E[i].m)}</b></td><td>${o.services.map(k => esc(E[k].m)).join(', ')} <span class="small">${esc(E[o.services[0]].c)}</span></td><td>${o.walls.map(w => esc(E[w].m)).join(', ')}</td></tr>`; }).join('')}
     </tbody></table></div>
 
     <h3>Smaller points</h3>
@@ -1047,7 +1435,8 @@ function buildDiag(){
   </section>`;
   $('#tab-diag').innerHTML = h;
   $('#tab-diag').addEventListener('click', e => {
-    const t = e.target.closest('[data-cl],[data-el],[data-mk],[data-cat]'); if (!t) return;
+    const t = e.target.closest('[data-cl],[data-el],[data-mk],[data-cat],[data-tabgo]'); if (!t) return;
+    if (t.dataset.tabgo) return showTab(t.dataset.tabgo);
     if (t.dataset.cl) return selectClash(t.dataset.cl, true);
     if (t.dataset.el) return selectEl(+t.dataset.el, true);
     if (t.dataset.mk){ const d = E.find(x => x.m === t.dataset.mk || x.m === t.dataset.mk.replace(/-(\d)$/,'-0$1')); if (d) selectEl(d.i, true); return; }
@@ -1059,7 +1448,7 @@ function buildDiag(){
 function buildTitle(){
   const major = CL.filter(c=>c.sev==='major').length, minor = CL.filter(c=>c.sev==='minor').length;
   $('#titleblock').innerHTML = `<div class="wide"><span>Drawing</span><strong>NCW coordinated corridor</strong></div>
-    <div><span>Format</span><strong>DWG AC1032</strong></div><div><span>Units</span><strong>mm</strong></div><div><span>Parts</span><strong>${E.length}</strong></div>
+    <div><span>Format</span><strong>DWG AC1032</strong></div><div><span>Units</span><strong>mm</strong></div><div><span>Parts</span><strong>${nFile}</strong></div>
     <div class="last"><span>Section box</span><strong>${((M.bmax[0]-M.bmin[0])/1000).toFixed(1)} × ${((M.bmax[1]-M.bmin[1])/1000).toFixed(1)} × ${((M.bmax[2]-M.bmin[2])/1000).toFixed(1)} m</strong></div>
     <div class="last"><span>Clashes</span><strong>${major} major, ${minor} minor</strong></div><div class="last"><span>Source view</span><strong>3D - nkucita</strong></div>`;
 }
@@ -1112,7 +1501,7 @@ themeMQ.addEventListener ? themeMQ.addEventListener('change', applyTheme) : them
 new MutationObserver(applyTheme).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
 
 /* ---------- go ---------- */
-buildLayers(); buildClipUI(); buildParts(); buildDiag(); buildTitle(); renderSel(); applyClip(); applyTheme();
+buildLayers(); buildClipUI(); buildParts(); buildDiag(); buildTitle(); renderOpenings(); renderSel(); applyClip(); applyTheme();
 if (mobile()){ app.classList.remove('noleft','noright'); st.tags = 'off'; $('#tagSel').value = 'off'; st.markers = 'off'; $('#mkSel').value = 'off'; }
 syncPanelBtns();
 resize(); refresh();
