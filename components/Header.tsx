@@ -26,6 +26,7 @@ export default function Header({ solid = false }: { solid?: boolean }) {
           </a>
           <Link className="pill" href="/experiments">Experiments</Link>
           <Link className="pill" href="/pitch">Pitch</Link>
+          <Link className="pill" href="/beta">Beta</Link>
         </div>
         <div className="header-right">
           <ul className="nav-links">
