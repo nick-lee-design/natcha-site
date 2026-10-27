@@ -24,7 +24,7 @@ export default function Header({ solid = false }: { solid?: boolean }) {
             <Image src="/logo.png" width={40} height={40} alt="" priority />
             TALO Engine
           </a>
-          <Link className="pill" href="/experiments">Experiments</Link>
+          <Link className="pill" href="/viewer">TALO Viewer</Link>
           <Link className="pill" href="/pitch">Pitch</Link>
           <Link className="pill" href="/beta">Beta</Link>
         </div>

@@ -1,0 +1,117 @@
+{
+  "_about": "Defaults for every project. A project file overrides any key. Values marked provisional are shown as provisional in the viewer, reports and schedule until the project confirms them.",
+  "project": {
+    "name": null,
+    "reference": null,
+    "building": null,
+    "revision": null,
+    "company": null,
+    "logo": null
+  },
+  "coordinates": {
+    "_about": "Model coordinates are the DWG's. Site setting-out needs a surveyed transform; without one, no grid distances are given.",
+    "siteGrid": null
+  },
+  "systems": [
+    { "id": "architectural", "name": "Architectural" },
+    { "id": "structural", "name": "Structural" },
+    { "id": "mechanical", "name": "Mechanical" },
+    { "id": "electrical", "name": "Electrical" },
+    { "id": "public-health", "name": "Public Health" }
+  ],
+  "disciplines": [
+    { "id": "WALL", "name": "Walls", "system": null, "explode": 0 },
+    { "id": "FLOOR", "name": "Floors", "system": "structural", "explode": 0 },
+    { "id": "CEILING", "name": "Ceilings", "system": "architectural", "explode": 0 },
+    { "id": "ROOF", "name": "Roofs", "system": "architectural", "explode": 0 },
+    { "id": "DOOR", "name": "Doors", "system": "architectural", "explode": 0 },
+    { "id": "WINDOW", "name": "Windows", "system": "architectural", "explode": 0 },
+    { "id": "STRUCT", "name": "Structure", "system": "structural", "explode": 0 },
+    { "id": "STAIR", "name": "Stairs", "system": "architectural", "explode": 0 },
+    { "id": "FURN", "name": "Furniture", "system": "architectural", "explode": 0 },
+    { "id": "GENERIC", "name": "Generic models", "system": "architectural", "explode": 0 },
+    { "id": "BWH", "name": "Builders’ work holes", "system": null, "explode": 0 },
+    { "id": "LITE", "name": "Lighting", "system": "electrical", "explode": -0.9 },
+    { "id": "ELEC", "name": "Electrical", "system": "electrical", "explode": -0.9 },
+    { "id": "CONDUIT", "name": "Conduit", "system": "electrical", "explode": 1.8, "clearance": 25 },
+    { "id": "DUCT", "name": "Ductwork", "system": "mechanical", "explode": 0.9, "clearance": 50 },
+    { "id": "MECH", "name": "Mechanical equipment", "system": "mechanical", "explode": 0.9 },
+    { "id": "TRAY", "name": "Cable tray", "system": "electrical", "explode": 1.8, "clearance": 50 },
+    { "id": "PIPE", "name": "Pipework", "system": "public-health", "explode": 2.7, "clearance": 25 }
+  ],
+  "clearancesProvisional": true,
+  "layerDisciplines": {
+    "_about": "Fallback when an entity carries no Revit category: the layer prefix decides.",
+    "A-WALL": "WALL", "I-WALL": "WALL", "S-WALL": "WALL", "A-FLOR": "FLOOR", "S-SLAB": "FLOOR", "A-CLNG": "CEILING", "A-DOOR": "DOOR", "A-GLAZ": "WINDOW",
+    "S-COLS": "STRUCT", "S-BEAM": "STRUCT", "M-": "DUCT", "P-": "PIPE", "E-CABL": "TRAY", "E-LITE": "LITE", "E-": "ELEC", "F-": "PIPE", "Q-": "GENERIC"
+  },
+  "partTypeRules": [
+    { "match": "BWIC|Hole ?Through ?Wall|Builders.?Work|Penetration|Core ?Hole", "type": "Builders’ work hole, modelled", "discipline": "BWH", "role": "opening" },
+    { "match": "Fire ?Damper|FKA|\\bFD\\b|Smoke ?Damper", "type": "Fire damper", "role": "fire-damper", "equipment": true },
+    { "match": "Volume ?Control ?Damper|\\bVCD\\b", "type": "Volume control damper", "equipment": true },
+    { "match": "Downlight", "type": "Downlight", "equipment": true },
+    { "match": "PIR|Presence|Detector", "type": "PIR detector", "equipment": true },
+    { "match": "Exit ?Sign", "type": "Exit sign", "equipment": true },
+    { "match": "Fire ?Signage|Escape", "type": "Fire escape sign", "equipment": true },
+    { "match": "FCU|Fused ?Connection|Spur", "type": "Fused connection unit", "equipment": true },
+    { "match": "MID|Luminaire|Light", "type": "Light fitting", "equipment": true }
+  ],
+  "pipeSystems": [
+    { "match": "Geberit|HDPE", "name": "Geberit HDPE drainage", "short": "HDPE drainage", "service": "Drainage", "material": "HDPE", "fireStopping": "Intumescent pipe collar on both faces" },
+    { "match": "Press-?Fit.*CU|CU1|Copper", "name": "Copper, press-fit", "short": "Copper", "material": "Copper" },
+    { "match": "Victaulic|^FP-|Sprinkler|Grooved", "name": "Fire protection, Victaulic grooved", "short": "Fire protection", "service": "Sprinkler", "material": "Steel Pipework" },
+    { "match": "Welded.*SS|Stainless|\\bSS\\b", "name": "Stainless steel, welded", "short": "Stainless steel", "material": "Stainless steel" }
+  ],
+  "trayKinds": [
+    { "match": "ELV", "name": "ELV cable basket" },
+    { "match": "CABLE BASKET|BASKET", "name": "LV cable basket" },
+    { "match": "LADDER|^LV", "name": "LV cable ladder" }
+  ],
+  "clash": {
+    "tolerance": 25,
+    "provisional": true,
+    "touchBelow": 1,
+    "majorWhenHalfSmaller": true,
+    "grades": [
+      { "id": "major", "name": "Major", "colour": "#D9361C" },
+      { "id": "minor", "name": "Minor", "colour": "#A86A12" },
+      { "id": "touch", "name": "Touch", "colour": "#57636E", "actionable": false }
+    ],
+    "disciplineTolerances": {},
+    "clearances": [],
+    "pairs": "between-disciplines"
+  },
+  "openings": {
+    "roundTo": 25,
+    "reference": "BWIC-{level}-{orientation}-{n:02d}",
+    "orientation": { "wall": "H", "floor": "V" },
+    "mergeWithin": 150,
+    "fireStopping": {
+      "damper": "Fire damper, fixed to its tested installation frame",
+      "ductWithDamper": "Fire damper {dampers} in the wall line",
+      "ductNoDamper": "Needs a fire damper or fire-rated ductwork. None found at this opening",
+      "tray": "Coated mineral wool batt, intumescent sealant around tray and cables",
+      "insulatedPipe": "Intumescent wrap over the insulation, annular gap sealed with fire-rated mastic",
+      "pipe": "Fire-rated intumescent mastic to the annular gap",
+      "unknownPipe": "Pipe material not recorded. Confirm before choosing a collar or mastic"
+    },
+    "reviewFlags": {
+      "_about": "Wall properties that send a proposed opening for engineering review. Unknown properties are flagged as needing verification.",
+      "structuralModel": "Structural engineer",
+      "materials": ["concrete", "RC", "reinforced", "masonry", "load"],
+      "fireRated": "Fire engineer"
+    }
+  },
+  "schedule": {
+    "missingValue": "TBC",
+    "notApplicable": "N/A",
+    "neverOverwrite": true,
+    "addModelled": false,
+    "_addModelled": "Modelled holes are usually in the schedule already. Off: they go to the reconciliation workbook, and only proposed openings are added"
+  },
+  "levels": {
+    "_about": "Level names from the schedule's sheets or the model. Elevations come from floor slabs when the model has them, and are marked derived.",
+    "names": null,
+    "elevations": null
+  }
+}

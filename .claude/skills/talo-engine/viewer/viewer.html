@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Model viewer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F4F3; --panel:#FAFBFA; --ink:#1C2228; --muted:#57636E; --rule:#D5DBDF; --rule-strong:#97A2AC;
+  --canvas:#E6EAE9; --accent:#C8136A; --accent-soft:rgba(200,19,106,.10); --clash:#D9361C; --warn:#A86A12; --ok:#2C7A4B; --focus:#2457D6;
+  --tip:#1C2228; --tip-ink:#F2F4F3; --bwh:#0F8B8D; --prop:#7C3AED;
+  --sans:"Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --cond:"Barlow Semi Condensed", "Arial Narrow", "Segoe UI", Arial, sans-serif;
+  color-scheme: light;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1A2027; --panel:#1F262E; --ink:#E5E9EC; --muted:#9AA6B1; --rule:#313B46; --rule-strong:#59667372;
+    --canvas:#242B34; --accent:#FF5BA6; --accent-soft:rgba(255,91,166,.14); --clash:#FF6A48; --warn:#E3A43A; --ok:#5EC08B; --focus:#86A9FF;
+    --tip:#E5E9EC; --tip-ink:#1A2027; --bwh:#3CC4C6; --prop:#A98BFA; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1A2027; --panel:#1F262E; --ink:#E5E9EC; --muted:#9AA6B1; --rule:#313B46; --rule-strong:#596673;
+  --canvas:#242B34; --accent:#FF5BA6; --accent-soft:rgba(255,91,166,.14); --clash:#FF6A48; --warn:#E3A43A; --ok:#5EC08B; --focus:#86A9FF;
+  --tip:#E5E9EC; --tip-ink:#1A2027; --bwh:#3CC4C6; --prop:#A98BFA; color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%; scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%; margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.45; -webkit-font-smoothing:antialiased; overflow:hidden}
+button,select,input{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+
+#app{height:100%; display:grid; grid-template-rows:auto minmax(0,1fr); grid-template-columns:var(--lw,288px) minmax(0,1fr) var(--rw,360px)}
+#app.noleft{--lw:0px} #app.noright{--rw:0px}
+#app.noleft #left,#app.noright #right{display:none}
+
+/* header */
+#bar{grid-column:1/-1; display:flex; align-items:center; gap:18px; padding:8px 14px; border-bottom:1px solid var(--rule); background:var(--panel); flex-wrap:wrap; position:relative; z-index:5}
+.ident h1{font-family:var(--cond); font-weight:600; font-size:19px; letter-spacing:.01em; margin:0; line-height:1.1}
+.ident{min-width:0} .ident p{margin:0; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+@media (min-width: 1240px){ #bar{flex-wrap:nowrap} .tools{flex-wrap:nowrap} }
+.views{display:flex; border:1px solid var(--rule-strong); border-radius:5px; overflow:hidden}
+.views button{border:0; background:transparent; padding:5px 11px; cursor:pointer; font-family:var(--cond); font-weight:500; font-size:14px; border-right:1px solid var(--rule)}
+.views button:last-child{border-right:0}
+.views button.on{background:var(--ink); color:var(--paper)}
+.tools{display:flex; align-items:center; gap:8px; margin-left:auto; flex-wrap:wrap}
+.btn{border:1px solid var(--rule-strong); background:transparent; border-radius:5px; padding:5px 10px; cursor:pointer; font-family:var(--cond); font-weight:500; font-size:14px; white-space:nowrap}
+.btn[aria-pressed="true"]{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.btn:hover{border-color:var(--ink)}
+.sel{display:flex; align-items:center; gap:5px; font-family:var(--cond); font-size:14px; color:var(--muted)}
+.sel select{border:1px solid var(--rule-strong); border-radius:5px; background:var(--panel); padding:4px 6px; color:var(--ink); font-family:var(--cond); font-size:14px}
+
+/* panels */
+.panel{background:var(--panel); overflow-y:auto; overscroll-behavior:contain; min-height:0}
+#left{border-right:1px solid var(--rule)}
+#right{border-left:1px solid var(--rule); display:flex; flex-direction:column}
+.sec{padding:14px 16px 16px; border-bottom:1px solid var(--rule)}
+.sec h2{font-family:var(--cond); font-weight:600; font-size:16px; margin:0 0 10px; letter-spacing:.01em}
+.sec h3{font-family:var(--cond); font-weight:600; font-size:15px; margin:18px 0 6px}
+.sec p{margin:0 0 9px; max-width:62ch}
+.small{font-size:12.5px; color:var(--muted)}
+.rowbtns{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px}
+
+.layer{display:grid; grid-template-columns:18px 16px 1fr auto; gap:8px; align-items:center; padding:5px 0; cursor:pointer}
+.layer input{margin:0; accent-color:var(--ink); width:15px; height:15px; cursor:pointer}
+.sw{width:16px; height:16px; border-radius:3px; border:1px solid rgba(0,0,0,.18)}
+.sw.line{height:0; border:0; border-top:3px solid; border-radius:0}
+.sw.dash{height:0; border:0; border-top:2px dashed; border-radius:0}
+.layer .nm{font-weight:500; line-height:1.2}
+.layer .nm small{display:block; color:var(--muted); font-size:12px; font-weight:400}
+.layer .code{font-family:var(--cond); font-size:12px; color:var(--muted)}
+.layer .solo{border:0; background:none; font-family:var(--cond); font-size:12.5px; color:var(--muted); cursor:pointer; padding:2px 4px; border-radius:4px; text-decoration:underline; text-underline-offset:2px}
+.layer .solo:hover{color:var(--ink)}
+.layer.off .nm,.layer.off .code{opacity:.45}
+
+.slider{display:grid; grid-template-columns:1fr auto; gap:2px 8px; margin:10px 0 4px; align-items:center}
+.slider label{font-weight:500}
+.slider output{font-family:var(--cond); color:var(--muted); font-variant-numeric:tabular-nums; font-size:13px}
+.slider input{grid-column:1/-1; width:100%; accent-color:var(--ink)}
+.pair{display:grid; grid-template-columns:1fr 1fr; gap:0 12px}
+.axis{margin-top:10px}
+.axis .lab{display:flex; justify-content:space-between; font-weight:500}
+.axis .lab span{font-family:var(--cond); font-weight:500; color:var(--muted); font-size:13px; font-variant-numeric:tabular-nums}
+.axis input{width:100%; accent-color:var(--ink)}
+
+/* tabs */
+.tabs{display:flex; border-bottom:1px solid var(--rule); position:sticky; top:0; background:var(--panel); z-index:2}
+.tabs button{flex:1; border:0; background:none; padding:11px 4px 9px; cursor:pointer; font-family:var(--cond); font-weight:500; font-size:14.5px; color:var(--muted); border-bottom:3px solid transparent}
+.tabs button.on{color:var(--ink); border-bottom-color:var(--ink)}
+.tabpane{display:none} .tabpane.on{display:block}
+
+dl.kv{display:grid; grid-template-columns:minmax(96px,auto) 1fr; gap:5px 12px; margin:0}
+dl.kv dt{color:var(--muted); font-size:13px}
+dl.kv dd{margin:0; overflow-wrap:anywhere}
+.mark{font-family:var(--cond); font-weight:600; font-size:24px; line-height:1}
+.chip{display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted)}
+.chip i{width:10px; height:10px; border-radius:2px; display:inline-block}
+.sev{font-family:var(--cond); font-weight:600; font-size:12.5px; padding:1px 7px; border-radius:20px; border:1px solid currentColor; white-space:nowrap}
+.sev.major{color:var(--clash)} .sev.minor{color:var(--warn)} .sev.touch{color:var(--muted)} .sev.penetration{color:var(--muted)} .sev.nohole{color:var(--prop)}
+.sev.modelled{color:var(--bwh)} .sev.proposed{color:var(--prop)} .sev.ok{color:var(--ok)} .sev.tight{color:var(--warn)} .sev.clash{color:var(--clash)}
+.views.filter{margin:10px 0 2px; width:max-content; max-width:100%}
+.views.filter button{padding:4px 9px; font-size:13.5px}
+.dimrow{display:grid; grid-template-columns:minmax(0,1fr) 112px 38px; gap:8px; align-items:center; padding:3px 0; font-size:13px; cursor:pointer}
+.dimrow input{width:100%; margin:0; accent-color:var(--ink)}
+.dimrow output{font-family:var(--cond); color:var(--muted); font-variant-numeric:tabular-nums; text-align:right}
+.stats{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px}
+.stat{border:1px solid var(--rule); border-radius:5px; padding:8px 10px; display:grid; gap:1px; min-width:0}
+.stat span{font-size:12px; color:var(--muted)}
+.stat b{font-family:var(--cond); font-weight:600; font-size:20px; line-height:1.15}
+.stat small{font-size:12px; color:var(--muted); line-height:1.3}
+.over{color:var(--clash); font-weight:600}
+table.t td.chk{width:22px; padding-right:2px} table.t td.chk input{margin:0; accent-color:var(--ink); width:15px; height:15px; cursor:pointer}
+.empty{color:var(--muted); padding:28px 16px}
+.link{background:none; border:0; padding:0; color:var(--ink); text-decoration:underline; text-underline-offset:2px; cursor:pointer; font:inherit}
+.link:hover{color:var(--accent)}
+
+table.t{width:100%; border-collapse:collapse; font-size:13px; margin:4px 0 8px}
+table.t th{font-family:var(--cond); font-weight:600; text-align:left; color:var(--muted); border-bottom:1px solid var(--rule-strong); padding:4px 6px 4px 0}
+table.t td{border-bottom:1px solid var(--rule); padding:5px 6px 5px 0; vertical-align:top}
+table.t td.n{font-variant-numeric:tabular-nums; text-align:right}
+table.t tr.click{cursor:pointer} table.t tr.click:hover td{background:var(--accent-soft)}
+.tablewrap{overflow-x:auto}
+
+#search{width:100%; border:1px solid var(--rule-strong); border-radius:5px; padding:7px 9px; background:var(--paper)}
+details.grp{border-bottom:1px solid var(--rule)}
+details.grp summary{cursor:pointer; padding:9px 0; display:flex; justify-content:space-between; font-weight:500; list-style:none}
+details.grp summary::-webkit-details-marker{display:none}
+details.grp summary::before{content:"+"; font-family:var(--cond); width:14px; color:var(--muted)}
+details.grp[open] summary::before{content:"\2212"}
+details.grp summary .nm{flex:1}
+details.grp summary .ct{color:var(--muted); font-variant-numeric:tabular-nums}
+.part{display:grid; grid-template-columns:78px 1fr; gap:8px; width:100%; text-align:left; border:0; background:none; padding:4px 4px 4px 14px; cursor:pointer; border-radius:4px; font-size:13px}
+.part:hover,.part.on{background:var(--accent-soft)}
+.part b{font-family:var(--cond); font-weight:600; font-size:14px}
+.part span{color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+/* stage */
+#stage{position:relative; min-width:0; min-height:0; background:var(--canvas); overflow:hidden}
+#c{display:block; width:100%; height:100%; touch-action:none}
+#labels{position:absolute; inset:0; pointer-events:none; overflow:hidden}
+.tag{position:absolute; left:0; top:0; pointer-events:auto; transform:translate(-50%,-120%); font-family:var(--cond); font-weight:600; font-size:12px; line-height:1; padding:3px 5px 3px 6px; background:var(--panel); color:var(--ink); border:1px solid var(--rule-strong); border-left:4px solid var(--c,#888); border-radius:3px; white-space:nowrap; cursor:pointer; display:none}
+.tag:hover{border-color:var(--ink)}
+.tag.cl{border-left-width:1px; background:var(--clash); color:#fff; border-color:var(--clash); border-radius:10px; padding:3px 7px}
+.tag.cl.minor{background:var(--warn); border-color:var(--warn)}
+.tag.cl.touch{background:var(--panel); color:var(--muted); border-color:var(--rule-strong)}
+.tag.wx{border-left-width:1px; border-radius:10px; padding:2px 6px; font-size:11px; color:var(--muted)}
+.tag.wx.nohole{color:var(--prop); border-color:var(--prop)}
+#tip{position:absolute; pointer-events:none; background:var(--tip); color:var(--tip-ink); padding:6px 9px; border-radius:4px; font-size:12.5px; line-height:1.35; max-width:300px; display:none; z-index:4}
+#tip b{font-family:var(--cond); font-weight:600; font-size:14px}
+#hint{position:absolute; left:12px; bottom:10px; font-size:12px; color:var(--muted); pointer-events:none; max-width:calc(100% - 380px)}
+#measureOut{position:absolute; left:12px; top:12px; background:var(--panel); border:1px solid var(--rule-strong); border-radius:5px; padding:8px 10px; font-size:13px; display:none; max-width:280px}
+#measureOut b{font-family:var(--cond); font-size:18px; font-weight:600}
+#loading{position:absolute; inset:0; display:grid; place-items:center; background:var(--canvas); color:var(--muted); font-family:var(--cond); font-size:16px; z-index:6; padding:24px; text-align:center}
+
+/* title block: the drawing-sheet convention */
+#titleblock{position:absolute; right:12px; bottom:12px; display:grid; grid-template-columns:auto auto auto; border:1.5px solid var(--ink); background:var(--panel); font-size:11.5px; line-height:1.25; max-width:calc(100% - 24px)}
+#titleblock div{padding:4px 8px; border-right:1px solid var(--ink); border-bottom:1px solid var(--ink)}
+#titleblock div:nth-child(3n){border-right:0}
+#titleblock div.last{border-bottom:0}
+#titleblock span{display:block; color:var(--muted); font-size:10.5px}
+#titleblock strong{font-family:var(--cond); font-weight:600; font-size:13.5px}
+#titleblock .wide{grid-column:1/-1; border-right:0}
+#titleblock .wide strong{font-size:17px}
+
+@media (max-width: 860px){
+  body{font-size:14.5px}
+  #app{grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) auto}
+  #bar{min-width:0}
+  #bar{gap:6px 8px; padding:6px 10px; flex-wrap:wrap}
+  .ident h1{font-size:16px}
+  .ident p{display:none}
+  .views{order:3}
+  .views button{padding:4px 9px}
+  .tools{margin-left:0; width:100%; flex-wrap:nowrap; overflow-x:auto; order:4; padding-bottom:2px; scrollbar-width:none}
+  .tools::-webkit-scrollbar{display:none}
+  .btn{padding:4px 9px}
+  .sel select{padding:3px 4px}
+  .sel span.lbl{display:none}
+  #left,#right{grid-column:1; grid-row:3; max-height:46vh; border:0; border-top:1px solid var(--rule)}
+  #app.mshow-left #right, #app.mshow-right #left{display:none}
+  #app:not(.mshow-left):not(.mshow-right) #left, #app:not(.mshow-left):not(.mshow-right) #right{display:none}
+  #stage{grid-column:1; grid-row:2}
+  #titleblock{display:none}
+  #hint{display:none}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important; animation:none!important} }
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="bar">
+    <div class="ident">
+      <h1>Model viewer</h1>
+      <p></p>
+    </div>
+    <nav class="views" aria-label="Camera views">
+      <button data-view="iso" class="on" title="3D view">3D</button>
+      <button data-view="plan" title="Plan, looking down">Plan</button>
+      <button data-view="below" title="From below, looking up at the ceiling void">Below</button>
+      <button data-view="side" title="Long side, from the bottom edge of the plan">Side</button>
+      <button data-view="end" title="End on, looking along the corridor">End</button>
+    </nav>
+    <div class="tools">
+      <button class="btn" id="fitBtn" title="Fit the visible model (F fits the selection)">Fit</button>
+      <button class="btn" id="projBtn" aria-pressed="false" title="Switch between perspective and orthographic">Orthographic</button>
+      <label class="sel"><span class="lbl">Tags</span>
+        <select id="tagSel" aria-label="Component tags"><option value="off" selected>None</option><option value="eq">Equipment</option><option value="bwh">Openings</option><option value="bwhxy">Openings with X, Y</option><option value="all">All parts</option></select></label>
+      <label class="sel"><span class="lbl">Markers</span>
+        <select id="mkSel" aria-label="Issue markers"><option value="off" selected>None</option><option value="cl">Clashes</option><option value="all">Clashes and walls</option></select></label>
+      <button class="btn" id="boxBtn" aria-pressed="false">Section box</button>
+      <button class="btn" id="measureBtn" aria-pressed="false" title="Click two points to measure">Measure</button>
+      <button class="btn" id="modelTog" aria-pressed="true">Model</button>
+      <button class="btn" id="inspTog" aria-pressed="true">Inspect</button>
+    </div>
+  </header>
+
+  <aside id="left" class="panel" aria-label="Model controls">
+    <section class="sec">
+      <h2>Layers</h2>
+      <div id="layerList"></div>
+      <div class="rowbtns"><button class="btn" id="allLayers">Show all layers</button></div>
+    </section>
+    <section class="sec">
+      <h2>Dim</h2>
+      <div id="dimList"></div>
+    </section>
+    <section class="sec">
+      <h2>Source models</h2>
+      <div id="srcList"></div>
+    </section>
+    <section class="sec">
+      <h2>Explode</h2>
+      <div class="slider"><label for="exDisc">Separate disciplines</label><output id="exDiscOut">0%</output><input type="range" id="exDisc" min="0" max="100" value="0"></div>
+      <div class="slider"><label for="exElem">Spread components</label><output id="exElemOut">0%</output><input type="range" id="exElem" min="0" max="100" value="0"></div>
+      <p class="small" id="exNote"></p>
+      <div class="rowbtns"><button class="btn" id="contractBtn">Contract</button></div>
+    </section>
+    <section class="sec">
+      <h2>Section box</h2>
+      <p class="small">Drag the arrows on the box, or the sliders below. Readouts are model coordinates in millimetres.</p>
+      <div id="clipUI"></div>
+      <div class="rowbtns"><button class="btn" id="clipReset">Reset box</button><button class="btn" id="clipSel">Box selection</button></div>
+    </section>
+  </aside>
+
+  <main id="stage">
+    <canvas id="c" aria-label="3D model view"></canvas>
+    <div id="labels"></div>
+    <div id="tip" role="status"></div>
+    <div id="measureOut"></div>
+    <div id="hint">Drag to orbit. Right-drag or two-finger drag to pan. Scroll or pinch to zoom. Click a part for details.</div>
+    <div id="titleblock" aria-label="Drawing information"></div>
+    <div id="loading">Loading model</div>
+  </main>
+
+  <aside id="right" class="panel" aria-label="Inspector">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="clash" class="on">Clashes</button>
+      <button role="tab" data-tab="sel">Selection</button>
+      <button role="tab" data-tab="parts">Parts</button>
+      <button role="tab" data-tab="open">Openings</button>
+      <button role="tab" data-tab="diag">Notes</button>
+    </div>
+    <div class="tabpane on" id="tab-clash"></div>
+    <div class="tabpane" id="tab-sel"></div>
+    <div class="tabpane" id="tab-parts">
+      <div class="sec" style="position:sticky;top:44px;background:var(--panel);z-index:1;padding-bottom:10px">
+        <input id="search" type="search" placeholder="Search mark, family, Revit ID or size" aria-label="Search parts">
+      </div>
+      <div id="partList" style="padding:0 12px 16px"></div>
+    </div>
+    <div class="tabpane" id="tab-open"></div>
+    <div class="tabpane" id="tab-diag"></div>
+  </aside>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(async function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const loading = $('#loading');
+if (!window.THREE || !THREE.OrbitControls){ loading.textContent = 'The 3D library did not load. Check the connection and reload the page.'; return; }
+// the model and everything found in it come from a data package: corridor.json plus the geometry chunks it names
+const pkgUrl = new URL(new URLSearchParams(location.search).get('package') || 'ncw-corridor/corridor.json', location.href);
+const TYPED = {uint16:Uint16Array, uint32:Uint32Array, int32:Int32Array, float32:Float32Array};
+let P, CH;
+try{
+  const res = await fetch(pkgUrl);
+  if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+  P = await res.json();
+  if (P.format !== 'talo-model-package' || P.version !== 1) throw new Error('not a version 1 model package');
+  // one chunk per system for now, later one per system and level; all fetched together
+  CH = await Promise.all(P.geometry.map(async K => {
+    const gr = await fetch(new URL(K.uri, pkgUrl));
+    if (!gr.ok) throw new Error(K.uri + ' ' + gr.status + ' ' + gr.statusText);
+    let buf = await gr.arrayBuffer();
+    // a server may already have undone the gzip in transit
+    const u8 = new Uint8Array(buf, 0, Math.min(2, buf.byteLength));
+    if (u8[0] === 0x1f && u8[1] === 0x8b) buf = await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+    const block = (b, n) => new TYPED[b.type](buf, b.byteOffset, n);
+    return {id:K.id, origin:K.positions.origin || [0,0,0], step:K.positions.step ?? 1,
+      pos:block(K.positions, K.positions.count*3), idx:block(K.indices, K.indices.count), lines:K.lines ? block(K.lines, K.lines.count*3) : null};
+  }));
+}catch(err){
+  loading.textContent = 'The model could not be loaded (' + err.message + '). Reload the page, or open it in a current Chrome, Edge, Firefox or Safari.';
+  return;
+}
+const chIx = Object.fromEntries(CH.map((K, k) => [K.id, k]));
+
+/* ---------- reference data, all from the package ---------- */
+if (!P.layers.some(L => L.role === 'opening'))
+  P.layers.push({id:'BWH', name:'Builders’ work holes', desc:'Modelled and proposed openings', colour:'#0F8B8D', role:'opening', proposedColour:'#7C3AED'});
+const LAYER = Object.fromEntries(P.layers.map(L => [L.id, {col:L.colour, name:L.name, desc:L.desc || '', role:L.role, op:L.opacity ?? 1}]));
+const LINES = Object.fromEntries((P.lineLayers || []).map(L => [L.id, {col:L.colour, dark:L.darkColour || L.colour, name:L.name, desc:L.desc || '', dash:!!L.dash, model:L.model, disc:L.discipline}]));
+const HOST = (P.models.find(m => m.role === 'host') || P.models[0]).id;
+const SRC = Object.fromEntries(P.models.map(m => [m.id, {name:m.name || m.label, desc:m.desc || [m.number, m.rev].filter(Boolean).join(', '), reviewer:m.reviewer}]));
+const MODELS = P.models.map(m => m.id).filter(id => P.elements.some(e => e.model === id));
+const TYPES = P.partTypes || [];
+const typeRole = Object.fromEntries(TYPES.filter(t => t.role).map(t => [t.name, t.role]));
+const EQUIP = new Set(TYPES.filter(t => t.equipment).map(t => t.name));
+const CAT_ORDER = TYPES.map(t => t.name);
+const DISC = Object.fromEntries(P.disciplines.map(d => [d.id, d.explode || 0]));
+const NEED = Object.fromEntries(P.disciplines.filter(d => d.clearance != null).map(d => [d.id, d.clearance]));   // clearance all round, mm
+const SYS = Object.fromEntries((P.pipeSystems || []).map(s => [s.name, s]));
+const SYSTEM = Object.fromEntries((P.systems || []).map(s => [s.id, s.name]));
+const ZONE = Object.fromEntries((P.zones || []).map(z => [z.id, z.name]));
+const zoneName = z => ZONE[z] || 'Zone ' + z;
+// a clash is placed by its zone, or by its level and grid reference when the package gives those instead
+const placeOf = c => c.zone != null ? zoneName(c.zone) : [c.level, c.grid && 'Grid ' + c.grid].filter(Boolean).join(', ') || 'Location not recorded';
+const R_CL = P.rules.clash, R_OPEN = P.rules.openings;
+const BWH_KEY = P.layers.find(L => L.role === 'opening').id;
+const BWH_MOD = (TYPES.find(t => t.role === 'opening') || {}).name || 'Builders’ work hole, modelled';
+const BWH_PROP = (TYPES.find(t => t.role === 'proposed-opening') || {}).name || 'Builders’ work hole, proposed';
+const PROP_COL = P.layers.find(L => L.role === 'opening').proposedColour || '#7C3AED';
+const isDamper = d => typeRole[d.c] === 'fire-damper';
+
+// the package's readable fields, mapped onto the short names the viewer works with; parts are referred to by id
+const layerIx = Object.fromEntries(P.layers.map((L, l) => [L.id, l]));
+const idIx = Object.fromEntries(P.elements.map((e, i) => [e.id, i]));
+const ref = id => id == null ? undefined : idIx[id];
+const M = {
+  centre:P.bounds.centre, bmin:P.bounds.min, bmax:P.bounds.max,
+  layers:P.layers.map(L => L.id), line_layers:Object.keys(LINES),
+  lines:(P.lineLayers || []).map(L => ({layer:L.id, ch:chIx[L.chunk ?? CH[0].id], off:L.offset, n:L.count})),
+  links:P.models.filter(m => m.role === 'link'), dups:(P.duplicates || []).map(d => ({mep:ref(d.mep), arch:ref(d.arch), dz:d.dz, dxy:d.dxy})),
+  elements:P.elements.map((e, i) => ({i, id:e.id, m:e.mark, l:layerIx[e.layer], g:LAYER[e.layer].role === 'opening' ? 'BWH' : e.discipline, s:e.model, sys:e.system, c:e.type, k:e.kind, z:e.size,
+    b:e.bbox, ch:chIx[e.mesh.chunk ?? CH[0].id], vo:e.mesh.vertexOffset, vc:e.mesh.vertexCount, io:e.mesh.indexOffset, ic:e.mesh.indexCount, nf:e.faces, np:e.plates,
+    f:e.family, t:e.familyType, r:e.revitId, sy:e.pipeSystem, ss:e.pipeSystemFrom, il:e.insertedOn, hasins:ref(e.insulation), ins:ref(e.insulates), desc:e.description, fr:e.fireRating})),
+  clashes:[...(P.clashes || []).map(c => ({id:c.id, a:ref(c.a), b:ref(c.b), sev:c.grade, p:c.point, ov:c.overlap, n:c.contacts, pair:c.pair, hole:null, zone:c.zone, level:c.level, grid:c.grid, depth:c.depth, measure:c.measure})),
+           ...(P.wallCrossings || []).map(c => ({id:c.id, a:ref(c.service), b:ref(c.wall), sev:'penetration', p:c.point, ov:c.overlap, n:c.contacts, pair:c.pair, hole:c.hole == null ? null : ref(c.hole), openRef:c.opening}))]
+};
+const E = M.elements;
+const CL = M.clashes;
+const byId = {}; CL.forEach(c => byId[c.id] = c);
+const elClashes = {}; CL.forEach(c => { (elClashes[c.a] ||= []).push(c); (elClashes[c.b] ||= []).push(c); });
+const dupOf = {}; M.dups.forEach(d => { dupOf[d.mep] = d; dupOf[d.arch] = d; });
+
+/* builders' work holes have their own layer; proposed ones are added once the meshes exist */
+const BWH_L = layerIx[BWH_KEY];
+document.title = P.project.name + ', model viewer';
+$('.ident h1').textContent = P.project.name;
+$('.ident p').textContent = P.project.subtitle || '';
+$('#exNote').textContent = P.ui?.explodeNote || '';
+const nFile = E.length;
+
+const fmt = n => Math.round(n).toLocaleString('en-GB');
+const esc = s => String(s ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const lc = s => /^[A-Z][a-z]/.test(s) ? s[0].toLowerCase() + s.slice(1) : s;     // "Architectural link" reads lower case mid-sentence, "MEP model" keeps its capitals
+const layerOf = d => M.layers[d.l];
+const dark = () => getComputedStyle(document.documentElement).colorScheme.includes('dark');
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ---------- three setup ---------- */
+const stage = $('#stage'), canvas = $('#c');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+renderer.localClippingEnabled = true;
+const scene = new THREE.Scene();
+const persp = new THREE.PerspectiveCamera(38, 1, 0.01, 400);
+const ortho = new THREE.OrthographicCamera(-1,1,1,-1,-400,400);
+persp.up.set(0,0,1); ortho.up.set(0,0,1);
+let cam = persp;
+const controls = new THREE.OrbitControls(persp, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.12; controls.screenSpacePanning = true;
+
+const hemi = new THREE.HemisphereLight(0xffffff, 0x6b7280, 0.62); hemi.position.set(0,0,1); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xffffff, 0.62); sun.position.set(0.5,-0.9,1.2); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 0.28); fill.position.set(-0.7,0.6,-0.4); scene.add(fill);
+
+const C = M.centre;
+const toW = (K,q,ax) => (q*K.step + K.origin[ax] - C[ax]) / 1000;           // quantised -> world metres
+const mmToW = (v,ax) => (v - C[ax]) / 1000;                    // model mm -> world metres
+const wToMm = (v,ax) => v*1000 + C[ax];
+
+const clipPlanes = [new THREE.Plane(new THREE.Vector3(1,0,0), 1e3), new THREE.Plane(new THREE.Vector3(-1,0,0), 1e3),
+                    new THREE.Plane(new THREE.Vector3(0,1,0), 1e3), new THREE.Plane(new THREE.Vector3(0,-1,0), 1e3),
+                    new THREE.Plane(new THREE.Vector3(0,0,1), 1e3), new THREE.Plane(new THREE.Vector3(0,0,-1), 1e3)];
+
+function mkMat(col, extra={}){ return new THREE.MeshPhongMaterial(Object.assign({color:col, flatShading:true, shininess:14, side:THREE.DoubleSide, clippingPlanes:clipPlanes}, extra)); }
+const layerMat = M.layers.map(L => mkMat(LAYER[L].col));
+const hoverMat = M.layers.map(L => mkMat(LAYER[L].col, {emissive:new THREE.Color(LAYER[L].col).multiplyScalar(0.55)}));
+const selMat = mkMat('#C8136A', {emissive:new THREE.Color('#5a0430')});
+const pairMat = mkMat('#E0391F', {emissive:new THREE.Color('#4a1006')});
+const dupMat = mkMat('#C8136A', {transparent:true, opacity:0.45, depthWrite:false});
+const ghostMat = M.layers.map(L => mkMat(LAYER[L].col, {transparent:true, opacity:0.11, depthWrite:false}));
+const bwhMat = {modelled:mkMat(LAYER[BWH_KEY].col, {transparent:true, opacity:0.62, depthWrite:false}),
+                proposed:mkMat(PROP_COL, {transparent:true, opacity:0.58, depthWrite:false})};
+const bwhHover = {modelled:mkMat(LAYER[BWH_KEY].col, {emissive:new THREE.Color(LAYER[BWH_KEY].col).multiplyScalar(0.55)}),
+                  proposed:mkMat(PROP_COL, {emissive:new THREE.Color(PROP_COL).multiplyScalar(0.55)})};
+const bwhEdge = {modelled:new THREE.LineBasicMaterial({color:'#0A5E60', clippingPlanes:clipPlanes}),
+                 proposed:new THREE.LineBasicMaterial({color:'#4C1D95', clippingPlanes:clipPlanes})};
+const greyMat = mkMat('#9AA3AB', {transparent:true, opacity:0.12, depthWrite:false});
+const WALLS = new Set(M.layers.map((L, l) => LAYER[L].role === 'wall' ? l : -1).filter(l => l >= 0));
+// every layer can be dimmed; each starts at its package opacity
+const layerOp = M.layers.map(L => LAYER[L].op);
+function setLayerOpacity(l, a){
+  [layerMat[l], hoverMat[l]].forEach(m => { m.transparent = a < 0.99; m.opacity = a; m.depthWrite = a >= 0.99; m.needsUpdate = true; });
+  if (l === BWH_L){ bwhMat.modelled.opacity = 0.62*a; bwhMat.proposed.opacity = 0.58*a; }
+}
+layerOp.forEach((a, l) => setLayerOpacity(l, a));
+
+/* meshes */
+const meshes = [];
+const group = new THREE.Group(); scene.add(group);
+for (const d of E){
+  const pos = new Float32Array(d.vc*3);
+  const K = CH[d.ch], POS = K.pos;
+  for (let k=0;k<d.vc;k++){ const p=(d.vo+k)*3; pos[k*3]=toW(K,POS[p],0); pos[k*3+1]=toW(K,POS[p+1],1); pos[k*3+2]=toW(K,POS[p+2],2); }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  g.setIndex(new THREE.BufferAttribute(K.idx.slice(d.io, d.io+d.ic),1));
+  g.computeBoundingSphere(); g.computeBoundingBox();
+  const m = new THREE.Mesh(g, layerMat[d.l]);
+  m.userData.i = d.i;
+  if (WALLS.has(d.l)) m.renderOrder = 2;
+  if (d.g === 'BWH') m.renderOrder = 3;
+  group.add(m); meshes.push(m);
+  d.cw = new THREE.Vector3(mmToW((d.b[0]+d.b[3])/2,0), mmToW((d.b[1]+d.b[4])/2,1), mmToW((d.b[2]+d.b[5])/2,2));
+  d.off = new THREE.Vector3();
+  d.cat = d.c;
+}
+/* lines */
+const lineObjs = {};
+for (const L of M.lines){
+  const arr = new Float32Array(L.n*3);
+  const K = CH[L.ch], LPOS = K.lines;
+  for (let k=0;k<L.n;k++){ const p=(L.off+k)*3; arr[k*3]=toW(K,LPOS[p],0); arr[k*3+1]=toW(K,LPOS[p+1],1); arr[k*3+2]=toW(K,LPOS[p+2],2); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(arr,3));
+  const st = LINES[L.layer];
+  const mat = st.dash ? new THREE.LineDashedMaterial({color:st.col, dashSize:0.08, gapSize:0.05, transparent:true, opacity:.9})
+                      : new THREE.LineBasicMaterial({color:st.col, clippingPlanes:clipPlanes, transparent:true, opacity:.85});
+  const obj = new THREE.LineSegments(g, mat); if (st.dash) obj.computeLineDistances();
+  scene.add(obj); lineObjs[L.layer] = obj;
+}
+/* section box outline (live) */
+const boxHelper = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1,1,1)), new THREE.LineBasicMaterial({color:'#C8136A', transparent:true, opacity:.7}));
+boxHelper.visible = false; scene.add(boxHelper);
+/* measure line */
+const mGeom = new THREE.BufferGeometry(); mGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array(6),3));
+const mLine = new THREE.Line(mGeom, new THREE.LineBasicMaterial({color:'#C8136A', depthTest:false, transparent:true}));
+mLine.renderOrder = 10; mLine.visible = false; scene.add(mLine);
+const mDots = [0,1].map(() => { const s = new THREE.Mesh(new THREE.SphereGeometry(0.018,12,8), new THREE.MeshBasicMaterial({color:'#C8136A', depthTest:false})); s.renderOrder=11; s.visible=false; scene.add(s); return s; });
+
+/* model extents in world */
+const W0 = new THREE.Vector3(mmToW(M.bmin[0],0), mmToW(M.bmin[1],1), mmToW(M.bmin[2],2));
+const W1 = new THREE.Vector3(mmToW(M.bmax[0],0), mmToW(M.bmax[1],1), mmToW(M.bmax[2],2));
+
+/* ---------- builders' work holes ---------- */
+const AXN = ['X','Y','Z'];
+const isService = d => NEED[d.g] != null && typeRole[d.c] !== 'insulation' && typeRole[d.c] !== 'support';
+const crossAx = ax => ax === 2 ? [0,1] : [ax === 0 ? 1 : 0, 2];
+const boxHit = (a, b, t=0) => [0,1,2].every(ax => a[ax] < b[ax+3]-t && a[ax+3] > b[ax]+t);
+const roundUp = v => Math.ceil(v/R_OPEN.roundTo)*R_OPEN.roundTo;
+// a service's cross-section within a slab along ax, from its vertices; the whole bounding box when no vertex falls inside
+function slabSection(i, ax, a0, a1){
+  const p = meshes[i].geometry.attributes.position.array, [u,v] = crossAx(ax);
+  const r = [Infinity,-Infinity,Infinity,-Infinity];
+  for (let k=0; k<p.length; k+=3){
+    const t = wToMm(p[k+ax], ax); if (t < a0 || t > a1) continue;
+    const pu = wToMm(p[k+u], u), pv = wToMm(p[k+v], v);
+    if (pu < r[0]) r[0] = pu; if (pu > r[1]) r[1] = pu; if (pv < r[2]) r[2] = pv; if (pv > r[3]) r[3] = pv;
+  }
+  const b = E[i].b;
+  return (r[1]-r[0] > 5 && r[3]-r[2] > 5) ? r : [b[u], b[u+3], b[v], b[v+3]];
+}
+// section of a service plus its insulation
+function svcSection(i, ax, a0, a1){
+  const r = slabSection(i, ax, a0, a1), d = E[i];
+  if (d.hasins == null) return r;
+  const q = slabSection(d.hasins, ax, a0, a1);
+  return [Math.min(r[0],q[0]), Math.max(r[1],q[1]), Math.min(r[2],q[2]), Math.max(r[3],q[3])];
+}
+function svcSize(i, ax, a0, a1){
+  const d = E[i], r = slabSection(i, ax, a0, a1), w = r[1]-r[0], h = r[3]-r[2];
+  let t = !/bounding box/.test(d.z) ? d.z.split(', ')[0].replace(' outside', '')
+        : d.g === 'PIPE' && Math.abs(w-h) < 0.15*Math.max(w,h) ? 'Ø' + fmt(Math.max(w,h)) : fmt(w) + ' × ' + fmt(h);
+  if (d.hasins != null){ const q = slabSection(d.hasins, ax, a0, a1); t += ', insulated to ' + (d.g === 'PIPE' ? 'Ø' + fmt(Math.max(q[1]-q[0], q[3]-q[2])) : fmt(q[1]-q[0]) + ' × ' + fmt(q[3]-q[2])); }
+  return t;
+}
+// clearance of each service to the opening edge, and the verdict against the rule
+function clearance(o){
+  const [u,v] = crossAx(o.ax), a0 = o.s0, a1 = o.s1;
+  const cu = (o.b[u]+o.b[u+3])/2, cv = (o.b[v]+o.b[v+3])/2;
+  o.gaps = o.services.map(i => {
+    const r = svcSection(i, o.ax, a0, a1);
+    let g;
+    if (o.shape === 'circ'){
+      const R = o.dia/2, su = (r[0]+r[1])/2, sv = (r[2]+r[3])/2;
+      g = R - (Math.hypot(su-cu, sv-cv) + Math.max(r[1]-r[0], r[3]-r[2])/2);
+    } else g = Math.min(r[0]-o.b[u], o.b[u+3]-r[1], r[2]-o.b[v], o.b[v+3]-r[3]);
+    return {i, g, need:isDamper(E[i]) ? 0 : NEED[E[i].g]};
+  });
+  o.minGap = o.gaps.length ? Math.min(...o.gaps.map(x => x.g)) : null;
+  o.need = o.gaps.length ? Math.max(...o.gaps.map(x => x.need)) : 0;
+  o.verdict = !o.gaps.length ? 'empty' : o.gaps.some(x => x.g < 0) ? 'clash' : o.gaps.some(x => x.g < x.need) ? 'tight' : 'ok';
+}
+function addEdges(i, status){
+  const m = meshes[i];
+  const e = new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry, 30), bwhEdge[status]);
+  e.renderOrder = 4; m.add(e); m.userData.edge = e;
+}
+const OPEN = [];
+const PEN = CL.filter(c => c.sev === 'penetration' && isService(E[c.a]));
+// wall faces met by a ray along ax, grouped into solid spans (gaps under 250 mm count as the same wall)
+const ray0 = new THREE.Raycaster();
+function spansAlong(pt, ax, from, to, walls){
+  const o = pt.slice(); o[ax] = from;
+  const dir = new THREE.Vector3(); dir.setComponent(ax, 1);
+  ray0.set(new THREE.Vector3(mmToW(o[0],0), mmToW(o[1],1), mmToW(o[2],2)), dir); ray0.far = (to-from)/1000;
+  const ts = walls.flatMap(w => ray0.intersectObject(meshes[w], false).map(h => from + h.distance*1000)).sort((a,b) => a-b);
+  const spans = [];
+  for (const t of ts){ const s = spans[spans.length-1]; if (s && t - s[1] < 250) s[1] = t; else spans.push([t,t]); }
+  return spans.filter(s => s[1]-s[0] >= 12 && s[1]-s[0] <= 450);
+}
+// a service passes through an opening when the centre of its section in the wall lies inside the opening
+function passes(o, i){
+  const [u,v] = crossAx(o.ax), r = svcSection(i, o.ax, o.s0, o.s1), su = (r[0]+r[1])/2, sv = (r[2]+r[3])/2;
+  return su > o.b[u] && su < o.b[u+3] && sv > o.b[v] && sv < o.b[v+3];
+}
+// a proposed opening becomes a part of its own: a box, or a cylinder when it carries a single pipe
+function addProposed(o){
+  const ax = o.ax, [u,v] = crossAx(ax), b = o.b, circ = o.shape === 'circ';
+  const sz = [0,0,0]; sz[ax] = o.depth/1000; sz[u] = o.w/1000; sz[v] = o.h/1000;
+  let g;
+  if (circ){ g = new THREE.CylinderGeometry(o.dia/2000, o.dia/2000, o.depth/1000, 32); if (ax === 0) g.rotateZ(-Math.PI/2); if (ax === 2) g.rotateX(Math.PI/2); }
+  else g = new THREE.BoxGeometry(sz[0], sz[1], sz[2]);
+  const cw = new THREE.Vector3(mmToW((b[0]+b[3])/2,0), mmToW((b[1]+b[4])/2,1), mmToW((b[2]+b[5])/2,2));
+  g.translate(cw.x, cw.y, cw.z); g.computeBoundingBox(); g.computeBoundingSphere();
+  const i = E.length;
+  const d = {i, m:'', l:BWH_L, g:'BWH', s:HOST, c:BWH_PROP, k:'bwh', prop:true, b, cw, off:new THREE.Vector3(), nf:g.index ? g.index.count/3 : 12,
+    z:(circ ? 'Ø' + o.dia : o.w + ' × ' + o.h) + ' × ' + fmt(o.depth) + ' deep'};
+  d.cat = d.c; d.bwh = o;
+  E.push(d);
+  const m = new THREE.Mesh(g, bwhMat.proposed); m.userData.i = i; m.renderOrder = 3;
+  group.add(m); meshes.push(m); addEdges(i, 'proposed'); OPEN.push(i);
+  return i;
+}
+// openings from the package, in their numbered order
+function loadOpenings(){
+  const byRef = {};
+  for (const r of P.openings){
+    const ax = AXN.indexOf(r.axis), circ = r.shape === 'circular';
+    const o = {status:r.status, shape:circ ? 'circ' : 'rect', ax, b:r.bbox, s0:r.wallSpan[0], s1:r.wallSpan[1], depth:r.depth, w:r.width, h:r.height, dia:circ ? r.diameter : null,
+      services:r.services.map(ref), walls:r.walls.map(ref), crossings:r.crossings.slice(), dampers:(r.dampers || []).map(ref), verdict:r.verdict, review:r.reviewStatus, flags:r.reviewFlags || [],
+      gaps:(r.gaps || []).map(x => ({i:ref(x.service), g:x.gap, need:x.need})), fire:Object.fromEntries((r.fireStopping || []).map(x => [ref(x.service), x.text]))};
+    o.minGap = o.gaps.length ? Math.min(...o.gaps.map(x => x.g)) : null;
+    o.need = o.gaps.length ? Math.max(...o.gaps.map(x => x.need)) : 0;
+    let i;
+    if (r.status === 'modelled'){ i = ref(r.element); E[i].bwh = o; E[i].mk0 = E[i].m; addEdges(i, 'modelled'); OPEN.push(i); }
+    else i = addProposed(o);
+    E[i].m = r.id; byRef[r.id] = i;
+  }
+  P.openings.forEach(r => E[byRef[r.id]].bwh.overlaps = (r.overlaps || []).map(id => byRef[id]));
+  CL.forEach(c => { if (c.openRef !== undefined) c.open = c.openRef == null ? null : byRef[c.openRef]; });
+}
+// no openings in the package: find them here. Modelled holes take their axis and depth from the wall; services with no hole get a proposed one
+function proposeOpenings(){
+  // modelled holes: the wall span sets the through axis and depth; services are what passes through that slab
+  for (const h of E.filter(d => d.g === 'BWH')){
+    const hb = h.b, circ = /Circular/i.test(h.f || '');
+    const dims = [0,1,2].map(ax => hb[ax+3]-hb[ax]), cen = [0,1,2].map(ax => (hb[ax]+hb[ax+3])/2);
+    const walls = [...new Set(CL.filter(c => c.sev === 'penetration' && c.hole === h.i).map(c => c.b))];
+    if (!walls.length) E.filter(d => d.k === 'wall' && boxHit(d.b, hb)).forEach(d => walls.push(d.i));
+    const spanAt = ax => spansAlong(cen, ax, cen[ax]-700, cen[ax]+700, walls).find(s => s[0]-30 < cen[ax] && s[1]+30 > cen[ax]);
+    let ax = circ ? [0,1,2].find(k => { const [j1,j2] = crossAx(k); return Math.abs(dims[j1]-dims[j2]) < 2; }) : undefined;
+    if (ax === undefined){
+      let best = Infinity;
+      [0,1,2].forEach(k => { const s = spanAt(k); if (s && Math.abs(s[1]-s[0]-dims[k]) < best){ best = Math.abs(s[1]-s[0]-dims[k]); ax = k; } });
+    }
+    if (ax === undefined) ax = dims.indexOf(Math.min(...dims));
+    const sp = spanAt(ax), s0 = sp ? Math.max(sp[0], hb[ax]) : hb[ax], s1 = sp ? Math.min(sp[1], hb[ax+3]) : hb[ax+3];
+    const [u,v] = crossAx(ax);
+    h.bwh = {status:'modelled', shape:circ ? 'circ' : 'rect', ax, b:hb, s0, s1, depth:dims[ax], w:dims[u], h:dims[v], dia:circ ? (dims[u]+dims[v])/2 : null, services:[], walls, crossings:[]};
+    h.bwh.services = E.filter(d => isService(d) && boxHit(d.b, hb, 2) && Math.min(d.b[ax+3], s1) - Math.max(d.b[ax], s0) > Math.min(20, (s1-s0)/2) && passes(h.bwh, d.i)).map(d => d.i);
+    clearance(h.bwh); addEdges(h.i, 'modelled'); OPEN.push(h.i);
+  }
+  const inHole = pt => OPEN.find(i => [0,1,2].every(ax => pt[ax] > E[i].b[ax]-20 && pt[ax] < E[i].b[ax+3]+20));
+  // through-wall spans of a service along ax, cast at the crossing point against the wall's mesh
+  function wallSpans(c, ax){
+    const d = E[c.a], lo = c.p[ax] - c.ov[ax]/2 - 30, hi = c.p[ax] + c.ov[ax]/2 + 30;
+    return spansAlong(c.p, ax, d.b[ax]-20, d.b[ax+3]+20, [c.b]).filter(s => s[1] > lo && s[0] < hi);
+  }
+  const cand = [];
+  for (const c of PEN){
+    const d = E[c.a];
+    if (c.hole != null && E[c.hole].bwh.services.includes(c.a)){ c.open = c.hole; E[c.hole].bwh.crossings.push(c.id); continue; }
+    const order = [0,1,2].sort((x,y) => (d.b[y+3]-d.b[y]) - (d.b[x+3]-d.b[x]));
+    let ax = -1, spans = [];
+    for (const k of order){ spans = wallSpans(c, k); if (spans.length){ ax = k; break; } }
+    if (ax < 0){ c.open = null; continue; }
+    for (const sp of spans){
+      const pt = c.p.slice(); pt[ax] = (sp[0]+sp[1])/2;
+      const h = inHole(pt);
+      if (h != null && (E[h].bwh.services.includes(c.a) || passes(E[h].bwh, c.a))){ c.open = h; const o = E[h].bwh; if (!o.services.includes(c.a)){ o.services.push(c.a); clearance(o); } o.crossings.push(c.id); continue; }
+      const same = cand.find(q => q.ax === ax && q.services.includes(c.a) && Math.abs((q.a0+q.a1)/2 - pt[ax]) < 150);
+      if (same){ same.a0 = Math.min(same.a0, sp[0]); same.a1 = Math.max(same.a1, sp[1]); if (!same.walls.includes(c.b)) same.walls.push(c.b); same.crossings.push(c); continue; }
+      cand.push({ax, a0:sp[0], a1:sp[1], services:[c.a], walls:[c.b], crossings:[c]});
+    }
+  }
+  // services whose openings would overlap share one rectangular opening
+  const rectOf = q => { const need = Math.max(...q.services.map(i => NEED[E[i].g])); const r = q.services.map(i => svcSection(i, q.ax, q.a0, q.a1)).reduce((a,b) => [Math.min(a[0],b[0]), Math.max(a[1],b[1]), Math.min(a[2],b[2]), Math.max(a[3],b[3])]); return {r, need}; };
+  for (let merged = true; merged;){
+    merged = false;
+    for (let x=0; x<cand.length && !merged; x++) for (let y=x+1; y<cand.length && !merged; y++){
+      const A = cand[x], B = cand[y];
+      if (A.ax !== B.ax || Math.abs((A.a0+A.a1)/2 - (B.a0+B.a1)/2) > 150) continue;
+      const ra = rectOf(A), rb = rectOf(B), na = ra.need, nb = rb.need;
+      if (ra.r[0]-na < rb.r[1]+nb && ra.r[1]+na > rb.r[0]-nb && ra.r[2]-na < rb.r[3]+nb && ra.r[3]+na > rb.r[2]-nb){
+        A.a0 = Math.min(A.a0,B.a0); A.a1 = Math.max(A.a1,B.a1);
+        B.services.forEach(i => A.services.includes(i) || A.services.push(i));
+        B.walls.forEach(i => A.walls.includes(i) || A.walls.push(i));
+        A.crossings.push(...B.crossings); cand.splice(y,1); merged = true;
+      }
+    }
+  }
+  cand.sort((a,b) => { const ca = rectOf(a).r, cb = rectOf(b).r, pa = a.ax === 0 ? (a.a0+a.a1)/2 : (ca[0]+ca[1])/2, pb = b.ax === 0 ? (b.a0+b.a1)/2 : (cb[0]+cb[1])/2; return pa - pb; });
+  cand.forEach(q => {
+    const {r, need} = rectOf(q), ax = q.ax, [u,v] = crossAx(ax);
+    const pipeOnly = q.services.length === 1 && E[q.services[0]].g === 'PIPE';
+    const depth = Math.max(q.a1-q.a0, 12), cu = (r[0]+r[1])/2, cv = (r[2]+r[3])/2;
+    const dia = pipeOnly ? roundUp(Math.max(r[1]-r[0], r[3]-r[2]) + 2*need) : null;
+    const W = pipeOnly ? dia : roundUp(r[1]-r[0] + 2*need), H = pipeOnly ? dia : roundUp(r[3]-r[2] + 2*need);
+    const b = [0,0,0,0,0,0];
+    b[ax] = q.a0; b[ax+3] = q.a0 + depth; b[u] = cu-W/2; b[u+3] = cu+W/2; b[v] = cv-H/2; b[v+3] = cv+H/2;
+    const o = {status:'proposed', shape:pipeOnly ? 'circ' : 'rect', ax, b, s0:q.a0, s1:q.a1, depth, w:W, h:H, dia, services:q.services, walls:q.walls, crossings:q.crossings.map(c => c.id)};
+    clearance(o);
+    const i = addProposed(o);
+    q.crossings.forEach(c => c.open = i);
+  });
+  // fire dampers sitting in each opening, and proposed openings that run into a modelled one
+  OPEN.forEach(i => { const o = E[i].bwh, bb = o.b.slice(); bb[o.ax] -= 200; bb[o.ax+3] += 200;
+    o.dampers = E.filter(d => isDamper(d) && boxHit(d.b, bb)).map(d => d.i);
+    o.overlaps = E[i].prop ? OPEN.filter(k => !E[k].prop && boxHit(E[k].b, o.b)) : []; });
+  // one reference per opening, numbered along the corridor; a hole family keeps its model mark alongside
+  OPEN.sort((a,b) => { const A = E[a].b, B = E[b].b; return (A[0]+A[3]) - (B[0]+B[3]) || (A[1]+A[4]) - (B[1]+B[4]); });
+  OPEN.forEach((i, n) => { const d = E[i]; if (!d.prop) d.mk0 = d.m; d.m = 'BWH-' + (n+1); });
+}
+if (P.openings) loadOpenings(); else proposeOpenings();
+const setOut = o => [0,1,2].map(ax => Math.round((o.b[ax]+o.b[ax+3])/2));
+
+/* ---------- descriptions and fire-stopping ---------- */
+// every part's description comes from the package; openings are sized here, so they are described here
+function descOf(d){
+  if (d.bwh) return 'Builders’ work hole ' + openSize(d.bwh);
+  return d.desc || d.c;
+}
+function fireFor(i, o){
+  const d = E[i];
+  if (o.fire && o.fire[i]) return o.fire[i];
+  const F = R_OPEN.fireStopping;
+  if (isDamper(d)) return F.damper;
+  if (d.g === 'DUCT') return o.dampers.length ? F.ductWithDamper.replace('{dampers}', o.dampers.map(k => E[k].m).join(', ')) : F.ductNoDamper;
+  if (d.g === 'TRAY') return F.tray;
+  if (SYS[d.sy]?.fireStopping) return SYS[d.sy].fireStopping;
+  if (d.sy) return d.hasins != null ? F.insulatedPipe : F.pipe;
+  return F.unknownPipe;
+}
+const reviewBy = o => [...new Set(o.walls.map(w => SRC[E[w].s].reviewer || 'Architect'))].sort((a,b) => a < b ? 1 : -1).join(', ') || 'Architect';
+const openSize = o => o.shape === 'circ' ? 'Ø' + fmt(o.dia) : fmt(o.w) + ' × ' + fmt(o.h);
+const VERDICT = R_OPEN.verdicts;
+
+/* ---------- state ---------- */
+const st = {layerOn: M.layers.map(()=>true), lineOn:Object.fromEntries(M.line_layers.map(L => [L, true])), srcOn:Object.fromEntries(MODELS.map(k => [k, true])),
+  hidden:new Set(), isolate:null, bwhIso:null, boxOn:false, clFilter:'all', sel:null, selClash:null, hover:null, exDisc:0, exElem:0, tags:'off', markers:'off', measure:false, mPts:[],
+  clip:[0,1000,0,1000,0,1000], ghost:true, focus:null};
+
+function visible(d){
+  return st.layerOn[d.l] && st.srcOn[d.s] && !st.hidden.has(d.i) && (!st.isolate || st.isolate.has(d.i));
+}
+function focusSet(){
+  if (st.selClash) return new Set([st.selClash.a, st.selClash.b]);
+  if (st.sel != null){
+    const f = new Set([st.sel]), d = E[st.sel];
+    if (d.ins != null) f.add(d.ins); if (d.hasins != null) f.add(d.hasins);
+    if (dupOf[st.sel]){ f.add(dupOf[st.sel].mep); f.add(dupOf[st.sel].arch); }
+    if (d.bwh) d.bwh.services.forEach(k => { f.add(k); if (E[k].hasins != null) f.add(E[k].hasins); });
+    return f;
+  }
+  return null;
+}
+function baseMat(d, hov){
+  if (d.bwh) return (hov ? bwhHover : bwhMat)[d.bwh.status];
+  return (hov ? hoverMat : layerMat)[d.l];
+}
+function matFor(d){
+  if (st.sel === d.i) return selMat;
+  if (st.sel != null && (E[st.sel].ins === d.i || E[st.sel].hasins === d.i)) return dupMat;
+  if (st.bwhIso && !st.bwhIso.has(d.i)) return st.hover === d.i ? baseMat(d, true) : greyMat;
+  if (st.ghost && st.focus && !st.focus.has(d.i)) return st.hover === d.i ? baseMat(d, true) : ghostMat[d.l];
+  if (st.selClash && (st.selClash.a === d.i)) return selMat;
+  if (st.selClash && (st.selClash.b === d.i)) return pairMat;
+  if (st.sel != null && dupOf[st.sel] && (dupOf[st.sel].mep === d.i || dupOf[st.sel].arch === d.i)) return dupMat;
+  if (st.hover === d.i) return baseMat(d, true);
+  return baseMat(d, false);
+}
+function refresh(){
+  st.focus = focusSet();
+  for (const d of E){ const m = meshes[d.i]; m.visible = visible(d); m.material = matFor(d); if (m.userData.edge) m.userData.edge.visible = (!st.bwhIso || st.bwhIso.has(d.i)) && !(st.ghost && st.focus && !st.focus.has(d.i)); }
+  for (const L of M.line_layers){
+    const s = LINES[L], o = lineObjs[L];
+    o.visible = st.lineOn[L] && (!s.model || st.srcOn[s.model] !== false) && !st.isolate;
+    if (s.disc) o.material.opacity = (st.exElem > 0.02) ? 0 : ((st.ghost && st.focus) || st.bwhIso ? 0.18 : 0.85);
+  }
+  updateSelEdges();
+  req();
+}
+
+/* selection outline */
+let edges = null;
+function updateSelEdges(){
+  if (edges){ edges.parent && edges.parent.remove(edges); edges.geometry.dispose(); edges = null; }
+  if (st.sel == null) return;
+  const m = meshes[st.sel];
+  edges = new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry, 28), new THREE.LineBasicMaterial({color:'#C8136A', depthTest:false, transparent:true, opacity:.9}));
+  edges.renderOrder = 9; m.add(edges);
+}
+
+/* ---------- explode ---------- */
+function applyExplode(){
+  const a = st.exDisc, b = st.exElem;
+  for (const d of E){
+    const lift = (DISC[d.g] || 0) * a;
+    d.off.set(d.cw.x*0.14*b, d.cw.y*1.7*b, d.cw.z*1.9*b + lift);
+    meshes[d.i].position.copy(d.off);
+  }
+  for (const L of M.line_layers){
+    const s = LINES[L]; if (!s.disc) continue;
+    lineObjs[L].position.set(0,0,(DISC[s.disc] || 0)*a);
+    lineObjs[L].material.opacity = b > 0.02 ? 0 : (st.ghost && st.focus ? 0.18 : 0.85);
+  }
+  req();
+}
+
+/* ---------- section box ---------- */
+const AX = ['X','Y','Z'];
+// an arrow on each face of the box; dragging one moves that face along its axis
+const handleMat = new THREE.MeshBasicMaterial({color:'#C8136A', depthTest:false, transparent:true, opacity:0.9});
+const handleHot = new THREE.MeshBasicMaterial({color:'#FF5BA6', depthTest:false, transparent:true, opacity:1});
+const handleGeo = [new THREE.ConeGeometry(0.42, 0.9, 20).translate(0, 1.05, 0), new THREE.CylinderGeometry(0.13, 0.13, 0.7, 12).translate(0, 0.35, 0)];
+const handles = [0,1,2,3,4,5].map(k => {
+  const g = new THREE.Group(), ax = k >> 1, dir = new THREE.Vector3(); dir.setComponent(ax, k & 1 ? 1 : -1);
+  handleGeo.forEach(geo => { const m = new THREE.Mesh(geo, handleMat); m.renderOrder = 13; m.userData.k = k; g.add(m); });
+  g.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir); g.userData = {k, ax, dir}; g.visible = false; scene.add(g);
+  return g;
+});
+function placeHandles(a, b){
+  handles.forEach(g => { const {ax, dir} = g.userData, p = a.clone().add(b).multiplyScalar(0.5);
+    p.setComponent(ax, dir.getComponent(ax) > 0 ? b.getComponent(ax) : a.getComponent(ax)); g.position.copy(p); g.visible = st.boxOn; });
+}
+// keep the arrows the same size on screen
+function sizeHandles(){
+  if (!st.boxOn) return;
+  handles.forEach(g => { const vh = cam === ortho ? (ortho.top - ortho.bottom)/ortho.zoom : 2*cam.position.distanceTo(g.position)*Math.tan(THREE.MathUtils.degToRad(persp.fov/2)); g.scale.setScalar(vh*0.03); });
+}
+const handleRay = new THREE.Raycaster();
+let drag = null, hotHandle = null;
+function aimRay(cx, cy){ const r = canvas.getBoundingClientRect(); handleRay.setFromCamera(new THREE.Vector2(((cx-r.left)/r.width)*2-1, -((cy-r.top)/r.height)*2+1), cam); }
+function hitHandle(cx, cy){
+  if (!st.boxOn) return null;
+  aimRay(cx, cy); const h = handleRay.intersectObjects(handles, true)[0];
+  return h ? handles[h.object.userData.k] : null;
+}
+function setHot(g){
+  if (hotHandle === g) return;
+  if (hotHandle) hotHandle.children.forEach(m => m.material = handleMat);
+  hotHandle = g; if (g) g.children.forEach(m => m.material = handleHot); req();
+}
+// position along the dragged axis under the pointer, on a plane through the axis facing the camera
+function axisAt(cx, cy){ aimRay(cx, cy); const p = new THREE.Vector3(); return handleRay.ray.intersectPlane(drag.plane, p) ? p.getComponent(drag.ax) : null; }
+canvas.addEventListener('pointerdown', e => {
+  const g = hitHandle(e.clientX, e.clientY); if (!g) return;
+  e.stopImmediatePropagation(); e.preventDefault();
+  const {k, ax} = g.userData, axis = new THREE.Vector3(); axis.setComponent(ax, 1);
+  const view = cam.getWorldDirection(new THREE.Vector3()), n = view.sub(axis.clone().multiplyScalar(view.dot(axis)));
+  if (n.lengthSq() < 1e-8) return;
+  drag = {k, ax, plane:new THREE.Plane().setFromNormalAndCoplanarPoint(n.normalize(), g.position)};
+  const t = axisAt(e.clientX, e.clientY); if (t == null){ drag = null; return; }
+  drag.offset = t - mmToW(clipVal(k), ax);
+  controls.enabled = false; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing';
+}, true);
+canvas.addEventListener('pointermove', e => {
+  if (drag){
+    e.stopImmediatePropagation();
+    const t = axisAt(e.clientX, e.clientY); if (t == null) return;
+    const ax = drag.ax, pair = drag.k ^ 1;
+    let v = Math.round((wToMm(t - drag.offset, ax) - M.bmin[ax]) / (M.bmax[ax]-M.bmin[ax]) * 1000);
+    v = Math.max(0, Math.min(1000, v));
+    v = drag.k % 2 === 0 ? Math.min(v, st.clip[pair]-5) : Math.max(v, st.clip[pair]+5);
+    st.clip[drag.k] = v; syncClipUI(); applyClip(); return;
+  }
+  if (e.buttons) return;
+  const g = hitHandle(e.clientX, e.clientY); setHot(g);
+  if (g){ e.stopImmediatePropagation(); tip.style.display = 'none'; setHover(null); canvas.style.cursor = 'grab'; }
+}, true);
+const endDrag = e => { if (!drag) return; e.stopImmediatePropagation(); drag = null; controls.enabled = true; canvas.style.cursor = ''; };
+canvas.addEventListener('pointerup', endDrag, true);
+canvas.addEventListener('pointercancel', endDrag, true);
+function setBox(on){ st.boxOn = on; $('#boxBtn').setAttribute('aria-pressed', String(on)); if (!on) setHot(null); applyClip(); }
+function clipVal(k){ const ax = k>>1; const t = st.clip[k]/1000; return M.bmin[ax] + t*(M.bmax[ax]-M.bmin[ax]); }
+function applyClip(){
+  let active = false;
+  for (let ax=0; ax<3; ax++){
+    const lo = st.clip[ax*2], hi = st.clip[ax*2+1];
+    clipPlanes[ax*2].constant = lo <= 0 ? 1e3 : -mmToW(clipVal(ax*2), ax);
+    clipPlanes[ax*2+1].constant = hi >= 1000 ? 1e3 : mmToW(clipVal(ax*2+1), ax);
+    if (lo > 0 || hi < 1000) active = true;
+  }
+  boxHelper.visible = active || st.boxOn;
+  if (boxHelper.visible){
+    const a = new THREE.Vector3(...[0,1,2].map(ax => mmToW(clipVal(ax*2),ax))), b = new THREE.Vector3(...[0,1,2].map(ax => mmToW(clipVal(ax*2+1),ax)));
+    boxHelper.position.copy(a).add(b).multiplyScalar(.5);
+    boxHelper.scale.set(Math.max(b.x-a.x,1e-3), Math.max(b.y-a.y,1e-3), Math.max(b.z-a.z,1e-3));
+    placeHandles(a, b);
+  } else handles.forEach(g => g.visible = false);
+  for (let k=0;k<6;k++){ const o = document.getElementById('clipOut'+k); if (o) o.textContent = fmt(clipVal(k)); }
+  req();
+}
+function insideClip(p){
+  for (let k=0;k<6;k++) if (clipPlanes[k].distanceToPoint(p) < -1e-6) return false;
+  return true;
+}
+
+/* ---------- camera ---------- */
+function resize(){
+  const w = stage.clientWidth, h = stage.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h, false);
+  persp.aspect = w/h; persp.updateProjectionMatrix();
+  const hh = (ortho.top - ortho.bottom)/2 || 1;
+  ortho.left = -hh*w/h; ortho.right = hh*w/h; ortho.updateProjectionMatrix();
+  req();
+}
+new ResizeObserver(resize).observe(stage);
+
+function visibleBounds(){
+  const box = new THREE.Box3(); let any=false;
+  for (const d of E){ if (!meshes[d.i].visible) continue; const bb = meshes[d.i].geometry.boundingBox.clone().translate(d.off); box.union(bb); any=true; }
+  if (!any) box.set(W0.clone(), W1.clone());
+  return box;
+}
+function distFor(radius){ return radius / Math.sin(THREE.MathUtils.degToRad(persp.fov/2)) * 1.02; }
+function frameBox(box, dir){
+  const c = box.getCenter(new THREE.Vector3());
+  const f = dir.clone().negate();
+  const right = new THREE.Vector3().crossVectors(f, new THREE.Vector3(0,0,1));
+  if (right.lengthSq() < 1e-14) right.set(1,0,0); right.normalize();
+  const up = new THREE.Vector3().crossVectors(right, f).normalize();
+  let hw = 0, hh = 0, hd = 0;
+  for (let k=0;k<8;k++){
+    const v = new THREE.Vector3(k&1 ? box.max.x : box.min.x, k&2 ? box.max.y : box.min.y, k&4 ? box.max.z : box.min.z).sub(c);
+    hw = Math.max(hw, Math.abs(v.dot(right))); hh = Math.max(hh, Math.abs(v.dot(up))); hd = Math.max(hd, Math.abs(v.dot(f)));
+  }
+  const aspect = (stage.clientWidth || 1) / (stage.clientHeight || 1);
+  const half = Math.max(hh, hw/aspect, 0.12) * 1.06;
+  const dist = half / Math.tan(THREE.MathUtils.degToRad(persp.fov/2)) + hd*0.3;
+  return {c, pos:c.clone().add(dir.clone().multiplyScalar(dist)), half};
+}
+let tween = null;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function flyTo(target, position, orthoHalf){
+  const from = {t:controls.target.clone(), p:cam.position.clone(), h:(ortho.top/ortho.zoom)};
+  const dur = reduceMotion ? 0 : 520, t0 = performance.now();
+  tween = (now) => {
+    const k = dur ? Math.min(1, (now - t0)/dur) : 1, e = k<.5 ? 2*k*k : 1-Math.pow(-2*k+2,2)/2;
+    controls.target.lerpVectors(from.t, target, e);
+    cam.position.lerpVectors(from.p, position, e);
+    if (cam === ortho && orthoHalf){ setOrthoHalf(from.h + (orthoHalf - from.h)*e); }
+    if (k >= 1) tween = null;
+    controls.update();
+  };
+  req();
+}
+function setOrthoHalf(h){
+  const w = stage.clientWidth, hh = stage.clientHeight || 1;
+  ortho.zoom = 1; ortho.top = h; ortho.bottom = -h; ortho.left = -h*w/hh; ortho.right = h*w/hh; ortho.updateProjectionMatrix();
+}
+const VIEWS = {iso:[0.62,-0.72,0.42], plan:[0,-0.0001,1], below:[0,-0.0001,-1], side:[0,-1,0.0001], end:[1,0,0.0001]};
+let curView = 'iso';
+function setView(name, box){
+  curView = name;
+  document.querySelectorAll('.views button').forEach(b => b.classList.toggle('on', b.dataset.view === name));
+  const fb = frameBox(box || visibleBounds(), new THREE.Vector3(...VIEWS[name]).normalize());
+  flyTo(fb.c, fb.pos, fb.half);
+}
+function fitTo(box){
+  const fb = frameBox(box, cam.position.clone().sub(controls.target).normalize());
+  flyTo(fb.c, fb.pos, fb.half);
+}
+function zoomToEl(i){
+  const d = E[i]; const bb = meshes[i].geometry.boundingBox.clone().translate(d.off).expandByScalar(d.bwh ? 0.6 : 0.12);
+  fitTo(bb);
+}
+function setProjection(toOrtho){
+  const target = controls.target.clone();
+  if (toOrtho && cam !== ortho){
+    const dist = persp.position.distanceTo(target);
+    ortho.position.copy(persp.position); ortho.quaternion.copy(persp.quaternion);
+    setOrthoHalf(dist * Math.tan(THREE.MathUtils.degToRad(persp.fov/2)));
+    cam = ortho;
+  } else if (!toOrtho && cam !== persp){
+    const h = (ortho.top / ortho.zoom);
+    const dir = ortho.position.clone().sub(target).normalize();
+    persp.position.copy(target).add(dir.multiplyScalar(h / Math.tan(THREE.MathUtils.degToRad(persp.fov/2))));
+    cam = persp;
+  }
+  controls.object = cam; controls.update();
+  $('#projBtn').setAttribute('aria-pressed', String(cam === ortho));
+  req();
+}
+
+/* ---------- render loop (on demand) ---------- */
+let needs = true;
+function req(){ needs = true; }
+controls.addEventListener('change', req);
+function frame(now){
+  requestAnimationFrame(frame);
+  if (tween) tween(now);
+  const moved = controls.update();
+  if (!needs && !moved && !tween) return;
+  needs = false;
+  sizeHandles();
+  renderer.render(scene, cam);
+  placeLabels();
+}
+
+/* ---------- labels: tags + markers ---------- */
+const labelLayer = $('#labels');
+const pool = []; let poolUsed = 0;
+function getLabel(){
+  let el = pool[poolUsed];
+  if (!el){ el = document.createElement('button'); el.type='button'; el.className='tag'; labelLayer.appendChild(el); pool.push(el);
+    el.addEventListener('click', ev => { ev.stopPropagation(); const k = el.dataset.k; if (k[0]==='e') selectEl(+k.slice(1), true); else selectClash(k.slice(1), true); });
+    el.addEventListener('pointerenter', () => { if (el.dataset.k[0]==='e') setHover(+el.dataset.k.slice(1)); });
+    el.addEventListener('pointerleave', () => setHover(null)); }
+  poolUsed++; return el;
+}
+const v3 = new THREE.Vector3();
+function project(p){
+  v3.copy(p).project(cam);
+  if (v3.z > 1 || v3.z < -1) return null;
+  const w = stage.clientWidth, h = stage.clientHeight;
+  const x = (v3.x+1)/2*w, y = (1-v3.y)/2*h;
+  if (x < -40 || y < -20 || x > w+40 || y > h+20) return null;
+  return [x,y];
+}
+function placeLabels(){
+  poolUsed = 0;
+  const placed = [];
+  const fits = (x,y,wd,ht) => { for (const r of placed){ if (x < r[2] && x+wd > r[0] && y < r[3] && y+ht > r[1]) return false; } placed.push([x,y,x+wd,y+ht]); return true; };
+  const camPos = cam.position;
+  // markers first (they matter most)
+  if (st.markers !== 'off'){
+    const list = CL.filter(c => c.sev === 'penetration' ? st.markers === 'all' : (st.clFilter === 'all' || c.sev === st.clFilter));
+    for (const c of list){
+      const A = E[c.a], B = E[c.b];
+      if (!meshes[c.a].visible && !meshes[c.b].visible) continue;
+      if (st.bwhIso && !st.bwhIso.has(c.a)) continue;
+      const wp = new THREE.Vector3(mmToW(c.p[0],0), mmToW(c.p[1],1), mmToW(c.p[2],2)).add(A.off);
+      if (!insideClip(wp)) continue;
+      const s = project(wp); if (!s) continue;
+      const pen = c.sev === 'penetration';
+      const wd = pen ? 40 : 38, ht = 18;
+      let dy = 0;
+      if (pen){ if (!fits(s[0]-wd/2, s[1]-ht-4, wd, ht)) continue; }
+      else { const tries = [0,-20,20,-40,40,-60]; dy = tries.find(t => fits(s[0]-wd/2, s[1]-ht-4+t, wd, ht)); if (dy === undefined) dy = 0; }
+      const el = getLabel();
+      el.className = 'tag ' + (pen ? 'wx' + (c.open != null && E[c.open].prop ? ' nohole' : '') : 'cl ' + c.sev);
+      el.textContent = c.id; el.dataset.k = 'c' + c.id;
+      el.title = pen ? (c.open == null ? 'Service runs along a wall' : 'Wall crossing, ' + (E[c.open].prop ? 'proposed opening ' : 'modelled hole ') + E[c.open].m) : (c.sev[0].toUpperCase()+c.sev.slice(1)) + ' clash: ' + A.m + ' and ' + B.m;
+      el.style.removeProperty('--c');
+      el.style.opacity = (st.selClash && st.selClash !== c) || (st.sel != null && c.a !== st.sel && c.b !== st.sel) ? '.45' : '';
+      el.style.outline = st.selClash === c ? '2px solid var(--ink)' : '';
+      el.style.transform = `translate(${s[0]}px,${s[1]+dy}px) translate(-50%,-120%)`; el.style.display = 'block';
+    }
+  }
+  if (st.tags !== 'off'){
+    const cand = [];
+    for (const d of E){
+      if (!meshes[d.i].visible || d.k === 'wall') continue;
+      if (st.tags === 'eq' && !EQUIP.has(d.c)) continue;
+      if (st.tags.startsWith('bwh') && !d.bwh) continue;
+      if (st.bwhIso && !st.bwhIso.has(d.i)) continue;
+      const wp = d.cw.clone().add(d.off);
+      if (!insideClip(wp)) continue;
+      cand.push([wp.distanceToSquared(camPos), d, wp]);
+    }
+    cand.sort((a,b) => a[0]-b[0]);
+    if (st.sel != null){ const i = cand.findIndex(x => x[1].i === st.sel); if (i > 0) cand.unshift(cand.splice(i,1)[0]); }
+    for (const [,d,wp] of cand){
+      if (poolUsed > 320) break;
+      const s = project(wp); if (!s) continue;
+      const txt = st.tags === 'bwhxy' ? d.m + '  X ' + fmt(setOut(d.bwh)[0]) + '  Y ' + fmt(setOut(d.bwh)[1]) : d.m;
+      const wd = txt.length*7 + 14, ht = 18;
+      if (!fits(s[0]-wd/2, s[1]-ht-4, wd, ht)) continue;
+      const el = getLabel();
+      el.className = 'tag'; el.textContent = txt; el.dataset.k = 'e' + d.i; el.title = d.c; el.style.opacity = ''; el.style.outline = st.sel === d.i ? '2px solid var(--accent)' : '';
+      el.style.setProperty('--c', d.bwh ? (d.bwh.verdict === 'clash' ? 'var(--clash)' : d.prop ? PROP_COL : LAYER[BWH_KEY].col) : LAYER[layerOf(d)].col);
+      el.style.transform = `translate(${s[0]}px,${s[1]}px) translate(-50%,-120%)`; el.style.display = 'block';
+    }
+  }
+  for (let k = poolUsed; k < pool.length; k++) pool[k].style.display = 'none';
+  // measure label position
+  if (st.mPts.length === 2){
+    const mid = st.mPts[0].w.clone().add(st.mPts[1].w).multiplyScalar(.5);
+    const s = project(mid);
+    const ml = $('#mlab');
+    if (ml){ if (s){ ml.style.display='block'; ml.style.transform=`translate(${s[0]}px,${s[1]}px) translate(-50%,-130%)`; } else ml.style.display='none'; }
+  }
+}
+
+/* ---------- picking ---------- */
+const ray = new THREE.Raycaster(); const ndc = new THREE.Vector2();
+function pick(cx, cy){
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((cx - r.left)/r.width)*2-1, -((cy - r.top)/r.height)*2+1);
+  ray.setFromCamera(ndc, cam);
+  const vis = meshes.filter(m => m.visible);
+  const hits = ray.intersectObjects(vis, false);
+  for (const h of hits){
+    if (!insideClip(h.point)) continue;
+    const d = E[h.object.userData.i];
+    if (layerOp[d.l] < 0.6 && hits.some(o => o !== h && layerOp[E[o.object.userData.i].l] >= 0.6 && insideClip(o.point))) continue;
+    const pref = st.bwhIso || (st.ghost && st.focus);
+    if (pref && !pref.has(d.i)){
+      const f = hits.find(o => pref.has(o.object.userData.i) && insideClip(o.point));
+      if (f) return {d:E[f.object.userData.i], point:f.point.clone()};
+    }
+    return {d, point:h.point.clone()};
+  }
+  return null;
+}
+const tip = $('#tip');
+function setHover(i){
+  if (st.hover === i) return;
+  const prev = st.hover; st.hover = i;
+  if (prev != null) meshes[prev].material = matFor(E[prev]);
+  if (i != null) meshes[i].material = matFor(E[i]);
+  req();
+}
+let down = null, hoverQueued = null;
+canvas.addEventListener('pointerdown', e => { down = {x:e.clientX, y:e.clientY, t:performance.now()}; });
+canvas.addEventListener('pointerleave', () => { tip.style.display='none'; setHover(null); });
+canvas.addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse' || e.buttons){ tip.style.display='none'; return; }
+  if (hoverQueued) return;
+  hoverQueued = requestAnimationFrame(() => {
+    hoverQueued = null;
+    const h = pick(e.clientX, e.clientY);
+    if (!h){ setHover(null); tip.style.display='none'; canvas.style.cursor = st.measure ? 'crosshair' : ''; return; }
+    setHover(h.d.i);
+    canvas.style.cursor = st.measure ? 'crosshair' : 'pointer';
+    const d = h.d, r = stage.getBoundingClientRect();
+    if (d.bwh){ const o = d.bwh; tip.innerHTML = `<b>${esc(d.m)}</b> ${esc(d.c)}<br>${openSize(o)}, ${fmt(o.depth)} deep<br>${o.services.length ? o.services.map(k => esc(E[k].m)).join(', ') + ', ' + VERDICT[o.verdict].toLowerCase() : VERDICT.empty}`; }
+    else tip.innerHTML = `<b>${esc(d.m)}</b> ${esc(descOf(d))}<br>${esc(d.f ? d.f + (d.t ? ', ' + d.t : '') : d.c)}${d.sy ? '<br>' + esc(d.sy) + ' (inferred)' : ''}${elClashes[d.i] ? '<br>' + issueLine(d.i) : ''}`;
+    tip.style.display = 'block';
+    const x = Math.min(e.clientX - r.left + 14, r.width - tip.offsetWidth - 8), y = Math.min(e.clientY - r.top + 14, r.height - tip.offsetHeight - 8);
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  });
+});
+canvas.addEventListener('pointerup', e => {
+  if (!down) return;
+  const moved = Math.hypot(e.clientX-down.x, e.clientY-down.y), dt = performance.now()-down.t; down = null;
+  if (moved > 5 || dt > 600) return;
+  const h = pick(e.clientX, e.clientY);
+  if (st.measure){ if (h) addMeasure(h); return; }
+  if (h) selectEl(h.d.i, false); else clearSelection();
+});
+function sizeShort(d){ return d.z.split(', ').slice(0,2).join(', '); }
+function issueLine(i){
+  const cs = elClashes[i].filter(c => ACTIONABLE.has(c.sev));
+  const w = elClashes[i].filter(c => c.sev === 'penetration');
+  const parts = [];
+  if (cs.length) parts.push(cs.length + (cs.length>1 ? ' clashes' : ' clash'));
+  if (w.length) parts.push(w.length + (w.length>1 ? ' wall crossings' : ' wall crossing'));
+  return parts.join(', ');
+}
+
+/* ---------- measure ---------- */
+const mOut = $('#measureOut');
+function addMeasure(h){
+  const d = h.d; const model = h.point.clone().sub(d.off);
+  const mm = [wToMm(model.x,0), wToMm(model.y,1), wToMm(model.z,2)];
+  if (st.mPts.length >= 2) st.mPts = [];
+  st.mPts.push({w:h.point.clone(), mm, mark:d.m});
+  mDots.forEach((s,k) => { s.visible = !!st.mPts[k]; if (st.mPts[k]) s.position.copy(st.mPts[k].w); });
+  if (st.mPts.length === 2){
+    const a = st.mPts[0], b = st.mPts[1];
+    const p = mGeom.attributes.position.array; p.set([a.w.x,a.w.y,a.w.z,b.w.x,b.w.y,b.w.z]); mGeom.attributes.position.needsUpdate = true; mGeom.computeBoundingSphere();
+    mLine.visible = true;
+    const dx = b.mm[0]-a.mm[0], dy = b.mm[1]-a.mm[1], dz = b.mm[2]-a.mm[2], dist = Math.hypot(dx,dy,dz);
+    mOut.innerHTML = `<b>${fmt(dist)} mm</b><br>From ${esc(a.mark)} to ${esc(b.mark)}<br>ΔX ${fmt(dx)}, ΔY ${fmt(dy)}, ΔZ ${fmt(dz)}${(st.exDisc||st.exElem) ? '<br><span class="small">Measured in model positions, with the explode removed.</span>' : ''}`;
+    let ml = $('#mlab'); if (!ml){ ml = document.createElement('div'); ml.id='mlab'; ml.className='tag'; ml.style.cssText='--c:#C8136A;pointer-events:none'; labelLayer.appendChild(ml); }
+    ml.textContent = fmt(dist) + ' mm';
+  } else {
+    mLine.visible = false; const ml = $('#mlab'); if (ml) ml.style.display='none';
+    mOut.innerHTML = `Point 1 on <b style="font-size:14px">${esc(d.m)}</b><br>Click a second point.`;
+  }
+  mOut.style.display = 'block'; req();
+}
+function setMeasure(on){
+  st.measure = on; $('#measureBtn').setAttribute('aria-pressed', String(on));
+  if (!on){ st.mPts = []; mLine.visible = false; mDots.forEach(s => s.visible=false); mOut.style.display='none'; const ml=$('#mlab'); if (ml) ml.remove(); }
+  else { mOut.innerHTML = 'Click the first point on any part.'; mOut.style.display = 'block'; }
+  canvas.style.cursor = on ? 'crosshair' : ''; req();
+}
+
+/* ---------- selection ---------- */
+function showTab(t){
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('on', p.id === 'tab-' + t));
+  if (matchMedia('(max-width: 860px)').matches){ app.classList.add('mshow-right'); app.classList.remove('mshow-left'); syncPanelBtns(); }
+}
+function selectEl(i, zoom){
+  st.sel = i; st.selClash = null;
+  if (!visible(E[i])){ st.layerOn[E[i].l] = true; st.srcOn[E[i].s] = true; st.hidden.delete(i); if (st.isolate) st.isolate.add(i); syncLayerUI(); }
+  refresh(); renderSel(); showTab('sel'); markPart(i); $('#right').scrollTop = 0;
+  if (zoom) zoomToEl(i);
+}
+function selectClash(id, zoom){
+  const c = byId[id]; if (!c) return;
+  st.sel = null; st.selClash = c;
+  [c.a,c.b].forEach(i => { const d=E[i]; if (!visible(d)){ st.layerOn[d.l]=true; st.srcOn[d.s]=true; st.hidden.delete(i); if (st.isolate) st.isolate.add(i); } });
+  syncLayerUI(); refresh(); renderClash(c); showTab('sel'); markPart(null);
+  if (zoom){
+    const A = E[c.a]; const p = new THREE.Vector3(mmToW(c.p[0],0), mmToW(c.p[1],1), mmToW(c.p[2],2)).add(A.off);
+    const r = Math.max(Math.max(...c.ov)/1000*1.4, 0.45);
+    fitTo(new THREE.Box3(p.clone().subScalar(r), p.clone().addScalar(r)));
+  }
+}
+function clearSelection(){ st.sel = null; st.selClash = null; refresh(); renderSel(); markPart(null); }
+
+const selPane = $('#tab-sel');
+function srcLine(d){ const s = SRC[d.s]; return `${esc(s.name)}<br><span class="small">${esc(s.desc)}</span>`; }
+function elLink(i){ const d=E[i]; return `<button class="link" data-el="${i}">${esc(d.m)}</button>`; }
+function clashRow(c, other){
+  const pen = c.sev === 'penetration';
+  const lab = pen ? (c.open == null ? '<span class="sev penetration">along wall</span>' : E[c.open].prop ? '<span class="sev nohole">proposed hole</span>' : '<span class="sev penetration">hole</span>') : `<span class="sev ${c.sev}">${c.sev}</span>`;
+  return `<tr class="click" data-cl="${c.id}"><td><b>${c.id}</b></td><td>${lab}</td><td>${pen ? 'Wall crossing, ' : ''}${esc(E[other].m)} <span class="small">${esc(descOf(E[other]))}</span></td></tr>`;
+}
+function ghostToggle(){ return `<label class="layer" style="grid-template-columns:18px 1fr;margin-top:10px"><input type="checkbox" id="ghostChk" ${st.ghost ? 'checked' : ''}><span>Fade other parts</span></label>`; }
+selPaneChange();
+function selPaneChange(){ document.addEventListener('change', e => { if (e.target.id === 'ghostChk'){ st.ghost = e.target.checked; refresh(); } }); }
+function renderBwh(d){
+  const o = d.bwh, [u,v] = crossAx(o.ax), a0 = o.s0, a1 = o.s1;
+  const col = d.prop ? PROP_COL : LAYER[BWH_KEY].col;
+  const cen = [0,1,2].map(ax => (o.b[ax]+o.b[ax+3])/2);
+  let h = `<section class="sec"><div class="chip"><i style="background:${col}"></i>Builders’ work hole</div>
+    <div style="display:flex;align-items:baseline;gap:10px;margin:8px 0 4px"><span class="mark">${esc(d.m)}</span><span class="sev ${o.status}">${d.prop ? 'Proposed' : 'Modelled'}</span><span class="sev ${o.verdict === 'empty' ? 'touch' : o.verdict}">${VERDICT[o.verdict]}</span></div>
+    <div class="rowbtns"><button class="btn" data-act="zoom">Zoom to</button><button class="btn" data-act="biso">Isolate</button><button class="btn" data-act="hide">Hide</button><button class="btn" data-act="box">Section box</button></div></section>
+    <section class="sec"><h2>Opening</h2><dl class="kv">
+    <dt>Shape</dt><dd>${o.shape === 'circ' ? 'Circular, Ø' + fmt(o.dia) : 'Rectangular, ' + fmt(o.w) + ' wide × ' + fmt(o.h) + (o.ax === 2 ? ' long' : ' high')}</dd>
+    <dt>Depth</dt><dd>${fmt(o.depth)} mm, ${o.ax === 2 ? 'vertical through the slab' : 'horizontal along ' + AXN[o.ax]}</dd>
+    <dt>Setting out</dt><dd><b>X ${fmt(cen[0])}, Y ${fmt(cen[1])}</b></dd>
+    <dt>Height</dt><dd>Centre Z ${fmt(cen[2])}, underside Z ${fmt(o.b[2])}</dd>
+    <dt>Wall</dt><dd>${o.walls.length ? o.walls.map(w => `${elLink(w)} <span class="small">${esc(SRC[E[w].s].name)}</span>`).join('<br>') : '<span class="small">Not found</span>'}</dd>`;
+  if (d.mk0) h += `<dt>Model mark</dt><dd>${esc(d.mk0)}</dd>`;
+  if (d.f) h += `<dt>Family</dt><dd>${esc(d.f)}</dd>`;
+  if (d.r) h += `<dt>Revit ID</dt><dd>${esc(d.r)}</dd>`;
+  if (d.prop) h += `<dt>Sized</dt><dd>Service plus ${o.need} mm all round, rounded up to ${R_OPEN.roundTo} mm</dd>`;
+  h += `</dl></section><section class="sec"><h2>Services through it</h2>`;
+  if (o.services.length){
+    h += `<div class="tablewrap"><table class="t"><thead><tr><th>Mark</th><th>Service</th><th>Size mm</th><th class="n">Gap mm</th></tr></thead><tbody>${o.gaps.map(x => { const s = E[x.i];
+      return `<tr class="click" data-el="${x.i}"><td><b>${esc(s.m)}</b></td><td>${esc(descOf(s))}</td><td>${svcSize(x.i, o.ax, a0, a1)}</td><td class="n"><span class="sev ${x.g < 0 ? 'clash' : x.g < x.need ? 'tight' : 'ok'}">${fmt(x.g)}</span></td></tr>`; }).join('')}</tbody></table></div>
+      <p class="small">Smallest gap ${fmt(o.minGap)} mm against ${o.need} mm needed all round. ${esc(R_OPEN.clearanceNote)}</p>`;
+  } else h += `<p class="small">No service passes through this hole in the model.</p>`;
+  h += `</section><section class="sec"><h2>Fire-stopping</h2><dl class="kv"><dt>Wall rating</dt><dd>${esc([...new Set(o.walls.map(w => E[w].fr).filter(Boolean))].join(', ') || 'Not recorded in the model')}</dd>`;
+  o.services.forEach(i => { h += `<dt>${esc(E[i].m)}</dt><dd>${esc(fireFor(i, o))}</dd>`; });
+  h += `</dl><p class="small">${esc(R_OPEN.fireStoppingNote)}</p></section>
+    <section class="sec"><h2>Coordination</h2><dl class="kv">
+    <dt>Status</dt><dd>${d.prop ? 'Not in the MEP model yet' : 'Modelled in the MEP model'}</dd>
+    ${o.review ? `<dt>Review status</dt><dd>${esc(o.review)}</dd>` : ''}
+    <dt>Review by</dt><dd>${reviewBy(o)}</dd>
+    ${o.flags && o.flags.length ? `<dt>To check</dt><dd>${o.flags.map(esc).join('<br>')}</dd>` : ''}
+    ${o.overlaps.length ? `<dt>Overlaps</dt><dd>${o.overlaps.map(elLink).join(', ')}, modelled hole</dd>` : ''}
+    <dt>Crossings</dt><dd>${o.crossings.length ? o.crossings.map(id => `<button class="link" data-cl="${id}">${id}</button>`).join(', ') : '<span class="small">None</span>'}</dd>
+    </dl></section>`;
+  selPane.innerHTML = h;
+}
+function renderSel(){
+  if (st.sel != null && E[st.sel].bwh) return renderBwh(E[st.sel]);
+  if (st.sel == null){ selPane.innerHTML = `<div class="empty">Click any part in the model, or pick one from Parts. Clash markers and diagnostic rows also open here.</div>`; return; }
+  const d = E[st.sel], L = layerOf(d);
+  const bb = d.b;
+  let h = `<section class="sec"><div class="chip"><i style="background:${LAYER[L].col}"></i>${esc(LAYER[L].name)}, ${esc(L)}</div>
+    <div style="display:flex;align-items:baseline;gap:10px;margin:8px 0 4px"><span class="mark">${esc(d.m)}</span><span>${esc(descOf(d))}</span></div>
+    <div class="rowbtns"><button class="btn" data-act="zoom">Zoom to</button><button class="btn" data-act="iso">Isolate</button><button class="btn" data-act="hide">Hide</button><button class="btn" data-act="box">Section box</button></div>${ghostToggle()}</section>
+    <section class="sec"><dl class="kv"><dt>Category</dt><dd>${esc(d.c)}</dd>`;
+  if (d.sys) h += `<dt>System</dt><dd>${esc(SYSTEM[d.sys] || d.sys)}</dd>`;
+  if (d.f) h += `<dt>Family</dt><dd>${esc(d.f)}</dd>`;
+  if (d.t) h += `<dt>Type</dt><dd>${esc(d.t)}</dd>`;
+  if (d.r) h += `<dt>Revit ID</dt><dd>${esc(d.r)}</dd>`;
+  h += `<dt>Size</dt><dd>${esc(d.z)}</dd>`;
+  if (d.sy) h += `<dt>Pipe system</dt><dd>${esc(d.sy)}<br><span class="small">Inferred from ${esc(d.ss)}</span></dd>`;
+  if (d.ins != null) h += `<dt>Insulates</dt><dd>${elLink(d.ins)}</dd>`;
+  if (d.hasins != null) h += `<dt>Insulation</dt><dd>${elLink(d.hasins)}</dd>`;
+  h += `<dt>Source</dt><dd>${srcLine(d)}</dd><dt>Layer</dt><dd>${esc(L)}${d.il ? '<br><span class="small">Inserted on ' + esc(d.il) + '</span>' : ''}</dd>`;
+  h += `<dt>Extent</dt><dd>X ${fmt(bb[0])} to ${fmt(bb[3])}<br>Y ${fmt(bb[1])} to ${fmt(bb[4])}<br>Z ${fmt(bb[2])} to ${fmt(bb[5])}</dd>`;
+  h += `<dt>Mesh</dt><dd>${fmt(d.nf)} faces${d.np ? ', joined from ' + d.np + ' plates' : ''}</dd></dl></section>`;
+  const dp = dupOf[d.i];
+  if (dp){
+    const other = dp.mep === d.i ? dp.arch : dp.mep;
+    h += `<section class="sec"><h2>Duplicate</h2><p>The same fitting also exists in the ${esc(lc(SRC[E[other].s].name))} as ${elLink(other)}, shown ghosted in pink. Plan position matches within ${dp.dxy} mm. The MEP copy sits ${fmt(dp.dz)} mm higher.</p></section>`;
+  }
+  const cs = elClashes[d.i];
+  if (cs){
+    h += `<section class="sec"><h2>Issues</h2><div class="tablewrap"><table class="t"><tbody>${cs.map(c => clashRow(c, c.a === d.i ? c.b : c.a)).join('')}</tbody></table></div></section>`;
+  }
+  selPane.innerHTML = h;
+}
+function renderClash(c){
+  const A = E[c.a], B = E[c.b];
+  const pen = c.sev === 'penetration';
+  const title = pen ? 'Wall crossing' : `${c.sev[0].toUpperCase()+c.sev.slice(1)} clash`;
+  let h = `<section class="sec"><div class="chip"><i style="background:var(--clash)"></i>${pen ? 'Service meets a linked wall' : esc(placeOf(c))}</div>
+    <div style="display:flex;align-items:baseline;gap:10px;margin:8px 0 4px"><span class="mark">${c.id}</span><span>${title}</span></div>
+    <div class="rowbtns"><button class="btn" data-act="czoom">Zoom to</button><button class="btn" data-act="ciso">Isolate pair</button><button class="btn" data-act="cbox">Section box</button></div>${ghostToggle()}</section>
+    <section class="sec"><dl class="kv">
+    ${pen ? '' : `<dt>Description</dt><dd>${esc(clashText(c))}</dd>`}
+    <dt><span class="chip"><i style="background:var(--accent)"></i>Part A</span></dt><dd>${elLink(c.a)} ${esc(descOf(A))}<br><span class="small">${esc(A.c)}</span></dd>
+    <dt><span class="chip"><i style="background:var(--clash)"></i>Part B</span></dt><dd>${elLink(c.b)} ${esc(descOf(B))}<br><span class="small">${esc(B.c)}</span></dd>
+    <dt>Location</dt><dd>X ${fmt(c.p[0])}, Y ${fmt(c.p[1])}, Z ${fmt(c.p[2])}</dd>
+    ${pen ? `<dt>Overlap</dt><dd>${c.ov.map(fmt).join(' × ')} mm<br><span class="small">Intersection of the two bounding boxes, X × Y × Z</span></dd>`
+      : `<dt>Overlap</dt><dd><b>${fmt(clDepth(c))} mm</b>, ${clDepth(c) >= TOL ? 'over' : 'within'} the ${TOL} mm tolerance<br><span class="small">Bounding boxes overlap ${c.ov.map(fmt).join(' × ')} mm, X × Y × Z</span></dd>`}
+    <dt>Contacts</dt><dd>${c.n} triangle contact${c.n>1?'s':''}</dd>`;
+  if (pen) h += `<dt>Opening</dt><dd>${c.open == null ? 'None. The service runs along the wall rather than through it' : elLink(c.open) + (E[c.open].prop ? ', proposed' : ', modelled')}</dd>`;
+  h += `</dl></section>`;
+  selPane.innerHTML = h;
+}
+selPane.addEventListener('click', e => {
+  const t = e.target.closest('[data-el],[data-cl],[data-act]'); if (!t) return;
+  if (t.dataset.el) return selectEl(+t.dataset.el, true);
+  if (t.dataset.cl) return selectClash(t.dataset.cl, true);
+  const a = t.dataset.act;
+  if (a === 'zoom') zoomToEl(st.sel);
+  if (a === 'biso') bwhIsolate([st.sel]);
+  if (a === 'iso'){ st.isolate = new Set([st.sel]); if (E[st.sel].hasins != null) st.isolate.add(E[st.sel].hasins); if (E[st.sel].ins != null) st.isolate.add(E[st.sel].ins); refresh(); zoomToEl(st.sel); showIsoBanner(); }
+  if (a === 'hide'){ st.hidden.add(st.sel); st.sel = null; refresh(); renderSel(); showIsoBanner(); }
+  if (a === 'box') boxAround(E[st.sel].b, 150);
+  const c = st.selClash;
+  if (a === 'czoom') selectClash(c.id, true);
+  if (a === 'ciso'){ st.isolate = new Set([c.a, c.b]); refresh(); selectClash(c.id, true); showIsoBanner(); }
+  if (a === 'cbox'){ const r = Math.max(...c.ov)/2 + 250; boxAround([c.p[0]-r,c.p[1]-r,c.p[2]-r,c.p[0]+r,c.p[1]+r,c.p[2]+r], 0); }
+});
+function showIsoBanner(){
+  const on = st.isolate || st.hidden.size || st.bwhIso;
+  let b = $('#isoBanner');
+  if (on && !b){ b = document.createElement('div'); b.id='isoBanner'; b.style.cssText='position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:3'; b.innerHTML='<button class="btn" style="background:var(--panel)">Show everything again</button>'; stage.appendChild(b);
+    b.firstChild.addEventListener('click', () => { st.isolate = null; st.bwhIso = null; st.hidden.clear(); refresh(); showIsoBanner(); renderOpenings(); }); }
+  if (!on && b) b.remove();
+}
+function boxAround(b, pad){
+  for (let ax=0; ax<3; ax++){
+    const span = M.bmax[ax]-M.bmin[ax];
+    st.clip[ax*2] = Math.max(0, Math.min(1000, Math.round((b[ax]-pad-M.bmin[ax])/span*1000)));
+    st.clip[ax*2+1] = Math.max(0, Math.min(1000, Math.round((b[ax+3]+pad-M.bmin[ax])/span*1000)));
+  }
+  st.boxOn = true; $('#boxBtn').setAttribute('aria-pressed', 'true');
+  syncClipUI(); applyClip();
+  const a = new THREE.Vector3(...[0,1,2].map(ax => mmToW(clipVal(ax*2),ax))), c = new THREE.Vector3(...[0,1,2].map(ax => mmToW(clipVal(ax*2+1),ax)));
+  fitTo(new THREE.Box3(a,c));
+}
+
+/* ---------- left panel UI ---------- */
+const app = $('#app');
+const counts = M.layers.map((_,l) => E.filter(d => d.l === l).length);
+function syncLayerUI(){
+  document.querySelectorAll('.layer[data-l]').forEach(r => { const l=+r.dataset.l; r.querySelector('input').checked = st.layerOn[l]; r.classList.toggle('off', !st.layerOn[l]); });
+  document.querySelectorAll('.layer[data-ln]').forEach(r => { const k=r.dataset.ln; r.querySelector('input').checked = st.lineOn[k]; r.classList.toggle('off', !st.lineOn[k]); });
+  document.querySelectorAll('.layer[data-s]').forEach(r => { const k=r.dataset.s; r.querySelector('input').checked = st.srcOn[k]; r.classList.toggle('off', !st.srcOn[k]); });
+}
+function buildLayers(){
+  let h = '';
+  M.layers.forEach((L,l) => {
+    const s = LAYER[L];
+    h += `<label class="layer" data-l="${l}"><input type="checkbox" checked><span class="sw" style="background:${s.col}"></span>
+      <span class="nm">${esc(s.name)}<small>${esc(s.desc)}</small></span><span><span class="code">${esc(L)}</span> <button type="button" class="solo" data-solo="${l}" title="Show only this layer">only</button></span></label>`;
+  });
+  M.line_layers.forEach(L => {
+    const s = LINES[L];
+    h += `<label class="layer" data-ln="${L}"><input type="checkbox" checked><span class="sw ${s.dash ? 'dash' : 'line'}" style="border-color:${s.col}"></span>
+      <span class="nm">${esc(s.name)}<small>${esc(s.desc)}</small></span><span class="code">${esc(L)}</span></label>`;
+  });
+  $('#layerList').innerHTML = h;
+  $('#layerList').addEventListener('change', e => {
+    const r = e.target.closest('.layer');
+    if (r.dataset.l != null) st.layerOn[+r.dataset.l] = e.target.checked; else st.lineOn[r.dataset.ln] = e.target.checked;
+    syncLayerUI(); refresh();
+  });
+  $('#layerList').addEventListener('click', e => {
+    const b = e.target.closest('[data-solo]'); if (!b) return; e.preventDefault();
+    const l = +b.dataset.solo; st.layerOn = st.layerOn.map((_,k) => k === l || (WALLS.has(k) && (WALLS.has(l) || l === BWH_L)) ); syncLayerUI(); refresh();
+  });
+  $('#allLayers').onclick = () => { st.layerOn = st.layerOn.map(()=>true); st.lineOn = Object.fromEntries(M.line_layers.map(L => [L, true])); st.srcOn = Object.fromEntries(MODELS.map(k => [k, true])); syncLayerUI(); refresh(); };
+  let s = '';
+  for (const k of MODELS){
+    const n = E.filter(d => d.s === k && !d.prop).length;
+    s += `<label class="layer" data-s="${k}" style="grid-template-columns:18px 1fr auto"><input type="checkbox" checked><span class="nm">${esc(SRC[k].name)}<small>${esc(SRC[k].desc)}</small></span><span class="code">${n}</span></label>`;
+  }
+  $('#srcList').innerHTML = s;
+  $('#srcList').addEventListener('change', e => { st.srcOn[e.target.closest('.layer').dataset.s] = e.target.checked; syncLayerUI(); refresh(); });
+}
+function buildDim(){
+  $('#dimList').innerHTML = M.layers.map((L, l) => `<label class="dimrow" for="dim${l}"><span>${esc(LAYER[L].name)}</span><input type="range" id="dim${l}" min="0" max="100" value="${Math.round(layerOp[l]*100)}"><output id="dimOut${l}">${Math.round(layerOp[l]*100)}%</output></label>`).join('');
+  $('#dimList').addEventListener('input', e => {
+    const l = +e.target.id.slice(3); if (Number.isNaN(l)) return;
+    layerOp[l] = Math.max(+e.target.value/100, 0.001); setLayerOpacity(l, layerOp[l]); $('#dimOut'+l).textContent = e.target.value + '%'; req();
+  });
+}
+function buildClipUI(){
+  let h = '';
+  for (let ax=0; ax<3; ax++){
+    h += `<div class="axis"><div class="lab">${AX[ax]} <span><span id="clipOut${ax*2}"></span> to <span id="clipOut${ax*2+1}"></span></span></div>
+      <div class="pair"><input type="range" min="0" max="1000" value="0" id="clip${ax*2}" aria-label="${AX[ax]} from"><input type="range" min="0" max="1000" value="1000" id="clip${ax*2+1}" aria-label="${AX[ax]} to"></div></div>`;
+  }
+  $('#clipUI').innerHTML = h;
+  for (let k=0;k<6;k++){
+    $('#clip'+k).addEventListener('input', e => {
+      let v = +e.target.value; const pair = k ^ 1;
+      if (k % 2 === 0 && v > st.clip[pair]-5) v = st.clip[pair]-5;
+      if (k % 2 === 1 && v < st.clip[pair]+5) v = st.clip[pair]+5;
+      st.clip[k] = v; e.target.value = v; applyClip();
+    });
+  }
+  $('#clipReset').onclick = () => { st.clip = [0,1000,0,1000,0,1000]; syncClipUI(); applyClip(); };
+  $('#clipSel').onclick = () => { if (st.sel != null) boxAround(E[st.sel].b, 150); else if (st.selClash){ const c=st.selClash, r=Math.max(...c.ov)/2+250; boxAround([c.p[0]-r,c.p[1]-r,c.p[2]-r,c.p[0]+r,c.p[1]+r,c.p[2]+r],0); } };
+}
+function syncClipUI(){ for (let k=0;k<6;k++) $('#clip'+k).value = st.clip[k]; }
+
+/* ---------- parts list ---------- */
+function buildParts(){
+  const groups = {};
+  E.forEach(d => (groups[d.c] ||= []).push(d));
+  const cats = CAT_ORDER.filter(c => groups[c]).concat(Object.keys(groups).filter(c => !CAT_ORDER.includes(c)));
+  let h = '';
+  for (const c of cats){
+    const items = groups[c].slice().sort((a,b) => a.m.localeCompare(b.m, 'en', {numeric:true}));
+    const col = LAYER[layerOf(items[0])].col;
+    h += `<details class="grp" data-cat="${esc(c)}"><summary><span class="nm"><span class="chip" style="color:inherit"><i style="background:${col}"></i>${esc(c)}</span></span><span class="ct">${items.length}</span></summary>`;
+    for (const d of items){
+      const sub = descOf(d);
+      const hay = [d.m, d.mk0, descOf(d), d.c, d.f, d.t, d.r, d.z, d.sy, layerOf(d)].join(' ').toLowerCase();
+      h += `<button class="part" data-el="${d.i}" data-hay="${esc(hay)}"><b>${esc(d.m)}</b><span>${esc(sub)}</span></button>`;
+    }
+    h += `</details>`;
+  }
+  $('#partList').innerHTML = h;
+  $('#partList').addEventListener('click', e => { const b = e.target.closest('.part'); if (b) selectEl(+b.dataset.el, true); });
+  $('#partList').addEventListener('pointerover', e => { const b = e.target.closest('.part'); setHover(b ? +b.dataset.el : null); });
+  $('#partList').addEventListener('pointerleave', () => setHover(null));
+  $('#search').addEventListener('input', e => {
+    const q = e.target.value.trim().toLowerCase();
+    document.querySelectorAll('#partList details').forEach(g => {
+      let n = 0;
+      g.querySelectorAll('.part').forEach(p => { const ok = !q || p.dataset.hay.includes(q); p.style.display = ok ? '' : 'none'; if (ok) n++; });
+      g.style.display = n ? '' : 'none'; g.open = !!q && n > 0 && n < 40;
+      g.querySelector('.ct').textContent = q ? n + ' of ' + g.querySelectorAll('.part').length : g.querySelectorAll('.part').length;
+    });
+  });
+}
+function markPart(i){
+  document.querySelectorAll('.part.on').forEach(p => p.classList.remove('on'));
+  if (i == null) return;
+  const p = document.querySelector(`.part[data-el="${i}"]`); if (p){ p.classList.add('on'); }
+}
+
+/* ---------- clashes ---------- */
+const TOL = R_CL.tolerance;                                     // clash tolerance, mm
+// grades in severity order; one marked not actionable (surfaces only touch) stays out of Fix first and issue counts
+const GRADES = R_CL.grades, ACTIONABLE = new Set(GRADES.filter(g => g.actionable !== false).map(g => g.id));
+const SEV_ORDER = Object.fromEntries(GRADES.map((g, k) => [g.id, k])), SEV_COL = Object.fromEntries(GRADES.map(g => [g.id, g.colour]));
+const SVC_CL = CL.filter(c => c.sev !== 'penetration');
+const clDepth = c => c.depth ?? Math.min(...c.ov);          // measured on the intersection solid when the package has it
+const parentOf = i => E[i].ins != null ? E[i].ins : i;
+function clashText(c){
+  const A = E[c.a], B = E[c.b], part = d => `${d.m} (${descOf(d)})`;
+  if (A.ins != null || B.ins != null){ const [s, ins] = A.ins != null ? [B, A] : [A, B]; return `${part(s)} cuts into the insulation of ${part(E[ins.ins])} by ${fmt(clDepth(c))} mm.`; }
+  if (!ACTIONABLE.has(c.sev)) return `${part(A)} touches ${part(B)}.`;
+  return `${part(A)} clashes with ${part(B)} by ${fmt(clDepth(c))} mm.`;
+}
+// the parts that would clear the most clashes if moved; insulation counts with what it insulates
+const TRIAGE = (() => {
+  const m = {};
+  SVC_CL.filter(c => ACTIONABLE.has(c.sev)).forEach(c => [parentOf(c.a), parentOf(c.b)].forEach(i => (m[i] ||= new Set()).add(c)));
+  return Object.entries(m).map(([i, set]) => ({i:+i, n:set.size, major:[...set].filter(c => c.sev === 'major').length}))
+    .filter(x => x.n > 1).sort((a,b) => b.n - a.n || b.major - a.major).slice(0, 5);
+})();
+const clRows = () => SVC_CL.filter(c => st.clFilter === 'all' || c.sev === st.clFilter).sort((a,b) => SEV_ORDER[a.sev] - SEV_ORDER[b.sev] || a.id.localeCompare(b.id, 'en', {numeric:true}));
+const RULE = esc(R_CL.summary);
+function renderClashes(){
+  const cnt = sv => SVC_CL.filter(c => c.sev === sv).length, list = clRows();
+  const nP = OPEN.filter(i => E[i].prop).length, nIss = OPEN.filter(i => E[i].bwh.verdict !== 'ok').length;
+  const F = [['all','All',SVC_CL.length], ...GRADES.map(g => [g.id, g.name, cnt(g.id)])];
+  $('#tab-clash').innerHTML = `<section class="sec"><h2>${esc(cap(P.project.scope || 'model'))} check</h2><div class="stats">
+      <div class="stat"><span>Clashes</span><b>${SVC_CL.length}</b><small>${GRADES.map(g => cnt(g.id) + ' ' + esc(lc(g.name))).join(', ')}</small></div>
+      <div class="stat"><span>Openings</span><b>${OPEN.length}</b><small>${nP} proposed, ${nIss} below rule</small></div>
+      <div class="stat"><span>Zoning</span>${P.checks?.zoning ? `<b>${esc(P.checks.zoning.status)}</b><small>${esc(P.checks.zoning.summary || '')}</small>` : '<b>Not set</b><small>Needs zone heights</small>'}</div></div></section>
+    <section class="sec"><h2>Fix first</h2><div class="tablewrap"><table class="t"><tbody>
+      ${TRIAGE.map(x => `<tr class="click" data-el="${x.i}"><td><b>${esc(E[x.i].m)}</b></td><td>${esc(descOf(E[x.i]))}</td><td class="n">Clears ${x.n}${x.major ? `<br><span class="small">${x.major} major</span>` : ''}</td></tr>`).join('')}
+    </tbody></table></div></section>
+    <section class="sec"><h2>Clashes</h2><p class="small">${RULE}</p>
+      <nav class="views filter" aria-label="Filter clashes">${F.map(([k,t,n]) => `<button data-cf="${esc(k)}" class="${st.clFilter === k ? 'on' : ''}">${esc(t)} ${n}</button>`).join('')}</nav>
+      <div class="rowbtns"><button class="btn" data-cact="report">Clash report</button></div></section>
+    <div class="tablewrap" style="padding:0 12px 16px"><table class="t"><thead><tr><th>ID</th><th>Grade</th><th>Description</th><th class="n">mm</th></tr></thead><tbody>
+      ${list.map(c => `<tr class="click" data-cl="${c.id}"><td><b>${c.id}</b></td><td><span class="sev ${c.sev}">${c.sev}</span></td><td>${esc(clashText(c))}</td><td class="n"><span class="${clDepth(c) >= TOL ? 'over' : ''}">${fmt(clDepth(c))}</span></td></tr>`).join('')}
+    </tbody></table></div>`;
+}
+$('#tab-clash').addEventListener('click', e => {
+  const f = e.target.closest('[data-cf]'); if (f){ st.clFilter = f.dataset.cf; renderClashes(); req(); return; }
+  if (e.target.closest('[data-cact]')) return clashReport();
+  const r = e.target.closest('[data-cl],[data-el]'); if (!r) return;
+  if (r.dataset.cl) selectClash(r.dataset.cl, true); else selectEl(+r.dataset.el, true);
+});
+
+/* clash report: a printable page with an image of every clash, captured offscreen */
+let shot = null;
+function stamp(src, marks, camera, r){
+  const cv = document.createElement('canvas'); cv.width = src.width; cv.height = src.height;
+  const g = cv.getContext('2d'); g.drawImage(src, 0, 0);
+  g.font = `600 ${r > 16 ? 22 : 15}px "Barlow Semi Condensed", Arial, sans-serif`; g.textBaseline = 'middle';
+  for (const m of marks){
+    const v = m.p.clone().project(camera); if (v.z > 1) continue;
+    const x = (v.x+1)/2*cv.width, y = (1-v.y)/2*cv.height;
+    g.lineWidth = r > 16 ? 3 : 2; g.strokeStyle = m.col; g.beginPath(); g.arc(x, y, r, 0, Math.PI*2); g.stroke();
+    const w = g.measureText(m.label).width + 12, hh = r > 16 ? 28 : 20;
+    g.fillStyle = m.col; g.fillRect(x + r + 3, y - hh/2, w, hh); g.fillStyle = '#fff'; g.fillText(m.label, x + r + 9, y);
+  }
+  return cv.toDataURL('image/jpeg', 0.86);
+}
+const clashPoint = c => new THREE.Vector3(mmToW(c.p[0],0), mmToW(c.p[1],1), mmToW(c.p[2],2)).add(E[c.a].off);
+function clashImages(list){
+  const W = 1200, H = 750;
+  if (!shot){ shot = new THREE.WebGLRenderer({antialias:true, preserveDrawingBuffer:true}); shot.setPixelRatio(1); }
+  shot.setSize(W, H, false);
+  shot.setClearColor('#E6EAE9'); shot.localClippingEnabled = false;
+  const keep = {sel:st.sel, selClash:st.selClash, ghost:st.ghost, hover:st.hover, m:mLine.visible, dots:mDots.map(s => s.visible)};
+  boxHelper.visible = false; handles.forEach(g => g.visible = false); mLine.visible = false; mDots.forEach(s => s.visible = false);
+  st.sel = null; st.hover = null; st.ghost = true;
+  const pc = new THREE.PerspectiveCamera(38, W/H, 0.01, 400); pc.up.set(0,0,1);
+  const dir = new THREE.Vector3(...VIEWS.iso).normalize(), out = {};
+  for (const c of list){
+    st.selClash = c; refresh();
+    const p = clashPoint(c), r = Math.max(Math.max(...c.ov)/1000*0.9, 0.45);
+    pc.position.copy(p).addScaledVector(dir, r / Math.sin(THREE.MathUtils.degToRad(19))); pc.lookAt(p); pc.updateMatrixWorld();
+    shot.render(scene, pc);
+    out[c.id] = stamp(shot.domElement, [{p, label:c.id, col:SEV_COL[c.sev]}], pc, 26);
+  }
+  // overview: the corridor from above with every clash in the report
+  st.selClash = null; refresh();
+  // sized to the corridor's proportions so the plan fills the image
+  const OW = 1600, OH = Math.max(360, Math.min(1000, Math.round(OW * (W1.y-W0.y)/(W1.x-W0.x) * 1.12)));
+  shot.setSize(OW, OH, false);
+  const cx = (W0.x+W1.x)/2, cy = (W0.y+W1.y)/2, half = Math.max((W1.y-W0.y)/2, (W1.x-W0.x)/2/(OW/OH))*1.04;
+  const oc = new THREE.OrthographicCamera(-half*OW/OH, half*OW/OH, half, -half, -400, 400); oc.up.set(0,1,0);
+  oc.position.set(cx, cy, 50); oc.lookAt(cx, cy, 0); oc.updateMatrixWorld();
+  shot.render(scene, oc);
+  out.overview = stamp(shot.domElement, list.map(c => ({p:clashPoint(c), label:c.id, col:SEV_COL[c.sev]})), oc, 9);
+  Object.assign(st, {sel:keep.sel, selClash:keep.selClash, ghost:keep.ghost, hover:keep.hover});
+  mLine.visible = keep.m; mDots.forEach((s, k) => s.visible = keep.dots[k]);
+  refresh(); applyClip();
+  return out;
+}
+function clashReport(){
+  const win = window.open('', '_blank'); if (!win) return;
+  win.document.write('<p style="font:16px Arial, sans-serif; padding:24px">Preparing the clash report</p>');
+  const list = clRows(), img = clashImages(list);
+  const issued = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+  const cnt = sv => list.filter(c => c.sev === sv).length;
+  const sev = c => `<span class="sev" style="color:${SEV_COL[c.sev]}">${esc(GRADES[SEV_ORDER[c.sev]].name)}</span>`;
+  const part = d => `<b>${esc(d.m)}</b> ${esc(descOf(d))}<br><span>${esc(d.c)}${d.sy ? ', ' + esc(d.sy) : ''}, ${esc(SRC[d.s].name)}</span>`;
+  const R = P.reports.clash, title = esc(R.title);
+  const SECTION = {
+    summary:() => `<h1>${title}</h1>
+<p class="meta">Issued ${issued}. ${esc(R.source || '')}</p>
+<div class="kpis"><div class="kpi"><b>${list.length}</b><span>Clashes in this report</span></div>${GRADES.map(g => `<div class="kpi"><b>${cnt(g.id)}</b><span>${esc(g.name)}</span></div>`).join('')}</div>
+<p class="rule">${RULE}</p>`,
+    locations:() => `<h2>Locations</h2><img src="${img.overview}" alt="Plan of the ${esc(P.project.scope || 'model')} with every clash marked">`,
+    fixFirst:() => `<h2>Fix first</h2>
+<table><thead><tr><th>Part</th><th>Description</th><th class="n">Clashes it clears</th><th class="n">Major</th></tr></thead><tbody>
+${TRIAGE.map(x => `<tr><td><b>${esc(E[x.i].m)}</b></td><td>${esc(descOf(E[x.i]))}</td><td class="n">${x.n}</td><td class="n">${x.major}</td></tr>`).join('')}
+</tbody></table>`,
+    table:() => `<h2>Summary</h2>
+<table><thead><tr><th>ID</th><th>Grade</th><th>Description</th><th class="n">X</th><th class="n">Y</th><th class="n">Z</th><th class="n">Overlap mm</th></tr></thead><tbody>
+${list.map(c => `<tr><td><b>${c.id}</b></td><td>${sev(c)}</td><td>${esc(clashText(c))}</td><td class="n">${fmt(c.p[0])}</td><td class="n">${fmt(c.p[1])}</td><td class="n">${fmt(c.p[2])}</td><td class="n${clDepth(c) >= TOL ? ' over' : ''}">${fmt(clDepth(c))}</td></tr>`).join('')}
+</tbody></table>`,
+    cards:() => `<h2 class="pb">Clashes</h2>
+${list.map(c => { const A = E[c.a], B = E[c.b]; return `<section class="card"><header><h3>${c.id}</h3>${sev(c)}<span>${esc(placeOf(c))}</span></header>
+<img src="${img[c.id]}" alt="${c.id}, ${esc(A.m)} and ${esc(B.m)}">
+<p class="desc">${esc(clashText(c))}</p>
+<dl><dt>Location</dt><dd>X ${fmt(c.p[0])}, Y ${fmt(c.p[1])}, Z ${fmt(c.p[2])}</dd>
+<dt>Overlap</dt><dd><b class="${clDepth(c) >= TOL ? 'over' : ''}">${fmt(clDepth(c))} mm</b>, ${clDepth(c) >= TOL ? 'over' : 'within'} the ${TOL} mm tolerance<br><span>Bounding boxes overlap ${c.ov.map(fmt).join(' × ')} mm, X × Y × Z</span></dd>
+<dt>Part A</dt><dd>${part(A)}</dd><dt>Part B</dt><dd>${part(B)}</dd></dl></section>`; }).join('')}`
+  };
+  win.document.open();
+  win.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<style>
+@page{size:A4; margin:14mm}
+*{box-sizing:border-box}
+body{margin:0; font:13px/1.45 Barlow, Arial, sans-serif; color:#1C2228; background:#fff}
+main{max-width:900px; margin:0 auto; padding:28px 24px 60px}
+h1,h2,h3{font-family:"Barlow Semi Condensed", Arial, sans-serif; font-weight:600; margin:0}
+h1{font-size:28px; line-height:1.1} h2{font-size:19px; margin:30px 0 10px} h3{font-size:22px}
+.bar{position:sticky; top:0; z-index:2; background:#fff; border-bottom:1px solid #D5DBDF; padding:10px 24px; display:flex; justify-content:space-between; align-items:center; gap:12px}
+.bar button{font:500 14px "Barlow Semi Condensed", Arial, sans-serif; padding:6px 12px; border:1px solid #1C2228; background:#1C2228; color:#fff; border-radius:5px; cursor:pointer}
+.meta,.rule{color:#57636E} .meta{margin-top:6px} .rule{font-size:12.5px; max-width:75ch; margin-top:10px}
+.kpis{display:flex; gap:10px; margin:18px 0 0; flex-wrap:wrap}
+.kpi{border:1px solid #D5DBDF; border-radius:5px; padding:8px 14px} .kpi b{display:block; font:600 24px/1.1 "Barlow Semi Condensed", Arial, sans-serif} .kpi span{color:#57636E; font-size:12px}
+img{width:100%; display:block; border:1px solid #D5DBDF; border-radius:4px}
+table{width:100%; border-collapse:collapse; font-size:12.5px}
+th{text-align:left; font:600 12px "Barlow Semi Condensed", Arial, sans-serif; color:#57636E; border-bottom:1px solid #97A2AC; padding:4px 8px 4px 0}
+td{border-bottom:1px solid #D5DBDF; padding:5px 8px 5px 0; vertical-align:top} .n{text-align:right; font-variant-numeric:tabular-nums}
+.sev{font:600 12px "Barlow Semi Condensed", Arial, sans-serif; padding:1px 7px; border-radius:20px; border:1px solid currentColor; white-space:nowrap}
+.card{break-inside:avoid; page-break-inside:avoid; border-top:2px solid #1C2228; padding-top:10px; margin-top:26px}
+.card header{display:flex; align-items:baseline; gap:10px; margin-bottom:8px; color:#57636E}
+.card header h3{color:#1C2228}
+.desc{font-size:14.5px; margin:10px 0 4px}
+dl{display:grid; grid-template-columns:110px 1fr; gap:4px 12px; margin:8px 0 0} dt{color:#57636E} dd{margin:0} dd span{color:#57636E}
+.over{color:#D9361C; font-weight:600}
+@media print{ .bar{display:none} main{padding:0; max-width:none} h2{break-after:avoid} .pb{break-before:page} }
+</style></head><body>
+<div class="bar"><span>${title}</span><button type="button" onclick="print()">Print or save as PDF</button></div>
+<main>
+${R.sections.map(k => SECTION[k] ? SECTION[k]() : '').join('\n')}
+</main></body></html>`);
+  win.document.close();
+}
+
+/* ---------- openings ---------- */
+const bw = {filter:'all', checked:new Set()};
+const bwhRows = () => OPEN.filter(i => { const o = E[i].bwh; return bw.filter === 'all' || (bw.filter === 'issue' ? o.verdict !== 'ok' : o.status === bw.filter); });
+function bwhIsolate(list){
+  const set = new Set();
+  list.forEach(i => { set.add(i); E[i].bwh.services.forEach(k => { set.add(k); if (E[k].hasins != null) set.add(E[k].hasins); }); });
+  st.bwhIso = set; st.isolate = null; st.layerOn[BWH_L] = true; st.srcOn[HOST] = true; syncLayerUI(); refresh();
+  const box = new THREE.Box3(); set.forEach(i => box.union(meshes[i].geometry.boundingBox.clone().translate(E[i].off)));
+  fitTo(box.expandByScalar(0.25)); showIsoBanner(); renderOpenings();
+}
+function renderOpenings(){
+  const list = bwhRows(), nP = OPEN.filter(i => E[i].prop).length, nIss = OPEN.filter(i => E[i].bwh.verdict !== 'ok').length;
+  const nChk = [...bw.checked].filter(i => list.includes(i)).length;
+  const F = [['all','All'],['proposed','Proposed'],['modelled','Modelled'],['issue','Below rule']];
+  $('#tab-open').innerHTML = `<section class="sec"><h2>Builders’ work holes</h2>
+    <p class="small">${OPEN.length - nP} modelled, ${nP} proposed where a service crosses a wall with no hole. ${nIss} fall short of the clearance rule.</p>
+    <nav class="views filter" aria-label="Filter openings">${F.map(([k,t]) => `<button data-bf="${k}" class="${bw.filter === k ? 'on' : ''}">${t}</button>`).join('')}</nav>
+    <div class="rowbtns"><button class="btn" data-bact="iso" aria-pressed="${!!st.bwhIso}">${st.bwhIso ? 'End isolation' : nChk ? 'Isolate ' + nChk + ' checked' : 'Isolate ' + list.length}</button><button class="btn" data-bact="xlsx">Download Excel schedule</button></div></section>
+    <div class="tablewrap" style="padding:0 12px 16px"><table class="t"><thead><tr><th></th><th>Mark</th><th>Opening mm</th><th>Services</th><th class="n">Gap mm</th></tr></thead><tbody>
+    ${list.map(i => { const d = E[i], o = d.bwh;
+      return `<tr class="click" data-el="${i}"><td class="chk"><input type="checkbox" data-chk="${i}" ${bw.checked.has(i) ? 'checked' : ''} aria-label="Select ${esc(d.m)}"></td>
+        <td><b>${esc(d.m)}</b><br><span class="sev ${o.status}">${d.prop ? 'proposed' : 'modelled'}</span></td>
+        <td>${openSize(o)}<br><span class="small">${fmt(o.depth)} deep</span></td>
+        <td>${o.services.map(k => esc(E[k].m)).join(', ') || '<span class="small">None</span>'}</td>
+        <td class="n">${o.minGap == null ? '' : `<span class="sev ${o.verdict}">${fmt(o.minGap)}</span>`}</td></tr>`; }).join('')}
+    </tbody></table></div>`;
+}
+/* Excel schedule: a minimal .xlsx (stored zip of SpreadsheetML parts) */
+const xesc = v => String(v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const colName = n => { let t = ''; for (n++; n; n = Math.floor((n-1)/26)) t = String.fromCharCode(65 + (n-1)%26) + t; return t; };
+// rows are arrays of [value, style]; numbers become numeric cells
+function sheetXml(rows, widths, opt={}){
+  const body = rows.map((r, y) => `<row r="${y+1}">${r.map(([v, st], x) => {
+    if (v === '' || v == null) return st ? `<c r="${colName(x)}${y+1}" s="${st}"/>` : '';
+    const ref = `${colName(x)}${y+1}"${st ? ` s="${st}"` : ''}`;
+    return typeof v === 'number' ? `<c r="${ref}><v>${v}</v></c>` : `<c r="${ref} t="inlineStr"><is><t xml:space="preserve">${xesc(v)}</t></is></c>`;
+  }).join('')}</row>`).join('');
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>
+<sheetViews><sheetView workbookViewId="0">${opt.freeze ? `<pane ySplit="${opt.freeze}" topLeftCell="A${opt.freeze+1}" activePane="bottomLeft" state="frozen"/>` : ''}</sheetView></sheetViews>
+<cols>${widths.map((w, x) => `<col min="${x+1}" max="${x+1}" width="${w}" customWidth="1"/>`).join('')}</cols>
+<sheetData>${body}</sheetData>${opt.filter ? `<autoFilter ref="${opt.filter}"/>` : ''}
+<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup paperSize="8" orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>`;
+}
+const CRC = (() => { const t = new Uint32Array(256); for (let n=0; n<256; n++){ let c = n; for (let k=0; k<8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = b => { let c = 0xFFFFFFFF; for (let k=0; k<b.length; k++) c = CRC[(c ^ b[k]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function zipStore(files){
+  const enc = new TextEncoder(), now = new Date();
+  const date = ((now.getFullYear()-1980) << 9) | ((now.getMonth()+1) << 5) | now.getDate();
+  const parts = [], central = []; let off = 0;
+  for (const [name, text] of files){
+    const nm = enc.encode(name), data = enc.encode(text), crc = crc32(data);
+    const h = new DataView(new ArrayBuffer(30));
+    [[0,0x04034b50,4],[4,20,2],[6,0x0800,2],[8,0,2],[10,0,2],[12,date,2],[14,crc,4],[18,data.length,4],[22,data.length,4],[26,nm.length,2],[28,0,2]].forEach(([o,v,n]) => n === 4 ? h.setUint32(o,v,true) : h.setUint16(o,v,true));
+    const c = new DataView(new ArrayBuffer(46));
+    [[0,0x02014b50,4],[4,20,2],[6,20,2],[8,0x0800,2],[10,0,2],[12,0,2],[14,date,2],[16,crc,4],[20,data.length,4],[24,data.length,4],[28,nm.length,2],[30,0,2],[32,0,2],[34,0,2],[36,0,2],[38,0,4],[42,off,4]].forEach(([o,v,n]) => n === 4 ? c.setUint32(o,v,true) : c.setUint16(o,v,true));
+    parts.push(h, nm, data); central.push(c, nm); off += 30 + nm.length + data.length;
+  }
+  const size = central.reduce((a, p) => a + p.byteLength, 0), e = new DataView(new ArrayBuffer(22));
+  [[0,0x06054b50,4],[4,0,2],[6,0,2],[8,files.length,2],[10,files.length,2],[12,size,4],[16,off,4],[20,0,2]].forEach(([o,v,n]) => n === 4 ? e.setUint32(o,v,true) : e.setUint16(o,v,true));
+  return new Blob([...parts, ...central, e], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+function bwhXLSX(){
+  const T = 4, H = 1, PL = 2, N = 3, W = 6, B = 5;               // styles: title, header, plain, number, wrapped text, bold text
+  const R = P.reports.holeSchedule, nP = OPEN.filter(i => E[i].prop).length;
+  const issued = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+  // one cell per column id: [value, style]
+  const COL = {
+    ref:(d) => [d.m, B], status:(d) => [d.prop ? 'Proposed' : 'Modelled', PL], shape:(d, o, c, circ) => [circ ? 'Circular' : 'Rectangular', PL],
+    size:(d, o, c, circ) => [circ ? 'Ø' + Math.round(o.dia) : Math.round(o.w) + ' × ' + Math.round(o.h), PL],
+    width:(d, o, c, circ) => [circ ? '' : Math.round(o.w), N], height:(d, o, c, circ) => [circ ? '' : Math.round(o.h), N],
+    diameter:(d, o, c, circ) => [circ ? Math.round(o.dia) : '', N], depth:(d, o) => [Math.round(o.depth), N],
+    x:(d, o, c) => [c[0], N], y:(d, o, c) => [c[1], N], zCentre:(d, o, c) => [c[2], N], zUnderside:(d, o) => [Math.round(o.b[2]), N],
+    wall:(d, o) => [o.walls.map(w => E[w].m).join(', '), W], wallSource:(d, o) => [[...new Set(o.walls.map(w => SRC[E[w].s].name))].join(', '), W],
+    wallRating:(d, o) => [[...new Set(o.walls.map(w => E[w].fr).filter(Boolean))].join(', '), W],
+    services:(d, o) => [o.services.map(k => E[k].m + ' ' + descOf(E[k])).join('\n'), W],
+    serviceSizes:(d, o) => [o.services.map(k => E[k].m + ' ' + svcSize(k, o.ax, o.s0, o.s1)).join('\n'), W],
+    minGap:(d, o) => [o.minGap == null ? '' : Math.round(o.minGap), N], gapNeeded:(d, o) => [o.services.length ? o.need : '', N], clearance:(d, o) => [VERDICT[o.verdict], PL],
+    fireStopping:(d, o) => [o.services.map(k => E[k].m + ': ' + fireFor(k, o)).join('\n'), W], reviewBy:(d, o) => [reviewBy(o), W],
+    modelMark:(d) => [d.mk0 || '', PL], revitId:(d) => [d.r || '', PL], crossings:(d, o) => [o.crossings.join(', '), W],
+    overlaps:(d, o) => [o.overlaps.map(k => E[k].m).join(', '), W], siteCheck:() => ['', PL]
+  };
+  const cols = R.columns.filter(c => COL[c.id]);
+  const head = cols.map(c => c.label), widths = cols.map(c => c.width || 12);
+  const rows = [
+    [[R.title, T]],
+    [[`Issued ${issued}. ${OPEN.length} openings: ${OPEN.length - nP} modelled, ${nP} proposed.`, 0]],
+    [[R.intro || '', 0]],
+    head.map(t => [t, H])];
+  OPEN.forEach(i => { const d = E[i], o = d.bwh, c = setOut(o), circ = o.shape === 'circ';
+    rows.push(cols.map(col => COL[col.id](d, o, c, circ))); });
+  const notes = [[['Notes', T]], ...(R.notes || []).map(n => [[n.label, B], [n.text, W]])];
+  const types = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+<Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`;
+  const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
+  const last = colName(head.length-1);
+  const book = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Schedule" sheetId="1" r:id="rId1"/><sheet name="Notes" sheetId="2" r:id="rId2"/></sheets>
+<definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">Schedule!$A$4:$${last}$${rows.length}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="0">Schedule!$4:$4</definedName></definedNames></workbook>`;
+  const bookRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+  const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="#,##0"/></numFmts>
+<fonts count="3"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="14"/><name val="Calibri"/><family val="2"/></font></fonts>
+<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE6EAE9"/><bgColor indexed="64"/></patternFill></fill></fills>
+<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color rgb="FF97A2AC"/></bottom><diagonal/></border></borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="7"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top"/></xf>
+<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top"/></xf>
+<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyAlignment="1"><alignment vertical="top"/></xf>
+<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf></cellXfs>
+<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+  const sheet1 = sheetXml(rows, widths, {freeze:4, filter:`A4:${last}${rows.length}`});
+  const sheet2 = sheetXml(notes, [16, 110]);
+  const blob = zipStore([['[Content_Types].xml', types], ['_rels/.rels', rels], ['xl/workbook.xml', book], ['xl/_rels/workbook.xml.rels', bookRels], ['xl/styles.xml', styles],
+    ['xl/worksheets/sheet1.xml', sheet1], ['xl/worksheets/sheet2.xml', sheet2]]);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = R.file || 'Builders work hole schedule.xlsx'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+$('#tab-open').addEventListener('click', e => {
+  const chk = e.target.closest('[data-chk]');
+  if (chk){ const i = +chk.dataset.chk; chk.checked ? bw.checked.add(i) : bw.checked.delete(i); renderOpenings(); return; }
+  const f = e.target.closest('[data-bf]'); if (f){ bw.filter = f.dataset.bf; renderOpenings(); return; }
+  const b = e.target.closest('[data-bact]');
+  if (b){
+    if (b.dataset.bact === 'xlsx') return bwhXLSX();
+    if (st.bwhIso){ st.bwhIso = null; refresh(); showIsoBanner(); renderOpenings(); return; }
+    const list = bwhRows(), chosen = list.filter(i => bw.checked.has(i));
+    return bwhIsolate(chosen.length ? chosen : list);
+  }
+  const r = e.target.closest('[data-el]'); if (r) selectEl(+r.dataset.el, true);
+});
+
+/* ---------- notes ---------- */
+function buildDiag(){
+  const nHost = E.filter(d => d.s === HOST && !d.prop).length;
+  const catCount = {}; E.forEach(d => catCount[d.c] = (catCount[d.c]||0)+1);
+  const cats = CAT_ORDER.filter(c => catCount[c] && c !== BWH_PROP).concat(Object.keys(catCount).filter(c => !CAT_ORDER.includes(c) && c !== BWH_PROP));
+  const rowsCl = list => list.map(c => `<tr class="click" data-cl="${c.id}"><td><b>${c.id}</b></td><td><span class="sev ${c.sev}">${c.sev}</span></td><td>${esc(E[c.a].m)} and ${esc(E[c.b].m)}<br><span class="small">${esc(E[c.a].c)}, ${esc(E[c.b].c)}</span></td><td class="n">${fmt(Math.min(...c.ov))}</td></tr>`).join('');
+  const wrap = (head, body) => `<div class="tablewrap"><table class="t"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+  // tables the notes can place by name; the viewer fills them from the data
+  const TABLE = {
+    models:() => wrap('<th>Model</th><th>Rev</th><th>Content inside the box</th>',
+      `<tr><td>${esc(SRC[HOST].name)} (host)</td><td></td><td>All ${nHost} service parts</td></tr>` +
+      M.links.map(l => `<tr><td>${esc(l.label)}<br><span class="small">${esc(l.number)}</span></td><td>${esc(String(l.rev || '').replace('rev ',''))}</td><td>${Object.keys(l.contents || {}).length ? Object.entries(l.contents).map(([k,v]) => v + ' on ' + esc(k)).join(', ') : '<span class="small">Nothing. The link is attached but has no geometry in this view.</span>'}</td></tr>`).join('')),
+    clashes:() => wrap('<th>ID</th><th>Grade</th><th>Parts</th><th class="n">Min overlap mm</th>', GRADES.map(g => rowsCl(SVC_CL.filter(c => c.sev === g.id))).join('')),
+    duplicates:() => wrap('<th>MEP</th><th>Architectural copy</th><th class="n">Height gap mm</th>',
+      M.dups.slice().sort((a,b)=>E[a.mep].m.localeCompare(E[b.mep].m,'en',{numeric:true})).map(d => `<tr><td>${elLink(d.mep)}</td><td>${elLink(d.arch)}</td><td class="n">${fmt(d.dz)}</td></tr>`).join('')),
+    proposedOpenings:() => wrap('<th>Opening</th><th>Service</th><th>Wall</th>',
+      OPEN.filter(i => E[i].prop).map(i => { const o = E[i].bwh; return `<tr class="click" data-el="${i}"><td><b>${esc(E[i].m)}</b></td><td>${o.services.map(k => esc(E[k].m)).join(', ')} <span class="small">${esc(E[o.services[0]].c)}</span></td><td>${o.walls.map(w => esc(E[w].m)).join(', ')}</td></tr>`; }).join('')),
+    inventory:() => wrap('<th>Category</th><th>Layer</th><th class="n">Count</th>',
+      cats.map(c => { const d = E.find(x => x.c === c); return `<tr class="click" data-cat="${esc(c)}"><td><span class="chip" style="color:inherit"><i style="background:${LAYER[layerOf(d)].col}"></i>${esc(c)}</span></td><td class="small">${esc(layerOf(d))}</td><td class="n">${catCount[c]}</td></tr>`; }).join(''))
+  };
+  // [[MARK]] links a part, [[tab:id|Label]] opens a tab
+  const text = t => esc(t).replace(/\[\[tab:([\w-]+)\|([^\]]+)\]\]/g, '<button class="link" data-tabgo="$1">$2</button>')
+    .replace(/\[\[([^\]|]+)\]\]/g, '<button class="link" data-mk="$1">$1</button>');
+  const block = b => b.h3 != null ? `<h3>${text(b.h3)}</h3>` : b.p != null ? `<p>${text(b.p)}</p>` : b.small != null ? `<p class="small">${text(b.small)}</p>`
+    : b.table && TABLE[b.table] ? TABLE[b.table]() : '';
+  const notes = P.notes || [];
+  $('#tab-diag').innerHTML = notes.length ? notes.map(s => `<section class="sec"><h2>${esc(s.heading)}</h2>${(s.blocks || []).map(block).join('\n')}</section>`).join('\n')
+    : '<div class="empty">No notes for this model.</div>';
+  $('#tab-diag').addEventListener('click', e => {
+    const t = e.target.closest('[data-cl],[data-el],[data-mk],[data-cat],[data-tabgo]'); if (!t) return;
+    if (t.dataset.tabgo) return showTab(t.dataset.tabgo);
+    if (t.dataset.cl) return selectClash(t.dataset.cl, true);
+    if (t.dataset.el) return selectEl(+t.dataset.el, true);
+    if (t.dataset.mk){ const d = E.find(x => x.m === t.dataset.mk || x.m === t.dataset.mk.replace(/-(\d)$/,'-0$1')); if (d) selectEl(d.i, true); return; }
+    if (t.dataset.cat){ showTab('parts'); const g = document.querySelector(`#partList details[data-cat="${CSS.escape(t.dataset.cat)}"]`); if (g){ g.open = true; g.scrollIntoView({block:'start'}); } }
+  });
+}
+
+/* ---------- title block ---------- */
+function buildTitle(){
+  // {parts}, {sectionBox} and a grade id such as {major} are filled from the model
+  const vals = {parts:nFile, sectionBox:[0,1,2].map(ax => ((M.bmax[ax]-M.bmin[ax])/1000).toFixed(1)).join(' × ') + ' m'};
+  GRADES.forEach(g => vals[g.id] = SVC_CL.filter(c => c.sev === g.id).length);
+  const fill = v => String(v ?? '').replace(/\{(\w+)\}/g, (m, k) => k in vals ? vals[k] : m);
+  const items = P.titleBlock || [], wide = items.filter(x => x.wide), rest = items.filter(x => !x.wide), nLast = rest.length % 3 || 3;
+  const cell = (x, cls) => `<div${cls ? ` class="${cls}"` : ''}><span>${esc(x.label)}</span><strong>${esc(fill(x.value))}</strong></div>`;
+  $('#titleblock').innerHTML = wide.map(x => cell(x, 'wide')).join('') + rest.map((x, k) => cell(x, k >= rest.length - nLast ? 'last' : '')).join('');
+  if (!items.length) $('#titleblock').style.display = 'none';
+}
+
+/* ---------- header wiring ---------- */
+document.querySelectorAll('.views button').forEach(b => b.addEventListener('click', () => {
+  const v = b.dataset.view;
+  if (v !== 'iso' && cam !== ortho) setProjection(true);
+  if (v === 'iso' && cam === ortho) setProjection(false);
+  setView(v);
+}));
+$('#fitBtn').onclick = () => { if (st.sel != null) zoomToEl(st.sel); else fitTo(visibleBounds()); };
+$('#projBtn').onclick = () => setProjection(cam !== ortho);
+$('#tagSel').onchange = e => { st.tags = e.target.value; req(); };
+$('#mkSel').onchange = e => { st.markers = e.target.value; req(); };
+$('#measureBtn').onclick = () => setMeasure(!st.measure);
+$('#boxBtn').onclick = () => setBox(!st.boxOn);
+const mobile = () => matchMedia('(max-width: 860px)').matches;
+function syncPanelBtns(){
+  if (mobile()){ $('#modelTog').setAttribute('aria-pressed', String(app.classList.contains('mshow-left'))); $('#inspTog').setAttribute('aria-pressed', String(app.classList.contains('mshow-right'))); }
+  else { $('#modelTog').setAttribute('aria-pressed', String(!app.classList.contains('noleft'))); $('#inspTog').setAttribute('aria-pressed', String(!app.classList.contains('noright'))); }
+}
+$('#modelTog').onclick = () => { if (mobile()){ const on = app.classList.toggle('mshow-left'); if (on) app.classList.remove('mshow-right'); } else app.classList.toggle('noleft'); syncPanelBtns(); };
+$('#inspTog').onclick = () => { if (mobile()){ const on = app.classList.toggle('mshow-right'); if (on) app.classList.remove('mshow-left'); } else app.classList.toggle('noright'); syncPanelBtns(); };
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+$('#exDisc').addEventListener('input', e => { st.exDisc = +e.target.value/100; $('#exDiscOut').textContent = e.target.value + '%'; applyExplode(); });
+$('#exElem').addEventListener('input', e => { st.exElem = +e.target.value/100; $('#exElemOut').textContent = e.target.value + '%'; applyExplode(); });
+$('#contractBtn').onclick = () => {
+  const a0 = st.exDisc, b0 = st.exElem, t0 = performance.now(), dur = reduceMotion ? 0 : 450;
+  const step = now => { const k = dur ? Math.min(1,(now-t0)/dur) : 1; st.exDisc = a0*(1-k); st.exElem = b0*(1-k); applyExplode();
+    $('#exDisc').value = Math.round(st.exDisc*100); $('#exElem').value = Math.round(st.exElem*100); $('#exDiscOut').textContent = $('#exDisc').value+'%'; $('#exElemOut').textContent = $('#exElem').value+'%';
+    if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+};
+window.addEventListener('keydown', e => {
+  if (e.target.matches('input,select,textarea')) return;
+  if (e.key === 'Escape'){ if (st.measure) setMeasure(false); else clearSelection(); }
+  if (e.key === 'f' || e.key === 'F'){ $('#fitBtn').click(); }
+  if ((e.key === 'h' || e.key === 'H') && st.sel != null){ st.hidden.add(st.sel); st.sel = null; refresh(); renderSel(); showIsoBanner(); }
+  if ((e.key === 'i' || e.key === 'I') && st.sel != null){ st.isolate = new Set([st.sel]); refresh(); zoomToEl(st.sel); showIsoBanner(); }
+});
+const themeMQ = matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(){
+  renderer.setClearColor(new THREE.Color(cssVar('--canvas') || '#E6EAE9'));
+  const dk = dark();
+  for (const L of M.line_layers) lineObjs[L].material.color.set(dk ? LINES[L].dark : LINES[L].col);
+  req();
+}
+themeMQ.addEventListener ? themeMQ.addEventListener('change', applyTheme) : themeMQ.addListener(applyTheme);
+new MutationObserver(applyTheme).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+
+/* ---------- go ---------- */
+buildLayers(); buildDim(); buildClipUI(); buildParts(); buildDiag(); buildTitle(); renderOpenings(); renderClashes(); renderSel(); applyClip(); applyTheme();
+if (mobile()){ app.classList.remove('noleft','noright'); st.tags = 'off'; $('#tagSel').value = 'off'; st.markers = 'off'; $('#mkSel').value = 'off'; }
+syncPanelBtns();
+resize(); refresh();
+const startBox = new THREE.Box3(W0.clone(), W1.clone());
+{ const fb = frameBox(startBox, new THREE.Vector3(...VIEWS.iso).normalize()); controls.target.copy(fb.c); persp.position.copy(fb.pos); controls.update(); }
+loading.remove();
+window.__viewer = {st, E, OPEN, CL, fireFor, selectEl, selectClash, setView, setProjection, applyExplode, req, setBox, descOf, clashText, TRIAGE, handles, camera:() => cam};
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
