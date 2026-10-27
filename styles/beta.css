@@ -277,3 +277,13 @@ button.chip:hover{background:var(--soft)}
 .project dt{color:var(--ink-muted); font-size:12.5px}
 .beta .project dd{margin:0; font-size:1.25rem; font-weight:600; letter-spacing:-.02em}
 @media (max-width:720px){.projects{grid-template-columns:1fr}}
+
+/* TALO Viewer: a project's password */
+.unlock{max-width:400px}
+.unlock h1{font-size:1.75rem; margin:6px 0 28px}
+.unlock form{display:grid; gap:14px}
+.unlock label{display:grid; gap:6px; color:var(--ink-soft); font-size:13px}
+.unlock input{min-height:40px; padding:0 12px; border:1px solid var(--rule); border-radius:6px; background:var(--panel); font-size:15px}
+.unlock input:focus{outline:2px solid var(--info); outline-offset:1px}
+.unlock .btn-p{min-height:40px}
+.unlock-wrong{color:var(--alert); font-size:13px}
