@@ -65,6 +65,9 @@ def grid_from(annotations):
 def _dist_signed(pt, g):
     a, b = np.array(g['a']), np.array(g['b'])
     d = b - a
+    # gridlines are drawn either way round; point each one up (or right) so the sign means the same side for every line in a family
+    if (d[1] < 0) if abs(d[1]) > abs(d[0]) else (d[0] < 0):
+        d = -d
     n = np.array([-d[1], d[0]]) / (np.linalg.norm(d) or 1)
     return float(np.dot(np.array(pt[:2]) - a, n))
 

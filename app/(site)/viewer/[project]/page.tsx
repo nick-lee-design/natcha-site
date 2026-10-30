@@ -18,9 +18,11 @@ export default async function ProjectViewer({ params, searchParams }: PageProps<
   const { project } = await params;
   const p = PROJECTS.find((x) => x.id === project);
   if (!p) notFound();
+  // a saved view shared by link travels in ?view=, through the password and into the viewer
+  const { wrong, view } = await searchParams;
+  const shared = typeof view === 'string' ? view : '';
 
   if (!unlocked(p, (await cookies()).get(cookieName(p))?.value)) {
-    const { wrong } = await searchParams;
     return (
       <div className="beta beta-index">
         <Header solid />
@@ -29,6 +31,7 @@ export default async function ProjectViewer({ params, searchParams }: PageProps<
           <h1>{p.title}</h1>
           <form action="/api/viewer/unlock" method="post">
             <input type="hidden" name="project" value={p.id} />
+            {shared ? <input type="hidden" name="view" value={shared} /> : null}
             <label>
               <span>Password</span>
               <input name="password" type="password" required autoFocus autoComplete="current-password" />
@@ -44,7 +47,12 @@ export default async function ProjectViewer({ params, searchParams }: PageProps<
   return (
     <div className="experiment">
       <Header solid />
-      <iframe className="experiment-frame" src={`/experiments/ncw-corridor.html?package=${p.package}`} title={`${p.title}, model viewer`} />
+      <iframe
+        className="experiment-frame"
+        src={`/experiments/ncw-corridor.html?package=${p.package}${shared ? `&view=${encodeURIComponent(shared)}` : ''}`}
+        title={`${p.title}, model viewer`}
+        allow="clipboard-write"
+      />
     </div>
   );
 }

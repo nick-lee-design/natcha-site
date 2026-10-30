@@ -8,6 +8,8 @@ export async function POST(req: Request) {
   const p = PROJECTS.find((x) => x.id === String(form.get('project') ?? ''));
   if (!p) return Response.redirect(new URL('/viewer', req.url), 303);
   const target = new URL(`/viewer/${p.id}`, req.url);
+  const view = String(form.get('view') ?? '');
+  if (view) target.searchParams.set('view', view);
   if (passwordMatches(p, String(form.get('password') ?? ''))) {
     (await cookies()).set(cookieName(p), token(p), {
       httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 60 * 24 * 30,

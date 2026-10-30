@@ -6,14 +6,15 @@
 <title>Model viewer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --paper:#F2F4F3; --panel:#FAFBFA; --ink:#1C2228; --muted:#57636E; --rule:#D5DBDF; --rule-strong:#97A2AC;
   --canvas:#E6EAE9; --accent:#C8136A; --accent-soft:rgba(200,19,106,.10); --clash:#D9361C; --warn:#A86A12; --ok:#2C7A4B; --focus:#2457D6;
   --tip:#1C2228; --tip-ink:#F2F4F3; --bwh:#0F8B8D; --prop:#7C3AED;
-  --sans:"Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --cond:"Barlow Semi Condensed", "Arial Narrow", "Segoe UI", Arial, sans-serif;
+  --sans:"Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --cond:var(--sans);
+  --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
   color-scheme: light;
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
@@ -41,19 +42,20 @@ button,select,input{font:inherit; color:inherit}
 
 /* header */
 #bar{grid-column:1/-1; display:flex; align-items:center; gap:18px; padding:8px 14px; border-bottom:1px solid var(--rule); background:var(--panel); flex-wrap:wrap; position:relative; z-index:5}
-.ident h1{font-family:var(--cond); font-weight:600; font-size:19px; letter-spacing:.01em; margin:0; line-height:1.1}
+.ident h1{font-family:var(--cond); font-weight:600; font-size:18px; letter-spacing:-.02em; margin:0; line-height:1.1}
 .ident{min-width:0} .ident p{margin:0; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 @media (min-width: 1240px){ #bar{flex-wrap:nowrap} .tools{flex-wrap:nowrap} }
-.views{display:flex; border:1px solid var(--rule-strong); border-radius:5px; overflow:hidden}
-.views button{border:0; background:transparent; padding:5px 11px; cursor:pointer; font-family:var(--cond); font-weight:500; font-size:14px; border-right:1px solid var(--rule)}
+.views{display:flex; flex:none; border:1px solid var(--rule-strong); border-radius:5px; overflow:hidden}
+.views button{border:0; background:transparent; padding:5px 10px; cursor:pointer; font-family:var(--cond); font-weight:500; font-size:13px; border-right:1px solid var(--rule)}
 .views button:last-child{border-right:0}
 .views button.on{background:var(--ink); color:var(--paper)}
 .tools{display:flex; align-items:center; gap:8px; margin-left:auto; flex-wrap:wrap}
-.btn{border:1px solid var(--rule-strong); background:transparent; border-radius:5px; padding:5px 10px; cursor:pointer; font-family:var(--cond); font-weight:500; font-size:14px; white-space:nowrap}
+.btn{border:1px solid var(--rule-strong); background:transparent; border-radius:5px; padding:5px 10px; cursor:pointer; font-family:var(--cond); font-weight:500; font-size:13px; white-space:nowrap}
+.btn:disabled{opacity:.45; cursor:default}
 .btn[aria-pressed="true"]{background:var(--ink); color:var(--paper); border-color:var(--ink)}
 .btn:hover{border-color:var(--ink)}
-.sel{display:flex; align-items:center; gap:5px; font-family:var(--cond); font-size:14px; color:var(--muted)}
-.sel select{border:1px solid var(--rule-strong); border-radius:5px; background:var(--panel); padding:4px 6px; color:var(--ink); font-family:var(--cond); font-size:14px}
+.sel{display:flex; align-items:center; gap:5px; font-family:var(--cond); font-size:13px; color:var(--muted)}
+.sel select{border:1px solid var(--rule-strong); border-radius:5px; background:var(--panel); padding:4px 6px; color:var(--ink); font-family:var(--cond); font-size:13px}
 
 /* panels */
 .panel{background:var(--panel); overflow-y:auto; overscroll-behavior:contain; min-height:0}
@@ -73,7 +75,7 @@ button,select,input{font:inherit; color:inherit}
 .sw.dash{height:0; border:0; border-top:2px dashed; border-radius:0}
 .layer .nm{font-weight:500; line-height:1.2}
 .layer .nm small{display:block; color:var(--muted); font-size:12px; font-weight:400}
-.layer .code{font-family:var(--cond); font-size:12px; color:var(--muted)}
+.layer .code{font-family:var(--mono); font-size:11px; color:var(--muted)}
 .layer .solo{border:0; background:none; font-family:var(--cond); font-size:12.5px; color:var(--muted); cursor:pointer; padding:2px 4px; border-radius:4px; text-decoration:underline; text-underline-offset:2px}
 .layer .solo:hover{color:var(--ink)}
 .layer.off .nm,.layer.off .code{opacity:.45}
@@ -90,14 +92,14 @@ button,select,input{font:inherit; color:inherit}
 
 /* tabs */
 .tabs{display:flex; border-bottom:1px solid var(--rule); position:sticky; top:0; background:var(--panel); z-index:2}
-.tabs button{flex:1; border:0; background:none; padding:11px 4px 9px; cursor:pointer; font-family:var(--cond); font-weight:500; font-size:14.5px; color:var(--muted); border-bottom:3px solid transparent}
+.tabs button{flex:1; border:0; background:none; padding:11px 2px 9px; cursor:pointer; font-family:var(--cond); font-weight:500; font-size:13px; color:var(--muted); border-bottom:3px solid transparent}
 .tabs button.on{color:var(--ink); border-bottom-color:var(--ink)}
 .tabpane{display:none} .tabpane.on{display:block}
 
 dl.kv{display:grid; grid-template-columns:minmax(96px,auto) 1fr; gap:5px 12px; margin:0}
 dl.kv dt{color:var(--muted); font-size:13px}
 dl.kv dd{margin:0; overflow-wrap:anywhere}
-.mark{font-family:var(--cond); font-weight:600; font-size:24px; line-height:1}
+.mark{font-family:var(--mono); font-weight:700; font-size:21px; line-height:1}
 .chip{display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted)}
 .chip i{width:10px; height:10px; border-radius:2px; display:inline-block}
 .sev{font-family:var(--cond); font-weight:600; font-size:12.5px; padding:1px 7px; border-radius:20px; border:1px solid currentColor; white-space:nowrap}
@@ -111,7 +113,7 @@ dl.kv dd{margin:0; overflow-wrap:anywhere}
 .stats{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px}
 .stat{border:1px solid var(--rule); border-radius:5px; padding:8px 10px; display:grid; gap:1px; min-width:0}
 .stat span{font-size:12px; color:var(--muted)}
-.stat b{font-family:var(--cond); font-weight:600; font-size:20px; line-height:1.15}
+.stat b{font-family:var(--sans); font-weight:600; font-size:20px; line-height:1.15; letter-spacing:-.02em; font-variant-numeric:tabular-nums}
 .stat small{font-size:12px; color:var(--muted); line-height:1.3}
 .over{color:var(--clash); font-weight:600}
 table.t td.chk{width:22px; padding-right:2px} table.t td.chk input{margin:0; accent-color:var(--ink); width:15px; height:15px; cursor:pointer}
@@ -136,14 +138,14 @@ details.grp summary .nm{flex:1}
 details.grp summary .ct{color:var(--muted); font-variant-numeric:tabular-nums}
 .part{display:grid; grid-template-columns:78px 1fr; gap:8px; width:100%; text-align:left; border:0; background:none; padding:4px 4px 4px 14px; cursor:pointer; border-radius:4px; font-size:13px}
 .part:hover,.part.on{background:var(--accent-soft)}
-.part b{font-family:var(--cond); font-weight:600; font-size:14px}
+.part b{font-family:var(--mono); font-weight:500; font-size:12.5px}
 .part span{color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 
 /* stage */
 #stage{position:relative; min-width:0; min-height:0; background:var(--canvas); overflow:hidden}
 #c{display:block; width:100%; height:100%; touch-action:none}
 #labels{position:absolute; inset:0; pointer-events:none; overflow:hidden}
-.tag{position:absolute; left:0; top:0; pointer-events:auto; transform:translate(-50%,-120%); font-family:var(--cond); font-weight:600; font-size:12px; line-height:1; padding:3px 5px 3px 6px; background:var(--panel); color:var(--ink); border:1px solid var(--rule-strong); border-left:4px solid var(--c,#888); border-radius:3px; white-space:nowrap; cursor:pointer; display:none}
+.tag{position:absolute; left:0; top:0; pointer-events:auto; transform:translate(-50%,-120%); font-family:var(--mono); font-weight:500; font-size:11.5px; line-height:1; padding:3px 5px 3px 6px; background:var(--panel); color:var(--ink); border:1px solid var(--rule-strong); border-left:4px solid var(--c,#888); border-radius:3px; white-space:nowrap; cursor:pointer; display:none}
 .tag:hover{border-color:var(--ink)}
 .tag.cl{border-left-width:1px; background:var(--clash); color:#fff; border-color:var(--clash); border-radius:10px; padding:3px 7px}
 .tag.cl.minor{background:var(--warn); border-color:var(--warn)}
@@ -167,6 +169,54 @@ details.grp summary .ct{color:var(--muted); font-variant-numeric:tabular-nums}
 #titleblock .wide{grid-column:1/-1; border-right:0}
 #titleblock .wide strong{font-size:17px}
 
+/* levels: one button per storey down the side of the model; hovering previews the storey in the section box */
+#levels{position:absolute; left:12px; top:12px; bottom:40px; z-index:3; display:flex; flex-direction:column; width:96px; background:var(--panel); border:1px solid var(--rule-strong); border-radius:6px; overflow:hidden}
+#levels h2{font-size:12px; font-weight:600; color:var(--muted); margin:0; padding:8px 10px 6px; border-bottom:1px solid var(--rule)}
+#levels .list{overflow-y:auto; overscroll-behavior:contain; flex:1; padding:2px 0}
+#levels button{display:flex; justify-content:space-between; align-items:baseline; gap:6px; width:100%; border:0; background:none; padding:4px 10px; cursor:pointer; text-align:left; font-size:13px; font-weight:500}
+#levels button:hover,#levels button.hot{background:var(--accent-soft)}
+#levels button.on{background:var(--ink); color:var(--paper)}
+#levels button small{font-family:var(--mono); font-size:10.5px; color:var(--muted); font-weight:400}
+#levels button.on small{color:inherit; opacity:.7}
+#levels button.none:not(.on){color:var(--muted); font-weight:400}
+#levels .all{border-bottom:1px solid var(--rule); padding:6px 10px}
+#stage.has-levels #measureOut,#stage.has-levels #hint{left:120px}
+#stage.has-levels #hint{max-width:calc(100% - 500px)}
+
+/* find a room or part */
+.find{flex:none}
+.find input{width:190px; border:1px solid var(--rule-strong); border-radius:5px; padding:5px 9px; background:var(--panel); font-size:13px}
+.pop{position:fixed; z-index:30; display:none; background:var(--panel); border:1px solid var(--rule-strong); border-radius:6px; box-shadow:0 10px 28px rgba(0,0,0,.18); padding:4px}
+#findList{width:340px; max-height:380px; overflow-y:auto}
+#findList button{display:grid; grid-template-columns:auto minmax(0,1fr); gap:1px 10px; width:100%; text-align:left; border:0; background:none; padding:6px 8px; border-radius:4px; cursor:pointer; font-size:13px}
+#findList button:hover,#findList button.on{background:var(--accent-soft)}
+#findList b{font-family:var(--mono); font-weight:500; font-size:12px}
+#findList span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+#findList small{grid-column:2; color:var(--muted); font-size:11.5px}
+#findList p{margin:0; padding:6px 8px; color:var(--muted); font-size:12px}
+
+/* report downloads */
+#repMenu{min-width:290px}
+#repMenu button{display:flex; justify-content:space-between; align-items:baseline; gap:18px; width:100%; border:0; background:none; padding:8px 10px; border-radius:4px; cursor:pointer; text-align:left; font-size:13.5px}
+#repMenu button:hover:not(:disabled),#repMenu button:focus-visible{background:var(--accent-soft)}
+#repMenu button:disabled{color:var(--muted); cursor:default}
+#repMenu small{color:var(--muted); font-size:11.5px; font-family:var(--mono); white-space:nowrap}
+
+/* saved views */
+.vcard{display:grid; grid-template-columns:112px minmax(0,1fr); gap:8px 12px; padding:12px 16px; border-bottom:1px solid var(--rule)}
+.vcard.flag{box-shadow:inset 3px 0 0 var(--clash)}
+.vcard img{width:112px; height:70px; object-fit:cover; border-radius:4px; border:1px solid var(--rule); cursor:pointer; background:var(--canvas); display:block}
+.vcard .vname{width:100%; border:1px solid transparent; background:none; font-weight:600; padding:2px 4px; margin:-3px 0 2px -5px; border-radius:4px}
+.vcard .vname:hover,.vcard .vname:focus{border-color:var(--rule-strong)}
+.vcard .meta{font-size:12px; color:var(--muted)}
+.vcard .flagged{color:var(--clash); font-weight:600}
+.vcard textarea{grid-column:1/-1; width:100%; min-height:52px; border:1px solid var(--rule-strong); border-radius:5px; padding:6px 8px; background:var(--paper); font:inherit; font-size:13px; resize:vertical}
+.vcard .rowbtns{grid-column:1/-1; margin-top:0}
+#shared{position:absolute; left:50%; top:12px; transform:translateX(-50%); z-index:4; display:none; align-items:center; gap:10px; max-width:calc(100% - 260px); background:var(--panel); border:1px solid var(--rule-strong); border-radius:6px; padding:6px 8px 6px 12px; font-size:13px; box-shadow:0 6px 18px rgba(0,0,0,.12)}
+#shared .note{color:var(--clash); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+#busy{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:7; display:none; background:var(--panel); border:1px solid var(--rule-strong); border-radius:6px; padding:12px 16px; font-size:13.5px; box-shadow:0 10px 28px rgba(0,0,0,.18)}
+#toast{position:fixed; left:50%; bottom:20px; transform:translateX(-50%); z-index:40; display:none; background:var(--tip); color:var(--tip-ink); border-radius:5px; padding:8px 12px; font-size:13px}
+
 @media (max-width: 860px){
   body{font-size:14.5px}
   #app{grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) auto}
@@ -187,6 +237,10 @@ details.grp summary .ct{color:var(--muted); font-variant-numeric:tabular-nums}
   #stage{grid-column:1; grid-row:2}
   #titleblock{display:none}
   #hint{display:none}
+  .find input{width:150px}
+  #levels{width:76px; bottom:12px}
+  #stage.has-levels #measureOut{left:96px}
+  #shared{max-width:calc(100% - 110px); left:auto; right:8px; transform:none}
 }
 @media (prefers-reduced-motion: reduce){ *{transition:none!important; animation:none!important} }
 </style>
@@ -205,6 +259,7 @@ details.grp summary .ct{color:var(--muted); font-variant-numeric:tabular-nums}
       <button data-view="side" title="Long side, from the bottom edge of the plan">Side</button>
       <button data-view="end" title="End on, looking along the corridor">End</button>
     </nav>
+    <div class="find"><input id="find" type="search" placeholder="Find a part" aria-label="Find a room or part" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="findList"></div>
     <div class="tools">
       <button class="btn" id="fitBtn" title="Fit the visible model (F fits the selection)">Fit</button>
       <button class="btn" id="projBtn" aria-pressed="false" title="Switch between perspective and orthographic">Orthographic</button>
@@ -214,6 +269,7 @@ details.grp summary .ct{color:var(--muted); font-variant-numeric:tabular-nums}
         <select id="mkSel" aria-label="Issue markers"><option value="off" selected>None</option><option value="cl">Clashes</option><option value="all">Clashes and walls</option></select></label>
       <button class="btn" id="boxBtn" aria-pressed="false">Section box</button>
       <button class="btn" id="measureBtn" aria-pressed="false" title="Click two points to measure">Measure</button>
+      <button class="btn" id="repBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="repMenu">Download reports</button>
       <button class="btn" id="modelTog" aria-pressed="true">Model</button>
       <button class="btn" id="inspTog" aria-pressed="true">Inspect</button>
     </div>
@@ -253,7 +309,9 @@ details.grp summary .ct{color:var(--muted); font-variant-numeric:tabular-nums}
     <div id="labels"></div>
     <div id="tip" role="status"></div>
     <div id="measureOut"></div>
-    <div id="hint">Drag to orbit. Right-drag or two-finger drag to pan. Scroll or pinch to zoom. Click a part for details.</div>
+    <div id="hint">Drag to orbit, right-drag to pan. Scroll zooms towards the pointer. Double-click a part to centre on it.</div>
+    <div id="shared" role="status"></div>
+    <div id="busy" role="status"></div>
     <div id="titleblock" aria-label="Drawing information"></div>
     <div id="loading">Loading model</div>
   </main>
@@ -265,6 +323,7 @@ details.grp summary .ct{color:var(--muted); font-variant-numeric:tabular-nums}
       <button role="tab" data-tab="parts">Parts</button>
       <button role="tab" data-tab="open">Openings</button>
       <button role="tab" data-tab="diag">Notes</button>
+      <button role="tab" data-tab="views">Views</button>
     </div>
     <div class="tabpane on" id="tab-clash"></div>
     <div class="tabpane" id="tab-sel"></div>
@@ -276,8 +335,12 @@ details.grp summary .ct{color:var(--muted); font-variant-numeric:tabular-nums}
     </div>
     <div class="tabpane" id="tab-open"></div>
     <div class="tabpane" id="tab-diag"></div>
+    <div class="tabpane" id="tab-views"></div>
   </aside>
 </div>
+<div class="pop" id="findList" role="listbox" aria-label="Rooms and parts"></div>
+<div class="pop" id="repMenu" role="menu" aria-label="Download reports"></div>
+<div id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
@@ -340,19 +403,49 @@ const BWH_MOD = (TYPES.find(t => t.role === 'opening') || {}).name || 'Builders�
 const BWH_PROP = (TYPES.find(t => t.role === 'proposed-opening') || {}).name || 'Builders’ work hole, proposed';
 const PROP_COL = P.layers.find(L => L.role === 'opening').proposedColour || '#7C3AED';
 const isDamper = d => typeRole[d.c] === 'fire-damper';
+// the model version every report and image carries: the project's revision, or the source file's date and a short hash of it
+const SRCF = P.project.source || {};
+const longDate = t => new Date(t).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+const VERSION = P.project.revision ? 'Revision ' + P.project.revision
+  : [SRCF.file, SRCF.modified && 'saved ' + longDate(SRCF.modified), SRCF.sha256 && 'file ' + SRCF.sha256.slice(0, 8)].filter(Boolean).join(', ') || 'Not recorded';
+// storeys, lowest first, and the structural grid, both read from the model
+const LEVELS = (P.levels || []).slice().sort((a, b) => a.elevation - b.elevation);
+const LEVEL = Object.fromEntries(LEVELS.map(L => [L.id, L]));
+const levelName = id => id == null ? '' : LEVEL[id]?.name || id;
+const GRID = (P.grid || []).map(g => {
+  // gridlines are drawn either way round: point each one up or right, so the side a point is on means the same for every line in a family
+  const along = Math.abs(g.b[1]-g.a[1]) > Math.abs(g.b[0]-g.a[0]);
+  let d = [g.b[0]-g.a[0], g.b[1]-g.a[1]]; if (along ? d[1] < 0 : d[0] < 0) d = [-d[0], -d[1]];
+  const n = Math.hypot(d[0], d[1]) || 1;
+  return {label:g.label, a:g.a, n:[-d[1]/n, d[0]/n], along};
+});
+// 'C–D / 4': the gridlines either side of a point in each direction, or the one it sits on
+function gridRef(x, y){
+  const out = [];
+  for (const fam of [GRID.filter(g => g.along), GRID.filter(g => !g.along)]){
+    const d = fam.filter(g => g.label).map(g => [(x-g.a[0])*g.n[0] + (y-g.a[1])*g.n[1], g.label]).sort((a, b) => a[0]-b[0]);
+    if (!d.length) continue;
+    const on = d.find(v => Math.abs(v[0]) < 300); if (on){ out.push(on[1]); continue; }
+    const neg = d.filter(v => v[0] < 0), pos = d.filter(v => v[0] > 0);
+    out.push(neg.length && pos.length ? [neg[neg.length-1][1], pos[0][1]].sort().join('–') : 'outside ' + (neg.length ? neg[neg.length-1][1] : pos[0][1]));
+  }
+  return out.join(' / ');
+}
 
 // the package's readable fields, mapped onto the short names the viewer works with; parts are referred to by id
 const layerIx = Object.fromEntries(P.layers.map((L, l) => [L.id, l]));
 const idIx = Object.fromEntries(P.elements.map((e, i) => [e.id, i]));
 const ref = id => id == null ? undefined : idIx[id];
+// framing and the section box work on the model's core, so one stray part far away (listed in Notes) doesn't shrink the building to a dot
+const CORE = P.bounds.core || P.bounds;
 const M = {
-  centre:P.bounds.centre, bmin:P.bounds.min, bmax:P.bounds.max,
+  centre:CORE.min.map((v, k) => (v + CORE.max[k])/2), bmin:CORE.min, bmax:CORE.max,
   layers:P.layers.map(L => L.id), line_layers:Object.keys(LINES),
   lines:(P.lineLayers || []).map(L => ({layer:L.id, ch:chIx[L.chunk ?? CH[0].id], off:L.offset, n:L.count})),
   links:P.models.filter(m => m.role === 'link'), dups:(P.duplicates || []).map(d => ({mep:ref(d.mep), arch:ref(d.arch), dz:d.dz, dxy:d.dxy})),
   elements:P.elements.map((e, i) => ({i, id:e.id, m:e.mark, l:layerIx[e.layer], g:LAYER[e.layer].role === 'opening' ? 'BWH' : e.discipline, s:e.model, sys:e.system, c:e.type, k:e.kind, z:e.size,
     b:e.bbox, ch:chIx[e.mesh.chunk ?? CH[0].id], vo:e.mesh.vertexOffset, vc:e.mesh.vertexCount, io:e.mesh.indexOffset, ic:e.mesh.indexCount, nf:e.faces, np:e.plates,
-    f:e.family, t:e.familyType, r:e.revitId, sy:e.pipeSystem, ss:e.pipeSystemFrom, il:e.insertedOn, hasins:ref(e.insulation), ins:ref(e.insulates), desc:e.description, fr:e.fireRating})),
+    f:e.family, t:e.familyType, r:e.revitId, sy:e.pipeSystem, ss:e.pipeSystemFrom, il:e.insertedOn, hasins:ref(e.insulation), ins:ref(e.insulates), desc:e.description, fr:e.fireRating, lv:e.level, cat0:e.category})),
   clashes:[...(P.clashes || []).map(c => ({id:c.id, a:ref(c.a), b:ref(c.b), sev:c.grade, p:c.point, ov:c.overlap, n:c.contacts, pair:c.pair, hole:null, zone:c.zone, level:c.level, grid:c.grid, depth:c.depth, measure:c.measure})),
            ...(P.wallCrossings || []).map(c => ({id:c.id, a:ref(c.service), b:ref(c.wall), sev:'penetration', p:c.point, ov:c.overlap, n:c.contacts, pair:c.pair, hole:c.hole == null ? null : ref(c.hole), openRef:c.opening}))]
 };
@@ -446,6 +539,7 @@ for (const d of E){
   d.cw = new THREE.Vector3(mmToW((d.b[0]+d.b[3])/2,0), mmToW((d.b[1]+d.b[4])/2,1), mmToW((d.b[2]+d.b[5])/2,2));
   d.off = new THREE.Vector3();
   d.cat = d.c;
+  d.stray = [0,1,2].some(ax => (d.b[ax]+d.b[ax+3])/2 < CORE.min[ax] - 1000 || (d.b[ax]+d.b[ax+3])/2 > CORE.max[ax] + 1000);
 }
 /* lines */
 const lineObjs = {};
@@ -690,7 +784,7 @@ const VERDICT = R_OPEN.verdicts;
 /* ---------- state ---------- */
 const st = {layerOn: M.layers.map(()=>true), lineOn:Object.fromEntries(M.line_layers.map(L => [L, true])), srcOn:Object.fromEntries(MODELS.map(k => [k, true])),
   hidden:new Set(), isolate:null, bwhIso:null, boxOn:false, clFilter:'all', sel:null, selClash:null, hover:null, exDisc:0, exElem:0, tags:'off', markers:'off', measure:false, mPts:[],
-  clip:[0,1000,0,1000,0,1000], ghost:true, focus:null};
+  clip:[0,1000,0,1000,0,1000], ghost:true, focus:null, level:null};
 
 function visible(d){
   return st.layerOn[d.l] && st.srcOn[d.s] && !st.hidden.has(d.i) && (!st.isolate || st.isolate.has(d.i));
@@ -814,7 +908,7 @@ canvas.addEventListener('pointermove', e => {
     let v = Math.round((wToMm(t - drag.offset, ax) - M.bmin[ax]) / (M.bmax[ax]-M.bmin[ax]) * 1000);
     v = Math.max(0, Math.min(1000, v));
     v = drag.k % 2 === 0 ? Math.min(v, st.clip[pair]-5) : Math.max(v, st.clip[pair]+5);
-    st.clip[drag.k] = v; syncClipUI(); applyClip(); return;
+    st.clip[drag.k] = v; if (drag.ax === 2) clearLevel(); syncClipUI(); applyClip(); return;
   }
   if (e.buttons) return;
   const g = hitHandle(e.clientX, e.clientY); setHot(g);
@@ -847,6 +941,50 @@ function insideClip(p){
   for (let k=0;k<6;k++) if (clipPlanes[k].distanceToPoint(p) < -1e-6) return false;
   return true;
 }
+function clipBox(){ return new THREE.Box3(new THREE.Vector3(...[0,1,2].map(ax => mmToW(clipVal(ax*2), ax))), new THREE.Vector3(...[0,1,2].map(ax => mmToW(clipVal(ax*2+1), ax)))); }
+
+/* ---------- levels ---------- */
+// each storey is a slice of the section box, from its level to the next one up; hovering a level previews it, clicking keeps it
+const toClip = (v, ax) => THREE.MathUtils.clamp((v - M.bmin[ax]) / (M.bmax[ax] - M.bmin[ax]) * 1000, 0, 1000);
+const levelSpan = k => [k === 0 ? Math.min(LEVELS[0].elevation, M.bmin[2]) - 50 : LEVELS[k].elevation - 50, k < LEVELS.length - 1 ? LEVELS[k+1].elevation - 50 : M.bmax[2]];
+let lvKeep = null;      // the box to go back to when the pointer leaves the list
+function sliceLevel(k){
+  if (k == null){ st.clip[4] = 0; st.clip[5] = 1000; }
+  else { const [a, b] = levelSpan(k); st.clip[4] = toClip(a, 2); st.clip[5] = Math.max(toClip(b, 2), st.clip[4] + 1); }
+  $('#boxBtn').setAttribute('aria-pressed', String(st.boxOn)); syncClipUI(); applyClip();
+}
+function markLevels(hot){
+  document.querySelectorAll('#levels [data-lv]').forEach(b => { const k = b.dataset.lv === '' ? null : +b.dataset.lv;
+    b.classList.toggle('on', k == null ? st.level == null : LEVELS[k].id === st.level); b.classList.toggle('hot', hot !== undefined && k === hot); });
+}
+function previewLevel(k){
+  if (!lvKeep) lvKeep = {clip:st.clip.slice(), box:st.boxOn};
+  st.boxOn = k != null || lvKeep.box; sliceLevel(k); markLevels(k);
+}
+function endPreview(){
+  if (!lvKeep) return;
+  st.clip = lvKeep.clip; st.boxOn = lvKeep.box; lvKeep = null;
+  $('#boxBtn').setAttribute('aria-pressed', String(st.boxOn)); syncClipUI(); applyClip(); markLevels();
+}
+function pickLevel(k){
+  lvKeep = null;
+  if (k != null && LEVELS[k].id === st.level) k = null;
+  st.level = k == null ? null : LEVELS[k].id; st.boxOn = k != null;
+  sliceLevel(k); markLevels();
+  fitTo(k == null ? visibleBounds() : clipBox());
+}
+function clearLevel(){ if (st.level == null) return; st.level = null; markLevels(); }
+function buildLevels(){
+  if (!LEVELS.length) return;
+  const n = {}; E.forEach(d => { if (d.lv) n[d.lv] = (n[d.lv] || 0) + 1; });
+  const nav = document.createElement('nav'); nav.id = 'levels'; nav.setAttribute('aria-label', 'Levels');
+  nav.innerHTML = `<h2>Levels</h2><button class="all on" data-lv="">All</button><div class="list">${LEVELS.map((L, k) => [L, k]).reverse().map(([L, k]) =>
+    `<button data-lv="${k}"${n[L.id] ? '' : ' class="none"'} title="${esc(L.name)}, ${(L.elevation/1000).toFixed(2)} m, ${fmt(n[L.id] || 0)} parts"><span>${esc(L.name)}</span><small>${fmt(n[L.id] || 0)}</small></button>`).join('')}</div>`;
+  stage.appendChild(nav); stage.classList.add('has-levels');
+  nav.addEventListener('pointerover', e => { const b = e.target.closest('[data-lv]'); if (b) previewLevel(b.dataset.lv === '' ? null : +b.dataset.lv); });
+  nav.addEventListener('pointerleave', endPreview);
+  nav.addEventListener('click', e => { const b = e.target.closest('[data-lv]'); if (b) pickLevel(b.dataset.lv === '' ? null : +b.dataset.lv); });
+}
 
 /* ---------- camera ---------- */
 function resize(){
@@ -862,7 +1000,7 @@ new ResizeObserver(resize).observe(stage);
 
 function visibleBounds(){
   const box = new THREE.Box3(); let any=false;
-  for (const d of E){ if (!meshes[d.i].visible) continue; const bb = meshes[d.i].geometry.boundingBox.clone().translate(d.off); box.union(bb); any=true; }
+  for (const d of E){ if (!meshes[d.i].visible || d.stray) continue; const bb = meshes[d.i].geometry.boundingBox.clone().translate(d.off); box.union(bb); any=true; }
   if (!any) box.set(W0.clone(), W1.clone());
   return box;
 }
@@ -906,7 +1044,7 @@ const VIEWS = {iso:[0.62,-0.72,0.42], plan:[0,-0.0001,1], below:[0,-0.0001,-1], 
 let curView = 'iso';
 function setView(name, box){
   curView = name;
-  document.querySelectorAll('.views button').forEach(b => b.classList.toggle('on', b.dataset.view === name));
+  document.querySelectorAll('.views button[data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === name));
   const fb = frameBox(box || visibleBounds(), new THREE.Vector3(...VIEWS[name]).normalize());
   flyTo(fb.c, fb.pos, fb.half);
 }
@@ -936,17 +1074,70 @@ function setProjection(toOrtho){
   req();
 }
 
+/* ---------- navigation: the wheel zooms towards the pointer, eased; double-click centres; near and far follow the view ---------- */
+const REACH = Math.hypot(...[0,1,2].map(k => P.bounds.max[k] - P.bounds.min[k])) / 1000;
+let zoomLeft = 0, zoomAt = null, zoomFrom = [0, 0], lastWheel = 0;
+function pointUnder(cx, cy){
+  const h = pick(cx, cy); if (h) return h.point;
+  // nothing under the pointer: the plane through the orbit target, facing the camera
+  const r = canvas.getBoundingClientRect(), rc = new THREE.Raycaster();
+  rc.setFromCamera(new THREE.Vector2(((cx-r.left)/r.width)*2-1, -((cy-r.top)/r.height)*2+1), cam);
+  const n = cam.getWorldDirection(new THREE.Vector3()), p = new THREE.Vector3();
+  return rc.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(n, controls.target), p) ? p : controls.target.clone();
+}
+// scale the view about p: p stays under the pointer
+function zoomBy(s, p){
+  if (cam === ortho){
+    const z = THREE.MathUtils.clamp(ortho.zoom / s, 0.01, 2000); s = ortho.zoom / z;
+    ortho.zoom = z; ortho.updateProjectionMatrix();
+    const dir = cam.getWorldDirection(new THREE.Vector3());
+    const shift = controls.target.clone().sub(p).multiplyScalar(s - 1); shift.addScaledVector(dir, -shift.dot(dir));
+    controls.target.add(shift); cam.position.add(shift);
+  } else {
+    const v = cam.position.clone().sub(p), d = v.length() || 1;
+    s = THREE.MathUtils.clamp(d * s, 0.03, REACH * 4) / d;
+    cam.position.copy(p).addScaledVector(v, s);
+    controls.target.sub(p).multiplyScalar(s).add(p);
+  }
+  req();
+}
+canvas.addEventListener('wheel', e => {
+  e.preventDefault(); e.stopImmediatePropagation();
+  tween = null;
+  const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
+  // a trackpad pinch arrives as small wheel steps with ctrlKey set
+  zoomLeft += THREE.MathUtils.clamp(e.deltaY * unit, -240, 240) * (e.ctrlKey ? 0.012 : 0.0018);
+  const now = performance.now();
+  if (!zoomAt || now - lastWheel > 350 || Math.hypot(e.clientX - zoomFrom[0], e.clientY - zoomFrom[1]) > 6){ zoomAt = pointUnder(e.clientX, e.clientY); zoomFrom = [e.clientX, e.clientY]; }
+  lastWheel = now; req();
+}, {passive:false, capture:true});
+canvas.addEventListener('dblclick', e => {
+  const h = pick(e.clientX, e.clientY); if (!h) return;
+  const dir = cam.position.clone().sub(controls.target).normalize(), d = Math.min(cam.position.distanceTo(controls.target), 4);
+  flyTo(h.point, h.point.clone().addScaledVector(dir, d), cam === ortho ? Math.min(ortho.top / ortho.zoom, 2.5) : null);
+});
+function fitDepth(){
+  const d = cam.position.distanceTo(controls.target), f = d + REACH * 2;
+  if (cam === persp){
+    const n = Math.max(0.01, d / 400);
+    if (Math.abs(persp.near - n) > n * 0.25 || Math.abs(persp.far - f) > f * 0.25){ persp.near = n; persp.far = f; persp.updateProjectionMatrix(); }
+  } else if (Math.abs(ortho.far - f) > f * 0.25){ ortho.near = -f; ortho.far = f; ortho.updateProjectionMatrix(); }
+}
+
 /* ---------- render loop (on demand) ---------- */
 let needs = true;
 function req(){ needs = true; }
 controls.addEventListener('change', req);
+let capturing = false;      // report images are drawing offscreen: leave the screen alone
 function frame(now){
   requestAnimationFrame(frame);
+  if (capturing) return;
   if (tween) tween(now);
+  if (Math.abs(zoomLeft) > 1e-4){ const k = reduceMotion ? zoomLeft : zoomLeft * 0.3; zoomLeft -= k; zoomBy(Math.exp(k), zoomAt || controls.target); }
   const moved = controls.update();
   if (!needs && !moved && !tween) return;
   needs = false;
-  sizeHandles();
+  fitDepth(); sizeHandles();
   renderer.render(scene, cam);
   placeLabels();
 }
@@ -1142,7 +1333,14 @@ function selectEl(i, zoom){
   st.sel = i; st.selClash = null;
   if (!visible(E[i])){ st.layerOn[E[i].l] = true; st.srcOn[E[i].s] = true; st.hidden.delete(i); if (st.isolate) st.isolate.add(i); syncLayerUI(); }
   refresh(); renderSel(); showTab('sel'); markPart(i); $('#right').scrollTop = 0;
-  if (zoom) zoomToEl(i);
+  if (zoom){ reveal(E[i].cw.clone().add(E[i].off), E[i].lv); zoomToEl(i); }
+}
+// something to show outside the section box: open its storey when a storey is showing, otherwise open the box
+function reveal(p, level){
+  if (insideClip(p)) return;
+  const k = LEVELS.findIndex(L => L.id === level);
+  if (st.level != null && k >= 0){ st.level = level; st.boxOn = true; sliceLevel(k); markLevels(); return; }
+  st.clip = [0,1000,0,1000,0,1000]; clearLevel(); syncClipUI(); applyClip();
 }
 function selectClash(id, zoom){
   const c = byId[id]; if (!c) return;
@@ -1151,6 +1349,7 @@ function selectClash(id, zoom){
   syncLayerUI(); refresh(); renderClash(c); showTab('sel'); markPart(null);
   if (zoom){
     const A = E[c.a]; const p = new THREE.Vector3(mmToW(c.p[0],0), mmToW(c.p[1],1), mmToW(c.p[2],2)).add(A.off);
+    reveal(p, c.level);
     const r = Math.max(Math.max(...c.ov)/1000*1.4, 0.45);
     fitTo(new THREE.Box3(p.clone().subScalar(r), p.clone().addScalar(r)));
   }
@@ -1277,6 +1476,7 @@ function showIsoBanner(){
   if (!on && b) b.remove();
 }
 function boxAround(b, pad){
+  clearLevel();
   for (let ax=0; ax<3; ax++){
     const span = M.bmax[ax]-M.bmin[ax];
     st.clip[ax*2] = Math.max(0, Math.min(1000, Math.round((b[ax]-pad-M.bmin[ax])/span*1000)));
@@ -1346,10 +1546,10 @@ function buildClipUI(){
       let v = +e.target.value; const pair = k ^ 1;
       if (k % 2 === 0 && v > st.clip[pair]-5) v = st.clip[pair]-5;
       if (k % 2 === 1 && v < st.clip[pair]+5) v = st.clip[pair]+5;
-      st.clip[k] = v; e.target.value = v; applyClip();
+      st.clip[k] = v; e.target.value = v; if (k >> 1 === 2) clearLevel(); applyClip();
     });
   }
-  $('#clipReset').onclick = () => { st.clip = [0,1000,0,1000,0,1000]; syncClipUI(); applyClip(); };
+  $('#clipReset').onclick = () => { st.clip = [0,1000,0,1000,0,1000]; clearLevel(); syncClipUI(); applyClip(); };
   $('#clipSel').onclick = () => { if (st.sel != null) boxAround(E[st.sel].b, 150); else if (st.selClash){ const c=st.selClash, r=Math.max(...c.ov)/2+250; boxAround([c.p[0]-r,c.p[1]-r,c.p[2]-r,c.p[0]+r,c.p[1]+r,c.p[2]+r],0); } };
 }
 function syncClipUI(){ for (let k=0;k<6;k++) $('#clip'+k).value = st.clip[k]; }
@@ -1401,7 +1601,8 @@ const clDepth = c => c.depth ?? Math.min(...c.ov);          // measured on the i
 const parentOf = i => E[i].ins != null ? E[i].ins : i;
 function clashText(c){
   const A = E[c.a], B = E[c.b], part = d => `${d.m} (${descOf(d)})`;
-  if (A.ins != null || B.ins != null){ const [s, ins] = A.ins != null ? [B, A] : [A, B]; return `${part(s)} cuts into the insulation of ${part(E[ins.ins])} by ${fmt(clDepth(c))} mm.`; }
+  if (A.ins != null || B.ins != null){ const [s, ins] = A.ins != null ? [B, A] : [A, B];
+    return ACTIONABLE.has(c.sev) ? `${part(s)} cuts into the insulation of ${part(E[ins.ins])} by ${fmt(clDepth(c))} mm.` : `${part(s)} touches the insulation of ${part(E[ins.ins])}.`; }
   if (!ACTIONABLE.has(c.sev)) return `${part(A)} touches ${part(B)}.`;
   return `${part(A)} clashes with ${part(B)} by ${fmt(clDepth(c))} mm.`;
 }
@@ -1434,7 +1635,7 @@ function renderClashes(){
 }
 $('#tab-clash').addEventListener('click', e => {
   const f = e.target.closest('[data-cf]'); if (f){ st.clFilter = f.dataset.cf; renderClashes(); req(); return; }
-  if (e.target.closest('[data-cact]')) return clashReport();
+  if (e.target.closest('[data-cact]')) return clashPDF();
   const r = e.target.closest('[data-cl],[data-el]'); if (!r) return;
   if (r.dataset.cl) selectClash(r.dataset.cl, true); else selectEl(+r.dataset.el, true);
 });
@@ -1444,10 +1645,11 @@ let shot = null;
 function stamp(src, marks, camera, r){
   const cv = document.createElement('canvas'); cv.width = src.width; cv.height = src.height;
   const g = cv.getContext('2d'); g.drawImage(src, 0, 0);
-  g.font = `600 ${r > 16 ? 22 : 15}px "Barlow Semi Condensed", Arial, sans-serif`; g.textBaseline = 'middle';
+  g.font = `500 ${r > 16 ? 19 : 13}px "JetBrains Mono", monospace`; g.textBaseline = 'middle';
   for (const m of marks){
     const v = m.p.clone().project(camera); if (v.z > 1) continue;
     const x = (v.x+1)/2*cv.width, y = (1-v.y)/2*cv.height;
+    if (!m.label){ g.fillStyle = m.col; g.beginPath(); g.arc(x, y, r, 0, Math.PI*2); g.fill(); continue; }
     g.lineWidth = r > 16 ? 3 : 2; g.strokeStyle = m.col; g.beginPath(); g.arc(x, y, r, 0, Math.PI*2); g.stroke();
     const w = g.measureText(m.label).width + 12, hh = r > 16 ? 28 : 20;
     g.fillStyle = m.col; g.fillRect(x + r + 3, y - hh/2, w, hh); g.fillStyle = '#fff'; g.fillText(m.label, x + r + 9, y);
@@ -1455,102 +1657,172 @@ function stamp(src, marks, camera, r){
   return cv.toDataURL('image/jpeg', 0.86);
 }
 const clashPoint = c => new THREE.Vector3(mmToW(c.p[0],0), mmToW(c.p[1],1), mmToW(c.p[2],2)).add(E[c.a].off);
-function clashImages(list){
-  const W = 1200, H = 750;
+// a close-up of each clash with everything else faded, and a plan of them all, drawn offscreen a few at a time
+async function clashImages(cards, all, progress){
+  const W = 960, H = 600;
   if (!shot){ shot = new THREE.WebGLRenderer({antialias:true, preserveDrawingBuffer:true}); shot.setPixelRatio(1); }
-  shot.setSize(W, H, false);
   shot.setClearColor('#E6EAE9'); shot.localClippingEnabled = false;
   const keep = {sel:st.sel, selClash:st.selClash, ghost:st.ghost, hover:st.hover, m:mLine.visible, dots:mDots.map(s => s.visible)};
+  capturing = true;
   boxHelper.visible = false; handles.forEach(g => g.visible = false); mLine.visible = false; mDots.forEach(s => s.visible = false);
   st.sel = null; st.hover = null; st.ghost = true;
   const pc = new THREE.PerspectiveCamera(38, W/H, 0.01, 400); pc.up.set(0,0,1);
-  const dir = new THREE.Vector3(...VIEWS.iso).normalize(), out = {};
-  for (const c of list){
-    st.selClash = c; refresh();
-    const p = clashPoint(c), r = Math.max(Math.max(...c.ov)/1000*0.9, 0.45);
-    pc.position.copy(p).addScaledVector(dir, r / Math.sin(THREE.MathUtils.degToRad(19))); pc.lookAt(p); pc.updateMatrixWorld();
-    shot.render(scene, pc);
-    out[c.id] = stamp(shot.domElement, [{p, label:c.id, col:SEV_COL[c.sev]}], pc, 26);
+  const dir = new THREE.Vector3(...VIEWS.iso).normalize(), out = {}, sc = new THREE.Vector3();
+  try{
+    shot.setSize(W, H, false);
+    for (let k = 0; k < cards.length; k++){
+      const c = cards[k];
+      st.selClash = c; refresh();
+      const p = clashPoint(c), r = Math.max(Math.max(...c.ov)/1000*0.9, 0.45), reach = r * 6;
+      // only what is near the clash is drawn, which keeps a large model quick
+      meshes.forEach(m => { if (m.visible){ const sp = m.geometry.boundingSphere; m.visible = sc.copy(sp.center).add(m.position).distanceTo(p) - sp.radius < reach; } });
+      pc.near = Math.max(0.01, r / 50); pc.far = reach * 4; pc.updateProjectionMatrix();
+      pc.position.copy(p).addScaledVector(dir, r / Math.sin(THREE.MathUtils.degToRad(19))); pc.lookAt(p); pc.updateMatrixWorld();
+      shot.render(scene, pc);
+      out[c.id] = stamp(shot.domElement, [{p, label:c.id, col:SEV_COL[c.sev]}], pc, 22);
+      if (k % 3 === 2){ progress?.(k + 1, cards.length); await new Promise(res => setTimeout(res)); }
+    }
+    // the plan: the model from above with every clash in the report; labelled when there are few enough to read
+    st.selClash = null; refresh();
+    const OW = 1600, OH = Math.max(500, Math.min(2000, Math.round(OW * (W1.y-W0.y)/(W1.x-W0.x) * 1.08)));
+    shot.setSize(OW, OH, false);
+    const cx = (W0.x+W1.x)/2, cy = (W0.y+W1.y)/2, half = Math.max((W1.y-W0.y)/2, (W1.x-W0.x)/2/(OW/OH))*1.04;
+    const oc = new THREE.OrthographicCamera(-half*OW/OH, half*OW/OH, half, -half, -REACH*2, REACH*2); oc.up.set(0,1,0);
+    oc.position.set(cx, cy, W1.z + 5); oc.lookAt(cx, cy, W0.z); oc.updateMatrixWorld();
+    shot.render(scene, oc);
+    out.overview = {src:stamp(shot.domElement, all.map(c => ({p:clashPoint(c), label:all.length <= 60 ? c.id : '', col:SEV_COL[c.sev]})), oc, all.length <= 60 ? 9 : 5), w:OW, h:OH};
+  } finally {
+    Object.assign(st, {sel:keep.sel, selClash:keep.selClash, ghost:keep.ghost, hover:keep.hover});
+    mLine.visible = keep.m; mDots.forEach((s, k) => s.visible = keep.dots[k]);
+    capturing = false; refresh(); applyClip();
   }
-  // overview: the corridor from above with every clash in the report
-  st.selClash = null; refresh();
-  // sized to the corridor's proportions so the plan fills the image
-  const OW = 1600, OH = Math.max(360, Math.min(1000, Math.round(OW * (W1.y-W0.y)/(W1.x-W0.x) * 1.12)));
-  shot.setSize(OW, OH, false);
-  const cx = (W0.x+W1.x)/2, cy = (W0.y+W1.y)/2, half = Math.max((W1.y-W0.y)/2, (W1.x-W0.x)/2/(OW/OH))*1.04;
-  const oc = new THREE.OrthographicCamera(-half*OW/OH, half*OW/OH, half, -half, -400, 400); oc.up.set(0,1,0);
-  oc.position.set(cx, cy, 50); oc.lookAt(cx, cy, 0); oc.updateMatrixWorld();
-  shot.render(scene, oc);
-  out.overview = stamp(shot.domElement, list.map(c => ({p:clashPoint(c), label:c.id, col:SEV_COL[c.sev]})), oc, 9);
-  Object.assign(st, {sel:keep.sel, selClash:keep.selClash, ghost:keep.ghost, hover:keep.hover});
-  mLine.visible = keep.m; mDots.forEach((s, k) => s.visible = keep.dots[k]);
-  refresh(); applyClip();
   return out;
 }
-function clashReport(){
-  const win = window.open('', '_blank'); if (!win) return;
-  win.document.write('<p style="font:16px Arial, sans-serif; padding:24px">Preparing the clash report</p>');
-  const list = clRows(), img = clashImages(list);
-  const issued = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
-  const cnt = sv => list.filter(c => c.sev === sv).length;
-  const sev = c => `<span class="sev" style="color:${SEV_COL[c.sev]}">${esc(GRADES[SEV_ORDER[c.sev]].name)}</span>`;
-  const part = d => `<b>${esc(d.m)}</b> ${esc(descOf(d))}<br><span>${esc(d.c)}${d.sy ? ', ' + esc(d.sy) : ''}, ${esc(SRC[d.s].name)}</span>`;
-  const R = P.reports.clash, title = esc(R.title);
-  const SECTION = {
-    summary:() => `<h1>${title}</h1>
-<p class="meta">Issued ${issued}. ${esc(R.source || '')}</p>
-<div class="kpis"><div class="kpi"><b>${list.length}</b><span>Clashes in this report</span></div>${GRADES.map(g => `<div class="kpi"><b>${cnt(g.id)}</b><span>${esc(g.name)}</span></div>`).join('')}</div>
-<p class="rule">${RULE}</p>`,
-    locations:() => `<h2>Locations</h2><img src="${img.overview}" alt="Plan of the ${esc(P.project.scope || 'model')} with every clash marked">`,
-    fixFirst:() => `<h2>Fix first</h2>
-<table><thead><tr><th>Part</th><th>Description</th><th class="n">Clashes it clears</th><th class="n">Major</th></tr></thead><tbody>
-${TRIAGE.map(x => `<tr><td><b>${esc(E[x.i].m)}</b></td><td>${esc(descOf(E[x.i]))}</td><td class="n">${x.n}</td><td class="n">${x.major}</td></tr>`).join('')}
-</tbody></table>`,
-    table:() => `<h2>Summary</h2>
-<table><thead><tr><th>ID</th><th>Grade</th><th>Description</th><th class="n">X</th><th class="n">Y</th><th class="n">Z</th><th class="n">Overlap mm</th></tr></thead><tbody>
-${list.map(c => `<tr><td><b>${c.id}</b></td><td>${sev(c)}</td><td>${esc(clashText(c))}</td><td class="n">${fmt(c.p[0])}</td><td class="n">${fmt(c.p[1])}</td><td class="n">${fmt(c.p[2])}</td><td class="n${clDepth(c) >= TOL ? ' over' : ''}">${fmt(clDepth(c))}</td></tr>`).join('')}
-</tbody></table>`,
-    cards:() => `<h2 class="pb">Clashes</h2>
-${list.map(c => { const A = E[c.a], B = E[c.b]; return `<section class="card"><header><h3>${c.id}</h3>${sev(c)}<span>${esc(placeOf(c))}</span></header>
-<img src="${img[c.id]}" alt="${c.id}, ${esc(A.m)} and ${esc(B.m)}">
-<p class="desc">${esc(clashText(c))}</p>
-<dl><dt>Location</dt><dd>X ${fmt(c.p[0])}, Y ${fmt(c.p[1])}, Z ${fmt(c.p[2])}</dd>
-<dt>Overlap</dt><dd><b class="${clDepth(c) >= TOL ? 'over' : ''}">${fmt(clDepth(c))} mm</b>, ${clDepth(c) >= TOL ? 'over' : 'within'} the ${TOL} mm tolerance<br><span>Bounding boxes overlap ${c.ov.map(fmt).join(' × ')} mm, X × Y × Z</span></dd>
-<dt>Part A</dt><dd>${part(A)}</dd><dt>Part B</dt><dd>${part(B)}</dd></dl></section>`; }).join('')}`
-  };
-  win.document.open();
-  win.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600&display=swap" rel="stylesheet">
-<style>
-@page{size:A4; margin:14mm}
-*{box-sizing:border-box}
-body{margin:0; font:13px/1.45 Barlow, Arial, sans-serif; color:#1C2228; background:#fff}
-main{max-width:900px; margin:0 auto; padding:28px 24px 60px}
-h1,h2,h3{font-family:"Barlow Semi Condensed", Arial, sans-serif; font-weight:600; margin:0}
-h1{font-size:28px; line-height:1.1} h2{font-size:19px; margin:30px 0 10px} h3{font-size:22px}
-.bar{position:sticky; top:0; z-index:2; background:#fff; border-bottom:1px solid #D5DBDF; padding:10px 24px; display:flex; justify-content:space-between; align-items:center; gap:12px}
-.bar button{font:500 14px "Barlow Semi Condensed", Arial, sans-serif; padding:6px 12px; border:1px solid #1C2228; background:#1C2228; color:#fff; border-radius:5px; cursor:pointer}
-.meta,.rule{color:#57636E} .meta{margin-top:6px} .rule{font-size:12.5px; max-width:75ch; margin-top:10px}
-.kpis{display:flex; gap:10px; margin:18px 0 0; flex-wrap:wrap}
-.kpi{border:1px solid #D5DBDF; border-radius:5px; padding:8px 14px} .kpi b{display:block; font:600 24px/1.1 "Barlow Semi Condensed", Arial, sans-serif} .kpi span{color:#57636E; font-size:12px}
-img{width:100%; display:block; border:1px solid #D5DBDF; border-radius:4px}
-table{width:100%; border-collapse:collapse; font-size:12.5px}
-th{text-align:left; font:600 12px "Barlow Semi Condensed", Arial, sans-serif; color:#57636E; border-bottom:1px solid #97A2AC; padding:4px 8px 4px 0}
-td{border-bottom:1px solid #D5DBDF; padding:5px 8px 5px 0; vertical-align:top} .n{text-align:right; font-variant-numeric:tabular-nums}
-.sev{font:600 12px "Barlow Semi Condensed", Arial, sans-serif; padding:1px 7px; border-radius:20px; border:1px solid currentColor; white-space:nowrap}
-.card{break-inside:avoid; page-break-inside:avoid; border-top:2px solid #1C2228; padding-top:10px; margin-top:26px}
-.card header{display:flex; align-items:baseline; gap:10px; margin-bottom:8px; color:#57636E}
-.card header h3{color:#1C2228}
-.desc{font-size:14.5px; margin:10px 0 4px}
-dl{display:grid; grid-template-columns:110px 1fr; gap:4px 12px; margin:8px 0 0} dt{color:#57636E} dd{margin:0} dd span{color:#57636E}
-.over{color:#D9361C; font-weight:600}
-@media print{ .bar{display:none} main{padding:0; max-width:none} h2{break-after:avoid} .pb{break-before:page} }
-</style></head><body>
-<div class="bar"><span>${title}</span><button type="button" onclick="print()">Print or save as PDF</button></div>
-<main>
-${R.sections.map(k => SECTION[k] ? SECTION[k]() : '').join('\n')}
-</main></body></html>`);
-  win.document.close();
+
+/* clash report: a PDF in Inter, with the report date and model version on every page */
+const loadScript = src => new Promise((ok, no) => { const el = document.createElement('script'); el.src = src; el.onload = ok; el.onerror = () => no(new Error('could not load ' + src.split('/').pop())); document.head.appendChild(el); });
+const fontData = {};
+async function pdfDoc(){
+  if (!window.jspdf) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  if (!window.jspdf.jsPDF.API.autoTable) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+  const doc = new window.jspdf.jsPDF({unit:'mm', format:'a4', compress:true});
+  // the fonts sit beside the viewer
+  for (const [file, style] of [['Inter-Regular.ttf', 'normal'], ['Inter-SemiBold.ttf', 'bold']]){
+    if (!fontData[file]){
+      const r = await fetch(new URL('fonts/' + file, location.href)); if (!r.ok) throw new Error(file + ' ' + r.status);
+      const u8 = new Uint8Array(await r.arrayBuffer()); let bin = '';
+      for (let k = 0; k < u8.length; k += 0x8000) bin += String.fromCharCode.apply(null, u8.subarray(k, k + 0x8000));
+      fontData[file] = btoa(bin);
+    }
+    doc.addFileToVFS(file, fontData[file]); doc.addFont(file, 'Inter', style);
+  }
+  doc.setFont('Inter', 'normal');
+  return doc;
+}
+const rgb = c => { const m = /^#?([0-9a-f]{6})$/i.exec(c || ''); return m ? [0,2,4].map(k => parseInt(m[1].slice(k, k+2), 16)) : [28,34,40]; };
+const INK = [28,34,40], MUTED = [87,99,110], HAIR = [213,219,223], OVER = [217,54,28];
+const CARD_MAX = 200;                    // clashes drawn as images; the summary table lists every one
+async function clashPDF(){
+  const list = clRows(); if (!list.length) return toast('No clashes to report.');
+  const actionable = list.filter(c => ACTIONABLE.has(c.sev)), cards = actionable.slice(0, CARD_MAX);
+  busy('Preparing the clash report');
+  try{
+    const doc = await pdfDoc();
+    const img = await clashImages(cards, list, (k, n) => busy(`Drawing clash images, ${k} of ${n}`));
+    busy('Writing the PDF'); await new Promise(res => setTimeout(res));
+    const R = P.reports.clash, issued = longDate(Date.now());
+    const PW = 210, PH = 297, MX = 14, CW = PW - 2*MX, TOP = 20, BOTTOM = PH - 16;
+    const filt = st.clFilter === 'all' ? 'all grades' : GRADES[SEV_ORDER[st.clFilter]].name.toLowerCase() + ' only';
+    let y = TOP;
+    // text at the top-left of its box; returns the height used
+    const text = (t, x, yy, o = {}) => {
+      const size = o.size || 9; doc.setFont('Inter', o.bold ? 'bold' : 'normal'); doc.setFontSize(size); doc.setTextColor(...(o.col || INK));
+      const lines = o.w ? doc.splitTextToSize(String(t), o.w) : [String(t)];
+      doc.text(lines, x, yy, {baseline:'top', align:o.align || 'left'}); return lines.length * size * 0.3528 * 1.2;
+    };
+    const need = h => { if (y + h > BOTTOM){ doc.addPage(); y = TOP; } };
+    const heading = t => { need(16); y += 3; y += text(t, MX, y, {size:13, bold:true}) + 3; };
+    const table = (head, body, opt = {}) => {
+      doc.autoTable({startY:y, head:[head], body, theme:'plain', margin:{left:MX, right:MX, top:TOP, bottom:PH - BOTTOM + 2},
+        styles:{font:'Inter', fontStyle:'normal', fontSize:8, textColor:INK, cellPadding:{top:1.4, bottom:1.4, left:0, right:2.5}, lineColor:HAIR, lineWidth:{bottom:0.2}, overflow:'linebreak'},
+        headStyles:{font:'Inter', fontStyle:'bold', textColor:MUTED, lineColor:[151,162,172], lineWidth:{bottom:0.35}}, ...opt});
+      y = doc.lastAutoTable.finalY + 6;
+    };
+    const cnt = sv => list.filter(c => c.sev === sv).length;
+    const gradeName = c => GRADES[SEV_ORDER[c.sev]].name;
+    const SECTION = {
+      summary:() => {
+        y += text(R.title, MX, y, {size:20, bold:true, w:CW}) + 1;
+        if (P.project.subtitle) y += text(P.project.subtitle, MX, y, {size:9.5, col:MUTED, w:CW}) + 4;
+        table(['', ''], [['Report date', issued], ['Model version', VERSION], ['Revision', P.project.revision || 'Not set for this project'],
+          ['Source', [SRCF.file, SRCF.view].filter(Boolean).join(', ') || 'Not recorded'], ['Clashes', `${list.length} in this report, ${filt}`]],
+          {showHead:false, columnStyles:{0:{cellWidth:34, textColor:MUTED}, 1:{fontStyle:'bold'}}});
+        const boxes = [['In this report', list.length, INK], ...GRADES.map(g => [g.name, cnt(g.id), rgb(g.colour)])];
+        const bw = (CW - 3*(boxes.length - 1)) / boxes.length; need(24);
+        boxes.forEach(([lab, n, col], k) => { const x = MX + k*(bw + 3);
+          doc.setDrawColor(...HAIR); doc.setLineWidth(0.3); doc.roundedRect(x, y, bw, 18, 1.5, 1.5);
+          text(fmt(n), x + 3, y + 2.6, {size:16, bold:true, col}); text(lab, x + 3, y + 11.6, {size:7.5, col:MUTED, w:bw - 5}); });
+        y += 24;
+        y += text(R_CL.summary, MX, y, {size:8, col:MUTED, w:CW}) + 2;
+        if (cards.length < actionable.length) y += text(`Images are included for the first ${cards.length} of ${actionable.length} actionable clashes, most severe first. The summary table lists all ${list.length}.`, MX, y, {size:8, col:MUTED, w:CW}) + 2;
+        y += 2;
+      },
+      locations:() => {
+        doc.addPage(); y = TOP; heading('Locations');
+        const o = img.overview, h = Math.min(CW * o.h / o.w, BOTTOM - TOP - 12); need(h);
+        doc.addImage(o.src, 'JPEG', MX, y, h * o.w / o.h, h); y += h + 6;
+      },
+      fixFirst:() => {
+        if (!TRIAGE.length) return;
+        heading('Fix first');
+        table(['Part', 'Description', 'Clashes it clears', 'Major'], TRIAGE.map(x => [E[x.i].m, descOf(E[x.i]), String(x.n), String(x.major)]),
+          {columnStyles:{0:{cellWidth:30}, 2:{halign:'right', cellWidth:28}, 3:{halign:'right', cellWidth:16}}});
+      },
+      table:() => {
+        heading('Summary');
+        table(['ID', 'Grade', 'Location', 'Description', 'Overlap mm'], list.map(c => [c.id, gradeName(c), placeOf(c), clashText(c), fmt(clDepth(c))]),
+          {columnStyles:{0:{cellWidth:13}, 1:{cellWidth:14}, 2:{cellWidth:32}, 4:{halign:'right', cellWidth:17}},
+           didParseCell:h => { if (h.section !== 'body') return; const c = list[h.row.index];
+             if (h.column.index === 1) h.cell.styles.textColor = rgb(SEV_COL[c.sev]);
+             if (h.column.index === 4 && clDepth(c) >= TOL) h.cell.styles.textColor = OVER; }});
+      },
+      cards:() => {
+        if (!cards.length) return;
+        doc.addPage(); y = TOP; heading('Clash details');
+        const IW = 100, IH = IW * 600/960, RX = MX + IW + 6, RW = CW - IW - 6;
+        for (const c of cards){
+          const A = E[c.a], B = E[c.b];
+          need(IH + 14);
+          doc.setDrawColor(...INK); doc.setLineWidth(0.5); doc.line(MX, y, MX + CW, y); y += 2.5;
+          text(c.id, MX, y, {size:11, bold:true}); text(gradeName(c), MX + 20, y + 0.7, {size:9, bold:true, col:rgb(SEV_COL[c.sev])});
+          text(placeOf(c), MX + CW, y + 0.7, {size:8.5, col:MUTED, align:'right'});
+          y += 7;
+          doc.addImage(img[c.id], 'JPEG', MX, y, IW, IH);
+          let ry = y;
+          const row = (lab, val) => { ry += text(lab, RX, ry, {size:7, col:MUTED}); ry += text(val, RX, ry, {size:8.5, w:RW}) + 1.8; };
+          ry += text(clashText(c), RX, ry, {size:9, bold:true, w:RW}) + 2.5;
+          row('Overlap', `${fmt(clDepth(c))} mm, ${clDepth(c) >= TOL ? 'over' : 'within'} the ${TOL} mm tolerance`);
+          row('Location', `X ${fmt(c.p[0])}, Y ${fmt(c.p[1])}, Z ${fmt(c.p[2])}`);
+          const who = d => [d.m + ' ' + descOf(d), d.c !== descOf(d) ? d.c : '', d.sy || ''].filter(Boolean).join(', ');
+          row('Part A', who(A)); row('Part B', who(B));
+          y = Math.max(y + IH, ry) + 6;
+        }
+      }
+    };
+    (R.sections || Object.keys(SECTION)).forEach(k => SECTION[k]?.());
+    // every page names the report, the model version and the report date
+    const pages = doc.getNumberOfPages();
+    for (let k = 1; k <= pages; k++){
+      doc.setPage(k);
+      text(`Report date: ${issued}`, PW - MX, 8, {size:7.5, col:MUTED, align:'right'});
+      doc.setFontSize(7.5); text(R.title, MX, 8, {size:7.5, col:MUTED, w:CW - doc.getTextWidth(`Report date: ${issued}`) - 8});
+      doc.setDrawColor(...HAIR); doc.setLineWidth(0.2); doc.line(MX, 12.5, PW - MX, 12.5);
+      text(`Model version: ${VERSION}`, MX, PH - 10, {size:7.5, col:MUTED, w:CW - 30});
+      text(`Page ${k} of ${pages}`, PW - MX, PH - 10, {size:7.5, col:MUTED, align:'right'});
+    }
+    doc.save(safeFile(`${P.project.name} clash report ${new Date().toISOString().slice(0, 10)}.pdf`));
+  } catch(err){ toast('The clash report could not be made: ' + err.message); }
+  finally{ busy(null); }
 }
 
 /* ---------- openings ---------- */
@@ -1615,53 +1887,31 @@ function zipStore(files){
   [[0,0x06054b50,4],[4,0,2],[6,0,2],[8,files.length,2],[10,files.length,2],[12,size,4],[16,off,4],[20,0,2]].forEach(([o,v,n]) => n === 4 ? e.setUint32(o,v,true) : e.setUint16(o,v,true));
   return new Blob([...parts, ...central, e], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
 }
-function bwhXLSX(){
-  const T = 4, H = 1, PL = 2, N = 3, W = 6, B = 5;               // styles: title, header, plain, number, wrapped text, bold text
-  const R = P.reports.holeSchedule, nP = OPEN.filter(i => E[i].prop).length;
-  const issued = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
-  // one cell per column id: [value, style]
-  const COL = {
-    ref:(d) => [d.m, B], status:(d) => [d.prop ? 'Proposed' : 'Modelled', PL], shape:(d, o, c, circ) => [circ ? 'Circular' : 'Rectangular', PL],
-    size:(d, o, c, circ) => [circ ? 'Ø' + Math.round(o.dia) : Math.round(o.w) + ' × ' + Math.round(o.h), PL],
-    width:(d, o, c, circ) => [circ ? '' : Math.round(o.w), N], height:(d, o, c, circ) => [circ ? '' : Math.round(o.h), N],
-    diameter:(d, o, c, circ) => [circ ? Math.round(o.dia) : '', N], depth:(d, o) => [Math.round(o.depth), N],
-    x:(d, o, c) => [c[0], N], y:(d, o, c) => [c[1], N], zCentre:(d, o, c) => [c[2], N], zUnderside:(d, o) => [Math.round(o.b[2]), N],
-    wall:(d, o) => [o.walls.map(w => E[w].m).join(', '), W], wallSource:(d, o) => [[...new Set(o.walls.map(w => SRC[E[w].s].name))].join(', '), W],
-    wallRating:(d, o) => [[...new Set(o.walls.map(w => E[w].fr).filter(Boolean))].join(', '), W],
-    services:(d, o) => [o.services.map(k => E[k].m + ' ' + descOf(E[k])).join('\n'), W],
-    serviceSizes:(d, o) => [o.services.map(k => E[k].m + ' ' + svcSize(k, o.ax, o.s0, o.s1)).join('\n'), W],
-    minGap:(d, o) => [o.minGap == null ? '' : Math.round(o.minGap), N], gapNeeded:(d, o) => [o.services.length ? o.need : '', N], clearance:(d, o) => [VERDICT[o.verdict], PL],
-    fireStopping:(d, o) => [o.services.map(k => E[k].m + ': ' + fireFor(k, o)).join('\n'), W], reviewBy:(d, o) => [reviewBy(o), W],
-    modelMark:(d) => [d.mk0 || '', PL], revitId:(d) => [d.r || '', PL], crossings:(d, o) => [o.crossings.join(', '), W],
-    overlaps:(d, o) => [o.overlaps.map(k => E[k].m).join(', '), W], siteCheck:() => ['', PL]
-  };
-  const cols = R.columns.filter(c => COL[c.id]);
-  const head = cols.map(c => c.label), widths = cols.map(c => c.width || 12);
-  const rows = [
-    [[R.title, T]],
-    [[`Issued ${issued}. ${OPEN.length} openings: ${OPEN.length - nP} modelled, ${nP} proposed.`, 0]],
-    [[R.intro || '', 0]],
-    head.map(t => [t, H])];
-  OPEN.forEach(i => { const d = E[i], o = d.bwh, c = setOut(o), circ = o.shape === 'circ';
-    rows.push(cols.map(col => COL[col.id](d, o, c, circ))); });
-  const notes = [[['Notes', T]], ...(R.notes || []).map(n => [[n.label, B], [n.text, W]])];
+const XS = {title:4, head:1, plain:2, num:3, bold:5, wrap:6};      // cell styles
+function download(blob, name){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+const safeFile = t => t.replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim();
+// sheets: {name, rows, widths, head}; the head row is frozen, filtered and repeated on printed pages
+function xlsxBook(file, sheets){
   const types = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>
 <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
-<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
-<Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+${sheets.map((sh, k) => `<Override PartName="/xl/worksheets/sheet${k+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('\n')}
 <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`;
   const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
-  const last = colName(head.length-1);
+  const last = sh => colName(sh.widths.length - 1), q = sh => `'${sh.name.replace(/'/g, "''")}'`;
+  const names = sheets.map((sh, k) => sh.head ? `<definedName name="_xlnm._FilterDatabase" localSheetId="${k}" hidden="1">${q(sh)}!$A$${sh.head}:$${last(sh)}$${sh.rows.length}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="${k}">${q(sh)}!$${sh.head}:$${sh.head}</definedName>` : '').join('');
   const book = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Schedule" sheetId="1" r:id="rId1"/><sheet name="Notes" sheetId="2" r:id="rId2"/></sheets>
-<definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">Schedule!$A$4:$${last}$${rows.length}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="0">Schedule!$4:$4</definedName></definedNames></workbook>`;
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map((sh, k) => `<sheet name="${xesc(sh.name)}" sheetId="${k+1}" r:id="rId${k+1}"/>`).join('')}</sheets>
+${names ? `<definedNames>${names}</definedNames>` : ''}</workbook>`;
   const bookRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((sh, k) => `<Relationship Id="rId${k+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${k+1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
   const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="#,##0"/></numFmts>
-<fonts count="3"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="14"/><name val="Calibri"/><family val="2"/></font></fonts>
+<fonts count="3"><font><sz val="10"/><name val="Inter"/><family val="2"/></font><font><b/><sz val="10"/><name val="Inter"/><family val="2"/></font><font><b/><sz val="14"/><name val="Inter"/><family val="2"/></font></fonts>
 <fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE6EAE9"/><bgColor indexed="64"/></patternFill></fill></fills>
 <borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color rgb="FF97A2AC"/></bottom><diagonal/></border></borders>
 <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
@@ -1673,14 +1923,67 @@ function bwhXLSX(){
 <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
 <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf></cellXfs>
 <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
-  const sheet1 = sheetXml(rows, widths, {freeze:4, filter:`A4:${last}${rows.length}`});
-  const sheet2 = sheetXml(notes, [16, 110]);
-  const blob = zipStore([['[Content_Types].xml', types], ['_rels/.rels', rels], ['xl/workbook.xml', book], ['xl/_rels/workbook.xml.rels', bookRels], ['xl/styles.xml', styles],
-    ['xl/worksheets/sheet1.xml', sheet1], ['xl/worksheets/sheet2.xml', sheet2]]);
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = R.file || 'Builders work hole schedule.xlsx'; document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  download(zipStore([['[Content_Types].xml', types], ['_rels/.rels', rels], ['xl/workbook.xml', book], ['xl/_rels/workbook.xml.rels', bookRels], ['xl/styles.xml', styles],
+    ...sheets.map((sh, k) => [`xl/worksheets/sheet${k+1}.xml`, sheetXml(sh.rows, sh.widths, sh.head ? {freeze:sh.head, filter:`A${sh.head}:${last(sh)}${sh.rows.length}`} : {})])]), file);
+}
+const shortDate = () => new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+function bwhXLSX(){
+  const R = P.reports.holeSchedule, nP = OPEN.filter(i => E[i].prop).length;
+  // one cell per column id: [value, style]
+  const COL = {
+    ref:(d) => [d.m, XS.bold], status:(d) => [d.prop ? 'Proposed' : 'Modelled', XS.plain], shape:(d, o, c, circ) => [circ ? 'Circular' : 'Rectangular', XS.plain],
+    size:(d, o, c, circ) => [circ ? 'Ø' + Math.round(o.dia) : Math.round(o.w) + ' × ' + Math.round(o.h), XS.plain],
+    width:(d, o, c, circ) => [circ ? '' : Math.round(o.w), XS.num], height:(d, o, c, circ) => [circ ? '' : Math.round(o.h), XS.num],
+    diameter:(d, o, c, circ) => [circ ? Math.round(o.dia) : '', XS.num], depth:(d, o) => [Math.round(o.depth), XS.num],
+    x:(d, o, c) => [c[0], XS.num], y:(d, o, c) => [c[1], XS.num], zCentre:(d, o, c) => [c[2], XS.num], zUnderside:(d, o) => [Math.round(o.b[2]), XS.num],
+    wall:(d, o) => [o.walls.map(w => E[w].m).join(', '), XS.wrap], wallSource:(d, o) => [[...new Set(o.walls.map(w => SRC[E[w].s].name))].join(', '), XS.wrap],
+    wallRating:(d, o) => [[...new Set(o.walls.map(w => E[w].fr).filter(Boolean))].join(', '), XS.wrap],
+    services:(d, o) => [o.services.map(k => E[k].m + ' ' + descOf(E[k])).join('\n'), XS.wrap],
+    serviceSizes:(d, o) => [o.services.map(k => E[k].m + ' ' + svcSize(k, o.ax, o.s0, o.s1)).join('\n'), XS.wrap],
+    minGap:(d, o) => [o.minGap == null ? '' : Math.round(o.minGap), XS.num], gapNeeded:(d, o) => [o.services.length ? o.need : '', XS.num], clearance:(d, o) => [VERDICT[o.verdict], XS.plain],
+    fireStopping:(d, o) => [o.services.map(k => E[k].m + ': ' + fireFor(k, o)).join('\n'), XS.wrap], reviewBy:(d, o) => [reviewBy(o), XS.wrap],
+    modelMark:(d) => [d.mk0 || '', XS.plain], revitId:(d) => [d.r || '', XS.plain], crossings:(d, o) => [o.crossings.join(', '), XS.wrap],
+    overlaps:(d, o) => [o.overlaps.map(k => E[k].m).join(', '), XS.wrap], siteCheck:() => ['', XS.plain]
+  };
+  const cols = R.columns.filter(c => COL[c.id]);
+  const rows = [
+    [[R.title, XS.title]],
+    [[`Issued ${shortDate()}. Model version: ${VERSION}. ${OPEN.length} openings: ${OPEN.length - nP} modelled, ${nP} proposed.`, 0]],
+    [[R.intro || '', 0]],
+    cols.map(c => [c.label, XS.head])];
+  OPEN.forEach(i => { const d = E[i], o = d.bwh, c = setOut(o), circ = o.shape === 'circ';
+    rows.push(cols.map(col => COL[col.id](d, o, c, circ))); });
+  const notes = [[['Notes', XS.title]], ...(R.notes || []).map(n => [[n.label, XS.bold], [n.text, XS.wrap]])];
+  xlsxBook(safeFile(`${P.project.name} builders’ work report.xlsx`), [{name:'Schedule', rows, widths:cols.map(c => c.width || 12), head:4}, ...(R.notes?.length ? [{name:'Notes', rows:notes, widths:[16, 110]}] : [])]);
+}
+
+/* equipment reports: every item of one Revit category, with where it is */
+const EQ_REPORTS = [
+  {id:'mech', name:'Mechanical equipment report', cat:'Mechanical equipment', type:'Mechanical equipment', what:'mechanical equipment'},
+  {id:'elec', name:'Electrical equipment report', cat:'Electrical equipment', type:'Electrical equipment', what:'electrical equipment'},
+  {id:'air', name:'Air terminals report', cat:'Air terminals', type:'Air terminal', what:'air terminals'}];
+// by Revit category where the package records it, otherwise by part type
+const equipOf = r => E.filter(d => !d.prop && (d.cat0 !== undefined ? d.cat0 === r.cat : d.c === r.type));
+function equipXLSX(r){
+  const lvOrder = Object.fromEntries(LEVELS.map((L, k) => [L.id, k]));
+  const list = equipOf(r).sort((a, b) => ((lvOrder[a.lv] ?? -1) - (lvOrder[b.lv] ?? -1)) || a.m.localeCompare(b.m, 'en', {numeric:true}));
+  const mid = (d, ax) => Math.round((d.b[ax] + d.b[ax+3]) / 2);
+  const C = [['Ref', 12, d => [d.m, XS.bold]], ['Description', 28, d => [descOf(d), XS.wrap]], ['Family', 36, d => [d.f || '', XS.wrap]], ['Type', 24, d => [d.t || '', XS.wrap]],
+    ...(LEVELS.length ? [['Level', 9, d => [levelName(d.lv), XS.plain]]] : []),
+    ...(GRID.length ? [['Grid', 14, d => [gridRef(mid(d, 0), mid(d, 1)), XS.plain]]] : []),
+    ['X mm', 10, d => [mid(d, 0), XS.num]], ['Y mm', 10, d => [mid(d, 1), XS.num]], ['Z underside mm', 14, d => [Math.round(d.b[2]), XS.num]],
+    ['Size', 28, d => [d.z, XS.wrap]], ['System', 13, d => [SYSTEM[d.sys] || '', XS.plain]], ['Model', 13, d => [SRC[d.s].name, XS.plain]],
+    ['Revit ID', 11, d => [d.r || '', XS.plain]], ['Open clashes', 12, d => [(elClashes[d.i] || []).filter(c => ACTIONABLE.has(c.sev)).length, XS.num]]];
+  const title = `${P.project.name}, ${r.what}`;
+  const rows = [[[title, XS.title]], [[`Issued ${shortDate()}. Model version: ${VERSION}. ${list.length} items.`, 0]],
+    [['Positions are model coordinates in millimetres at the centre of each item. Z is its underside.', 0]], C.map(c => [c[0], XS.head]), ...list.map(d => C.map(c => c[2](d)))];
+  // the same items counted by family and type
+  const groups = {}; list.forEach(d => (groups[(d.f || d.c) + '\u0000' + (d.t || '')] ||= []).push(d));
+  const byType = Object.values(groups).sort((a, b) => b.length - a.length);
+  const sum = [[[`${title}, by type`, XS.title]], [[`${byType.length} types, ${list.length} items.`, 0]], [['', 0]],
+    ['Family', 'Type', 'Count', ...(LEVELS.length ? ['Levels'] : [])].map(t => [t, XS.head]),
+    ...byType.map(g => [[g[0].f || g[0].c, XS.wrap], [g[0].t || '', XS.wrap], [g.length, XS.num], ...(LEVELS.length ? [[[...new Set(g.map(d => levelName(d.lv)).filter(Boolean))].join(', '), XS.wrap]] : [])])];
+  xlsxBook(safeFile(`${P.project.name} ${r.what}.xlsx`), [{name:'Items', rows, widths:C.map(c => c[1]), head:4}, {name:'By type', rows:sum, widths:[44, 30, 9, 44], head:4}]);
 }
 $('#tab-open').addEventListener('click', e => {
   const chk = e.target.closest('[data-chk]');
@@ -1793,15 +2096,252 @@ function applyTheme(){
 themeMQ.addEventListener ? themeMQ.addEventListener('change', applyTheme) : themeMQ.addListener(applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
 
+/* ---------- progress and short messages ---------- */
+const busyEl = $('#busy'), toastEl = $('#toast'); let toastT = 0;
+function busy(t){ busyEl.textContent = t || ''; busyEl.style.display = t ? 'block' : 'none'; }
+function toast(t){ toastEl.textContent = t; toastEl.style.display = 'block'; clearTimeout(toastT); toastT = setTimeout(() => toastEl.style.display = 'none', 3200); }
+
+/* ---------- saved views ---------- */
+// kept in this browser for now; a link or an email carries a view to anyone else
+const VKEY = 'talo-views:' + pkgUrl.pathname;
+const vStore = {
+  load(){ try{ return JSON.parse(localStorage.getItem(VKEY) || '[]'); }catch(e){ return []; } },
+  save(list){ try{ localStorage.setItem(VKEY, JSON.stringify(list)); return true; }catch(e){ return false; } }
+};
+let SAVED = vStore.load(), vFilter = 'all';
+// parts are kept by their stable id; proposed openings, made here, by their reference
+const markIx = {}; E.forEach(d => { if (d.m) markIx[d.m] = d.i; });
+const elRef = i => E[i].id || E[i].m, elFrom = r => idIx[r] ?? markIx[r];
+const r3 = n => Math.round(n * 1000) / 1000;
+function captureState(){
+  return {p:cam === ortho ? 'o' : 'p', pos:cam.position.toArray().map(r3), tgt:controls.target.toArray().map(r3), half:cam === ortho ? r3(ortho.top / ortho.zoom) : null, view:curView,
+    clip:st.clip.map(v => Math.round(v * 10) / 10), box:st.boxOn, level:st.level,
+    off:M.layers.filter((L, l) => !st.layerOn[l]), srcOff:MODELS.filter(k => !st.srcOn[k]),
+    hidden:st.hidden.size <= 300 ? [...st.hidden].map(elRef) : [], iso:st.isolate && st.isolate.size <= 300 ? [...st.isolate].map(elRef) : null,
+    sel:st.sel != null ? elRef(st.sel) : null, clash:st.selClash ? st.selClash.id : null, tags:st.tags, markers:st.markers};
+}
+function applyState(s, instant){
+  st.layerOn = M.layers.map(L => !(s.off || []).includes(L)); st.srcOn = Object.fromEntries(MODELS.map(k => [k, !(s.srcOff || []).includes(k)]));
+  st.hidden = new Set((s.hidden || []).map(elFrom).filter(i => i != null)); st.isolate = s.iso ? new Set(s.iso.map(elFrom).filter(i => i != null)) : null; st.bwhIso = null;
+  if (s.clip) st.clip = s.clip.slice(); st.boxOn = !!s.box; st.level = s.level ?? null; lvKeep = null;
+  $('#boxBtn').setAttribute('aria-pressed', String(st.boxOn)); syncClipUI(); applyClip(); markLevels();
+  st.tags = s.tags || 'off'; $('#tagSel').value = st.tags; st.markers = s.markers || 'off'; $('#mkSel').value = st.markers;
+  st.selClash = s.clash && byId[s.clash] ? byId[s.clash] : null; st.sel = st.selClash || s.sel == null ? null : elFrom(s.sel) ?? null;
+  syncLayerUI(); refresh(); if (st.selClash) renderClash(st.selClash); else renderSel(); markPart(st.sel); showIsoBanner();
+  setProjection(s.p === 'o');
+  curView = s.view || curView; document.querySelectorAll('.views button[data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === curView));
+  const tgt = new THREE.Vector3(...s.tgt), pos = new THREE.Vector3(...s.pos);
+  if (instant){ tween = null; zoomLeft = 0; controls.target.copy(tgt); cam.position.copy(pos); if (cam === ortho && s.half) setOrthoHalf(s.half); controls.update(); req(); }
+  else flyTo(tgt, pos, s.half);
+}
+// the view as drawn, with its tags and markers, and a caption band underneath when one is given
+function viewCanvas(caption){
+  renderer.render(scene, cam);
+  const W = canvas.width, H = canvas.height, k = W / (canvas.clientWidth || W), r0 = canvas.getBoundingClientRect();
+  const band = caption ? Math.round((caption.note ? 84 : 62) * k) : 0;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H + band;
+  const g = cv.getContext('2d');
+  g.drawImage(canvas, 0, 0);
+  document.querySelectorAll('#labels .tag').forEach(el => {
+    if (el.style.display !== 'block') return;
+    const r = el.getBoundingClientRect(), cs = getComputedStyle(el);
+    const x = (r.left - r0.left) * k, y = (r.top - r0.top) * k, w = r.width * k, h = r.height * k;
+    if (x + w < 0 || y + h < 0 || x > W || y > H) return;
+    g.globalAlpha = +cs.opacity || 1;
+    g.fillStyle = cs.backgroundColor; g.fillRect(x, y, w, h);
+    g.strokeStyle = cs.borderTopColor; g.lineWidth = k; g.strokeRect(x + k/2, y + k/2, w - k, h - k);
+    const bl = parseFloat(cs.borderLeftWidth) * k; if (bl > k * 1.5){ g.fillStyle = cs.borderLeftColor; g.fillRect(x, y, bl, h); }
+    g.fillStyle = cs.color; g.font = `500 ${parseFloat(cs.fontSize) * k}px "JetBrains Mono", monospace`; g.textBaseline = 'middle';
+    g.fillText(el.textContent, x + (parseFloat(cs.paddingLeft) + parseFloat(cs.borderLeftWidth)) * k, y + h/2);
+    g.globalAlpha = 1;
+  });
+  if (caption){
+    const pad = 16 * k, fit = (t, w) => { if (g.measureText(t).width <= w) return t; while (t && g.measureText(t + '…').width > w) t = t.slice(0, -1); return t + '…'; };
+    g.fillStyle = cssVar('--panel') || '#FAFBFA'; g.fillRect(0, H, W, band);
+    g.fillStyle = cssVar('--rule-strong') || '#97A2AC'; g.fillRect(0, H, W, Math.max(1, k));
+    g.textBaseline = 'alphabetic';
+    g.fillStyle = cssVar('--ink'); g.font = `600 ${15*k}px Inter, sans-serif`; g.fillText(fit(caption.title, W - 2*pad), pad, H + 26*k);
+    g.fillStyle = cssVar('--muted'); g.font = `400 ${12*k}px Inter, sans-serif`; g.fillText(fit(caption.sub, W - 2*pad), pad, H + 46*k);
+    if (caption.note){ g.fillStyle = cssVar('--clash'); g.font = `600 ${12*k}px Inter, sans-serif`; g.fillText(fit(caption.note, W - 2*pad), pad, H + 68*k); }
+  }
+  return cv;
+}
+function thumb(){
+  const src = viewCanvas(null), w = 224, h = 140, cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const s = Math.max(w / src.width, h / src.height), sw = w / s, sh = h / s;
+  cv.getContext('2d').drawImage(src, (src.width - sw)/2, (src.height - sh)/2, sw, sh, 0, 0, w, h);
+  return cv.toDataURL('image/jpeg', 0.78);
+}
+function saveView(name, state, flag, note){
+  const v = {id:Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name:name || 'View ' + (SAVED.length + 1), created:new Date().toISOString(),
+    state:state || captureState(), thumb:thumb(), flag:!!flag, note:note || ''};
+  SAVED.unshift(v);
+  if (!vStore.save(SAVED)) toast('This browser would not store the view. It stays until the page closes.');
+  renderViews(); return v;
+}
+const b64u = t => btoa(unescape(encodeURIComponent(t))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const unb64u = t => decodeURIComponent(escape(atob(t.replace(/-/g, '+').replace(/_/g, '/'))));
+// a link to the page the viewer sits in, or to the viewer itself, carrying the view, its name and its issue
+function viewLink(v){
+  let u = null;
+  try{ if (window.parent !== window && parent.location.origin === location.origin) u = new URL(parent.location.href); }catch(e){}
+  u = u || new URL(location.href);
+  u.searchParams.set('view', b64u(JSON.stringify({n:v.name, f:v.flag ? v.note || '' : null, s:v.state}))); u.hash = '';
+  return u.toString();
+}
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); return true; }
+  catch(e){ const ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select();
+    let ok = false; try{ ok = document.execCommand('copy'); }catch(e2){} ta.remove(); return ok; }
+}
+function mailView(v){
+  const body = [v.name + (v.flag ? ', flagged as an issue' : ''), ...(v.flag && v.note ? [v.note] : []), '',
+    [P.project.name, levelName(v.state.level)].filter(Boolean).join(', '), 'Model version: ' + VERSION, '', 'Open this view: ' + viewLink(v)].join('\n');
+  const a = document.createElement('a');
+  a.href = 'mailto:?subject=' + encodeURIComponent(`${P.project.name}: ${v.name}${v.flag ? ' (issue)' : ''}`) + '&body=' + encodeURIComponent(body);
+  document.body.appendChild(a); a.click(); a.remove();
+}
+async function viewImage(v){
+  if (v){ applyState(v.state, true); await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))); }
+  const cv = viewCanvas({title:v ? v.name : P.project.name, sub:[P.project.name, levelName(st.level), 'Model version: ' + VERSION, longDate(Date.now())].filter(Boolean).join('   ·   '),
+    note:v && v.flag ? 'Issue' + (v.note ? ': ' + v.note : '') : ''});
+  cv.toBlob(b => download(b, safeFile(`${P.project.name} ${v ? v.name : 'view'}.png`)), 'image/png');
+}
+const VIEW_NAME = {iso:'3D', plan:'Plan', below:'Below', side:'Side', end:'End'};
+function renderViews(){
+  const list = SAVED.filter(v => vFilter === 'all' || v.flag), nF = SAVED.filter(v => v.flag).length;
+  const when = t => new Date(t).toLocaleString('en-GB', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+  $('#tab-views').innerHTML = `<section class="sec"><h2>Saved views</h2><p class="small">Kept in this browser. Send one by link or email.</p>
+    <div class="rowbtns"><button class="btn" data-vact="save">Save this view</button></div>
+    ${SAVED.length ? `<nav class="views filter" aria-label="Filter views"><button data-vf="all" class="${vFilter === 'all' ? 'on' : ''}">All ${SAVED.length}</button><button data-vf="flag" class="${vFilter === 'flag' ? 'on' : ''}">Flagged ${nF}</button></nav>` : ''}</section>
+    ${list.map(v => `<article class="vcard${v.flag ? ' flag' : ''}" data-vid="${esc(v.id)}">
+      <img src="${esc(v.thumb)}" alt="" data-vact="open">
+      <div><input class="vname" value="${esc(v.name)}" aria-label="View name" data-vname>
+        <div class="meta">${esc(when(v.created))} · ${esc(levelName(v.state.level) || VIEW_NAME[v.state.view] || '3D')}${v.flag ? ' · <span class="flagged">Issue</span>' : ''}</div></div>
+      ${v.flag ? `<textarea data-vnote placeholder="What needs looking at" aria-label="Issue">${esc(v.note)}</textarea>` : ''}
+      <div class="rowbtns"><button class="btn" data-vact="open">Open</button><button class="btn" data-vact="flag" aria-pressed="${v.flag}">${v.flag ? 'Flagged' : 'Flag issue'}</button><button class="btn" data-vact="img">Image</button><button class="btn" data-vact="mail">Email</button><button class="btn" data-vact="link">Copy link</button><button class="btn" data-vact="del">Delete</button></div>
+    </article>`).join('') || `<div class="empty">${SAVED.length ? 'No flagged views.' : 'No saved views yet.'}</div>`}`;
+}
+$('#tab-views').addEventListener('click', async e => {
+  const f = e.target.closest('[data-vf]'); if (f){ vFilter = f.dataset.vf; return renderViews(); }
+  const b = e.target.closest('[data-vact]'); if (!b) return;
+  if (b.dataset.vact === 'save'){ saveView(); const inp = $('#tab-views .vname'); if (inp){ inp.focus(); inp.select(); } return; }
+  const v = SAVED.find(x => x.id === b.closest('[data-vid]').dataset.vid); if (!v) return;
+  const a = b.dataset.vact;
+  if (a === 'open') applyState(v.state, false);
+  if (a === 'flag'){ v.flag = !v.flag; vStore.save(SAVED); renderViews(); if (v.flag) document.querySelector(`[data-vid="${CSS.escape(v.id)}"] textarea`)?.focus(); }
+  if (a === 'img') viewImage(v);
+  if (a === 'mail') mailView(v);
+  if (a === 'link') toast(await copyText(viewLink(v)) ? 'Link copied' : 'The link could not be copied');
+  if (a === 'del'){ SAVED = SAVED.filter(x => x !== v); vStore.save(SAVED); renderViews(); }
+});
+$('#tab-views').addEventListener('input', e => {
+  const card = e.target.closest('[data-vid]'); if (!card) return;
+  const v = SAVED.find(x => x.id === card.dataset.vid); if (!v) return;
+  if (e.target.matches('[data-vname]')) v.name = e.target.value.trim() || v.name;
+  if (e.target.matches('[data-vnote]')) v.note = e.target.value;
+  vStore.save(SAVED);
+});
+// a view sent by link opens as it was saved, with its name and issue on screen
+function openShared(){
+  const code = new URLSearchParams(location.search).get('view'); if (!code) return;
+  let v; try{ v = JSON.parse(unb64u(code)); }catch(e){ return toast('That view link is damaged.'); }
+  if (!v || !v.s || !v.s.pos) return;
+  applyState(v.s, true);
+  const box = $('#shared');
+  box.innerHTML = `<span>Shared view: <b>${esc(v.n || 'View')}</b></span>${v.f != null ? `<span class="note">Issue${v.f ? ': ' + esc(v.f) : ''}</span>` : ''}<button class="btn" data-sh="save">Save to my views</button><button class="btn" data-sh="close">Close</button>`;
+  box.style.display = 'flex';
+  box.onclick = e => { const b = e.target.closest('[data-sh]'); if (!b) return;
+    if (b.dataset.sh === 'save'){ saveView(v.n, v.s, v.f != null, v.f || ''); toast('Saved to your views'); }
+    box.style.display = 'none'; };
+}
+
+/* ---------- find a room or part ---------- */
+// rooms come from the package when the export carries them; parts by mark, Revit ID, family or description
+const ROOMS = (P.rooms || []).map(r => ({...r, hay:[r.number, r.name, levelName(r.level)].filter(Boolean).join(' ').toLowerCase()}));
+const findIn = $('#find'), findList = $('#findList');
+findIn.placeholder = ROOMS.length ? 'Find a room or part' : 'Find a part';
+const partHay = E.map(d => [d.m, d.mk0, d.r, descOf(d), d.c, d.f, d.t].filter(Boolean).join(' ').toLowerCase());
+let findHits = [], findOn = -1;
+function findResults(q){
+  q = q.trim().toLowerCase(); if (!q) return [];
+  const rooms = ROOMS.map(r => [String(r.number || '').toLowerCase() === q ? 0 : r.hay.startsWith(q) ? 1 : r.hay.includes(q) ? 2 : 9, r])
+    .filter(x => x[0] < 9).sort((a, b) => a[0] - b[0]).slice(0, 8).map(x => ({room:x[1]}));
+  const parts = [];
+  for (const d of E){
+    const m = (d.m || '').toLowerCase(), rank = m === q || d.r === q ? 0 : m.startsWith(q) ? 1 : partHay[d.i].includes(q) ? 2 : 9;
+    if (rank < 9) parts.push([rank, d]);
+  }
+  parts.sort((a, b) => a[0] - b[0] || a[1].m.localeCompare(b[1].m, 'en', {numeric:true}));
+  return rooms.concat(parts.slice(0, 14 - rooms.length).map(x => ({part:x[1]})));
+}
+function closeFind(){ findList.style.display = 'none'; findIn.setAttribute('aria-expanded', 'false'); }
+function showFind(){
+  const q = findIn.value.trim();
+  if (!q) return closeFind();
+  findHits = findResults(q); findOn = findHits.length ? 0 : -1;
+  findList.innerHTML = findHits.map((h, k) => h.room
+    ? `<button role="option" data-k="${k}"><b>${esc(h.room.number || '')}</b><span>${esc(h.room.name || 'Room')}</span><small>Room${h.room.level ? ' · ' + esc(levelName(h.room.level)) : ''}</small></button>`
+    : `<button role="option" data-k="${k}"><b>${esc(h.part.m)}</b><span>${esc(descOf(h.part))}</span><small>${esc([h.part.c, levelName(h.part.lv)].filter(Boolean).join(' · '))}</small></button>`).join('')
+    + (findHits.length ? '' : '<p>Nothing matches.</p>') + (ROOMS.length ? '' : '<p>No rooms in this export.</p>');
+  const r = findIn.getBoundingClientRect();
+  findList.style.left = Math.max(8, Math.min(r.left, innerWidth - 348)) + 'px'; findList.style.top = (r.bottom + 4) + 'px';
+  findList.style.display = 'block'; findIn.setAttribute('aria-expanded', 'true'); markFind();
+}
+function markFind(){ findList.querySelectorAll('[data-k]').forEach(b => b.classList.toggle('on', +b.dataset.k === findOn)); findList.querySelector('.on')?.scrollIntoView({block:'nearest'}); }
+function goFind(h){
+  closeFind(); findIn.blur();
+  if (h.room){ boxAround(h.room.bbox, 300); if (h.room.level && LEVEL[h.room.level]){ st.level = h.room.level; markLevels(); } return; }
+  selectEl(h.part.i, true);
+}
+findIn.addEventListener('input', showFind);
+findIn.addEventListener('focus', () => { if (findIn.value.trim()) showFind(); });
+findIn.addEventListener('keydown', e => {
+  if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && findHits.length){ e.preventDefault(); findOn = (findOn + (e.key === 'ArrowDown' ? 1 : -1) + findHits.length) % findHits.length; markFind(); }
+  if (e.key === 'Enter' && findHits[findOn]){ e.preventDefault(); goFind(findHits[findOn]); }
+  if (e.key === 'Escape') closeFind();
+});
+findIn.addEventListener('blur', () => setTimeout(() => { if (document.activeElement !== findIn) closeFind(); }, 150));
+findList.addEventListener('pointerdown', e => e.preventDefault());      // keeps focus in the box while choosing
+findList.addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) goFind(findHits[+b.dataset.k]); });
+
+/* ---------- report downloads ---------- */
+const REPORTS = [
+  {name:'Clash report', fmt:'PDF', n:() => SVC_CL.length, run:clashPDF},
+  {name:'Builders’ work report', fmt:'Excel', n:() => OPEN.length, run:bwhXLSX},
+  ...EQ_REPORTS.map(r => ({name:r.name, fmt:'Excel', n:() => equipOf(r).length, run:() => equipXLSX(r)}))];
+const repBtn = $('#repBtn'), repMenu = $('#repMenu');
+function closeReports(){ repMenu.style.display = 'none'; repBtn.setAttribute('aria-expanded', 'false'); }
+repBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  if (repMenu.style.display === 'block') return closeReports();
+  repMenu.innerHTML = REPORTS.map((r, k) => { const n = r.n();
+    return `<button role="menuitem" data-rep="${k}"${n ? '' : ' disabled'}><span>${esc(r.name)}</span><small>${n ? fmt(n) + ' · ' + r.fmt : 'None in this model'}</small></button>`; }).join('');
+  repMenu.style.display = 'block';
+  const b = repBtn.getBoundingClientRect();
+  repMenu.style.left = Math.max(8, Math.min(b.right - repMenu.offsetWidth, innerWidth - repMenu.offsetWidth - 8)) + 'px'; repMenu.style.top = (b.bottom + 4) + 'px';
+  repBtn.setAttribute('aria-expanded', 'true'); repMenu.querySelector('button:not(:disabled)')?.focus();
+});
+repMenu.addEventListener('click', e => { const b = e.target.closest('[data-rep]'); if (!b || b.disabled) return; closeReports(); REPORTS[+b.dataset.rep].run(); });
+repMenu.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){ closeReports(); repBtn.focus(); }
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp'){ e.preventDefault(); const bs = [...repMenu.querySelectorAll('button:not(:disabled)')], k = bs.indexOf(document.activeElement);
+    bs[(k + (e.key === 'ArrowDown' ? 1 : -1) + bs.length) % bs.length]?.focus(); }
+});
+document.addEventListener('click', e => { if (!repMenu.contains(e.target)) closeReports(); });
+
 /* ---------- go ---------- */
 buildLayers(); buildDim(); buildClipUI(); buildParts(); buildDiag(); buildTitle(); renderOpenings(); renderClashes(); renderSel(); applyClip(); applyTheme();
+buildLevels(); renderViews();
 if (mobile()){ app.classList.remove('noleft','noright'); st.tags = 'off'; $('#tagSel').value = 'off'; st.markers = 'off'; $('#mkSel').value = 'off'; }
 syncPanelBtns();
 resize(); refresh();
 const startBox = new THREE.Box3(W0.clone(), W1.clone());
 { const fb = frameBox(startBox, new THREE.Vector3(...VIEWS.iso).normalize()); controls.target.copy(fb.c); persp.position.copy(fb.pos); controls.update(); }
 loading.remove();
-window.__viewer = {st, E, OPEN, CL, fireFor, selectEl, selectClash, setView, setProjection, applyExplode, req, setBox, descOf, clashText, TRIAGE, handles, camera:() => cam};
+openShared();
+window.__viewer = {st, E, OPEN, CL, fireFor, selectEl, selectClash, setView, setProjection, applyExplode, req, setBox, descOf, clashText, TRIAGE, handles, camera:() => cam,
+  controls, LEVELS, VERSION, gridRef, previewLevel, endPreview, pickLevel, zoomBy, findResults, captureState, applyState, saveView, viewLink, clashPDF, bwhXLSX, equipXLSX, equipOf, EQ_REPORTS};
 requestAnimationFrame(frame);
 })();
 </script>

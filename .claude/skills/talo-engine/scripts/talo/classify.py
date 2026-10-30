@@ -128,7 +128,7 @@ def classify(x, cfg, levels=None):
             'part': p, 'verts': v, 'tris': t, 'bbox': [round(float(z), 1) for z in (*lo, *hi)],
             'modelKey': p.model, 'modelCode': x.models.get(p.model, {}).get('code'), 'layer': p.layer or '0', 'discipline': disc, 'type': ptype, 'role': role, 'equipment': equipment,
             'kind': 'wall' if disc == 'WALL' else 'segment' if (p.category in SEGMENTS or p.category in INSULATION or p.kind == 'element') and disc != 'WALL' else 'family',
-            'family': p.family, 'familyType': p.familyType, 'revitId': p.revitId, 'revitType': p.typeId, 'idSource': p.source,
+            'family': p.family, 'familyType': p.familyType, 'revitId': p.revitId, 'revitType': p.typeId, 'idSource': p.source, 'category': cat[0] if cat else None,
             'typeSource': src, 'plates': p.plates, 'faces': int(len(t)), 'insertedOn': p.insertLayer if p.insertLayer and p.insertLayer != p.layer else None,
         }
         elements.append(e)

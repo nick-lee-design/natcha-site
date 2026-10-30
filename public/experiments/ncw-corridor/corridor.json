@@ -9,8 +9,12 @@
     "source": {
       "file": "NCW_COORDINATED_CORRIDOR.dwg",
       "format": "DWG AC1032",
-      "view": "3D - nkucita"
-    }
+      "view": "3D - nkucita",
+      "modified": "2026-10-21T15:33:39+0100",
+      "bytes": 3249697,
+      "sha256": "4f919d93203c1551638dbab79383fcc01647743cda730dd38918ca1cea510187"
+    },
+    "revision": null
   },
   "titleBlock": [
     {

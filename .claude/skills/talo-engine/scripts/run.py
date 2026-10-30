@@ -74,6 +74,34 @@ def duplicates(E, tol=5.0):
     return out
 
 
+def file_version(path):
+    """The source file's date, size and a short content hash: enough to tell two exports apart when no revision is given."""
+    import hashlib
+    h = hashlib.sha256()
+    with open(path, 'rb') as f:
+        for block in iter(lambda: f.read(1 << 20), b''):
+            h.update(block)
+    return {'modified': time.strftime('%Y-%m-%dT%H:%M:%S%z', time.localtime(os.path.getmtime(path))), 'bytes': os.path.getsize(path), 'sha256': h.hexdigest()}
+
+
+def stray_parts(E, margin=20000):
+    """Parts whose centre lies more than margin mm outside the box holding 98% of the model: usually a stray family in Revit.
+    Returns the box around everything else, and the strays with their distance outside it."""
+    if len(E) < 50:
+        return None, []
+    cen = [[(e['bbox'][k] + e['bbox'][k + 3]) / 2 for e in E] for k in range(3)]
+    q = [sorted(c) for c in cen]
+    lo = [c[int(0.01 * (len(c) - 1))] - margin for c in q]; hi = [c[int(0.99 * (len(c) - 1))] + margin for c in q]
+    strays, keep = [], []
+    for i, e in enumerate(E):
+        d = max(max(lo[k] - cen[k][i], cen[k][i] - hi[k], 0) for k in range(3))
+        (strays if d > 0 else keep).append((e, d + margin) if d > 0 else e)
+    if not strays:
+        return None, []
+    core = ([min(e['bbox'][k] for e in keep) for k in range(3)], [max(e['bbox'][k + 3] for e in keep) for k in range(3)])
+    return core, sorted(strays, key=lambda x: -x[1])
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--dwg', required=True)
@@ -96,6 +124,7 @@ def main():
     if not os.path.exists(a.dwg):
         raise SystemExit(f'DWG not found: {a.dwg}')
     validation['inputs']['dwg'] = {'file': os.path.basename(a.dwg), 'bytes': os.path.getsize(a.dwg)}
+    source_version = file_version(a.dwg)
     prof = None
     if a.excel:
         log('inspecting the schedule')
@@ -138,6 +167,11 @@ def main():
                                 idSources=dict(collections.Counter(e['idSource'] for e in E)))
     if x.empty:
         validation['limits'].append(f'{len(x.empty)} families have no geometry in the exported view and are left out.')
+    core, strays = stray_parts(E)
+    if strays:
+        validation['limits'].append(f'{len(strays)} part{"s" if len(strays) > 1 else ""} far outside the rest of the model, left out of framing: '
+                                    + ', '.join(f"{e['mark']} ({e['type']}, {d / 1000:.0f} m away)" for e, d in strays[:10]) + '. Check in Revit.')
+        validation['counts']['strays'] = [{'mark': e['mark'], 'distance': round(d)} for e, d in strays]
     if crep['unknown categories']:
         validation['limits'].append('Unknown Revit categories, classified by layer: ' + ', '.join(f'{k} ({v})' for k, v in crep['unknown categories'].items()))
     host_services = sum(1 for e in E if e['modelKey'] == 'HOST' and e['discipline'] in ('PIPE', 'DUCT', 'TRAY', 'CONDUIT'))
@@ -234,12 +268,14 @@ def main():
     extra = {
         'hostCode': host_code, 'hostName': f'{host_code} model' if host_code == 'MEP' else 'Host model', 'hostDesc': os.path.basename(a.dwg),
         'project': {'name': name, 'scope': 'building' if len(levels) > 2 else 'area', 'units': 'mm', 'subtitle': f'{os.path.basename(a.dwg)}, read from its Revit export',
-                    'source': {'file': os.path.basename(a.dwg), 'format': f"DWG {conv['version'] or ''}".strip()}, 'reference': cfg['project'].get('reference'),
+                    'source': {'file': os.path.basename(a.dwg), 'format': f"DWG {conv['version'] or ''}".strip(), **source_version},
+                    'generated': time.strftime('%Y-%m-%dT%H:%M:%S%z'), 'reference': cfg['project'].get('reference'),
                     'revision': cfg['project'].get('revision'), 'company': cfg['project'].get('company')},
         'titleBlock': [{'label': 'Drawing', 'value': name, 'wide': True}, {'label': 'Format', 'value': f"DWG {conv['version'] or ''}".strip()}, {'label': 'Units', 'value': 'mm'},
                        {'label': 'Parts', 'value': '{parts}'}, {'label': 'Extent', 'value': '{sectionBox}'}, {'label': 'Clashes', 'value': '{major} major, {minor} minor'},
                        {'label': 'Levels', 'value': str(len(levels)) if levels else 'Not in model'}],
-        'bounds': {'min': [round(v, 1) for v in lo], 'max': [round(v, 1) for v in hi], 'centre': [round((p + q) / 2, 1) for p, q in zip(lo, hi)]},
+        'bounds': {'min': [round(v, 1) for v in lo], 'max': [round(v, 1) for v in hi], 'centre': [round((p + q) / 2, 1) for p, q in zip(lo, hi)],
+                   **({'core': {'min': [round(v, 1) for v in core[0]], 'max': [round(v, 1) for v in core[1]]}} if strays else {})},
         'clashSummary': (f"Tolerance {cfg['clash']['tolerance']} mm{' (provisional)' if cfg['clash']['provisional'] else ''}. Major: {cfg['clash']['tolerance']} mm or more of overlap, "
                          'or half the smaller part. Minor: less, or into insulation. Touch: surfaces meet.'),
         'clearanceNote': 'Rule: ' + ', '.join(f"{d['clearance']} mm for {d['name'].lower()}" for d in cfg['disciplines'] if d.get('clearance') is not None) +
@@ -254,6 +290,9 @@ def main():
         if "'ncw-corridor/corridor.json'" not in html:
             raise SystemExit('viewer.html has no default package path to set')
         open(os.path.join(a.out, 'index.html'), 'w').write(html.replace("'ncw-corridor/corridor.json'", json.dumps(a.name + '.json').replace('"', "'")))
+        # the fonts the viewer embeds in its PDF reports
+        if os.path.isdir(os.path.join(SKILL, 'viewer', 'fonts')):
+            shutil.copytree(os.path.join(SKILL, 'viewer', 'fonts'), os.path.join(a.out, 'fonts'), dirs_exist_ok=True)
     summary = {'package': os.path.relpath(path, a.out), 'elements': len(E), 'levels': len(levels), 'clashes': dict(nM), 'crossings': len(crossings),
                'openings': dict(collections.Counter(o['status'] for o in openings)), 'schedule': sched_result, 'limits': validation['limits'],
                'seconds': round(time.time() - t0)}

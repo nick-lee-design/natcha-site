@@ -21,10 +21,10 @@ Units are millimetres in model coordinates.
 | Key | Required | What it holds |
 | --- | --- | --- |
 | `format`, `version` | yes | `"talo-model-package"`, `1` |
-| `project` | yes | `name`, `scope` ("corridor", later "block" or "building"), `units`, `subtitle`, `source` (`file`, `format`, `view`) |
+| `project` | yes | `name`, `scope` ("corridor", later "block" or "building"), `units`, `subtitle`, `source` (`file`, `format`, `view`, `modified`, `bytes`, `sha256`), `generated`, `revision`. Reports print the model version: the revision when set, otherwise the file, its date and the first 8 characters of its hash |
 | `titleBlock` | no | `[{label, value, wide}]`. Values can use `{parts}`, `{sectionBox}` and any grade id such as `{major}` |
 | `geometry` | yes | The chunks. See below |
-| `bounds` | yes | `min`, `max` and `centre`, each `[x, y, z]` |
+| `bounds` | yes | `min`, `max` and `centre`, each `[x, y, z]`. `core` (`min`, `max`) when a stray part lies far outside the rest; the viewer frames and sections on the core |
 | `models` | yes | The host file and its links: `id`, `name`, `desc`, `role` ("host" or "link"), `label`, `number`, `rev`, `contents`, `reviewer` (who reviews openings in its walls) |
 | `systems` | yes | `[{id, name}]`: `architectural`, `structural`, `mechanical`, `electrical`, `public-health`. Names are set per project |
 | `disciplines` | yes | `id`, `name`, `system`, `explode` (lift in metres when disciplines separate), `clearance` (mm all round an opening; a discipline with a clearance counts as a service) |
@@ -35,6 +35,7 @@ Units are millimetres in model coordinates.
 | `levels` | no | `[{id, name, elevation, source}]`, lowest first, read from the model's level lines and labels |
 | `grid` | no | `[{label, a, b}]`: structural grid lines in plan, read from the model |
 | `zones` | no | See below |
+| `rooms` | no | `[{id, number, name, level, bbox}]`, searched by number or name. Neither NCW export carries rooms yet: Revit has to export rooms or spaces, or a room schedule with positions has to be supplied |
 | `rules` | yes | See below |
 | `checks` | no | `zoning`: `{status, summary}`, or null for "Not set". `validation`: what the skill read, counted and could not check |
 | `ui` | no | `explodeNote` |
@@ -61,6 +62,7 @@ Units are millimetres in model coordinates.
 | `id` | Stable reference, as agreed above |
 | `mark` | Shown everywhere, for example `D-10`. Unique |
 | `layer`, `discipline`, `system`, `model`, `type` | Ids from the lists above. `type` is a part type name |
+| `category` | The Revit category name (`Air terminals`, `Mechanical equipment`). The equipment reports go by it, so a family-name rule that renames a part does not move it out of its category |
 | `level` | The level the part's underside sits on |
 | `kind` | `segment`, `family` or `wall` |
 | `size` | Text, for example `600 × 300, 3851 long, horizontal` |

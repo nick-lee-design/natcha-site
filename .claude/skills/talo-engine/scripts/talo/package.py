@@ -141,7 +141,7 @@ def write(out_dir, name, elements, x, cfg, levels, grid, clashes, crossings, ope
         if e.get('level'):
             o['level'] = e['level']
         o.update(bbox=e['bbox'], mesh=mesh_of[i], faces=e['faces'], plates=e['plates'])
-        for k in ('family', 'familyType', 'revitId', 'revitType', 'pipeSystem', 'pipeSystemFrom', 'insertedOn', 'fireRating'):
+        for k in ('category', 'family', 'familyType', 'revitId', 'revitType', 'pipeSystem', 'pipeSystemFrom', 'insertedOn', 'fireRating'):
             if e.get(k):
                 o[k] = e[k]
         if e.get('insulation') is not None:
